@@ -1,4 +1,5 @@
 # Raspberry-Pi-Looper-synth-drum-thing
+
 This is a fork of otem's "Raspberry Pi Looper synth drum thing" or "piLooper" as the pd file is called. This fork is designed to run on any computer with PD Vanilla installed with any MIDI controller plugged into it.
 
  All of the buttons and controls are done using MIDI but it's a bit buried within subpatches to actually find where the samples are being played and where you can change the note values.
@@ -11,8 +12,14 @@ This is a fork of otem's "Raspberry Pi Looper synth drum thing" or "piLooper" as
 * Click on the box labeled [pd guts]. This is a subpatch with a bunch of other subpatches in it. Clicking on it should open it, but it if you end up editing the name instead or moving it around, you are in Edit Mode. If you're in Edit Mode you can right-click / cmd-click -> "Open" instead.
 * From here click on [pd set-midi-buttons]
 
-Now you should see a 4x4 grid of [samp] objects with a bunch of different arguments. For example, the first one is [samp 60 /btn13 snare_04.wav]. The "60" is the midi node, the "/btn13" I believe is for the screen's GUI so lets ignore it edit: the "/btn13" is for the synth patch to know what note you are pressing, and the "snare_04.wav" is the path to the sample that is played when you hit midi note 60. If you want to edit these values, switch over to edit mode "Edit" -> "Edit Mode" or ctrl + e (cmd + e) and then click the box and change the data.
+Now the instructions on screen should be pretty straight forward, but the idea is that you're editing the message boxes to use the values of the buttons on your MIDI controller. Once you are done with the buttons, close the [pd set-midi-buttons] subpatch, and open [pd set-midi-knobs-or-sliders] and follow the same process.
 
-To configure your MIDI controller buttons and knobs, 
+# Not yet implemented because I haven't gotten to it yet
+
+* The X/Y pad
+* Lighting up MIDI buttons
+* Audio input
+* Saving / Loading
+* Probably some other features that I haven't noticed yet
 
 Check out his project readme for more details. https://github.com/otem/Raspberry-Pi-Looper-synth-drum-thing
