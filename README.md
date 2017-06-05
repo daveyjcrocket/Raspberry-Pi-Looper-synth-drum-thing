@@ -7,13 +7,13 @@ All of the buttons and controls are done using MIDI but it's a bit buried within
 As with otem's version, no samples are provided for the drum machine portions. To quote his readme:
 
 > To add your own samples just add .wav files to the piLooper directory with names like:
-
+>
 > kick_01.wav - kick_24.wav
-
+>
 > hh_01.wav - hh_12.wav
-
+>
 > snare_01.wav - snare_24.wav
-
+>
 > crash_01.wav - crash_04.wav
 
 
