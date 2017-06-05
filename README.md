@@ -4,6 +4,19 @@ This is a fork of otem's "Raspberry Pi Looper synth drum thing" or "piLooper" as
 
 All of the buttons and controls are done using MIDI but it's a bit buried within subpatches to actually find where the samples are being played and where you can change the note values.
 
+As with otem's version, no samples are provided for the drum machine portions. To quote his readme:
+
+> To add your own samples just add .wav files to the piLooper directory with names like:
+
+> kick_01.wav - kick_24.wav
+
+> hh_01.wav - hh_12.wav
+
+> snare_01.wav - snare_24.wav
+
+> crash_01.wav - crash_04.wav
+
+
 # How do I install this?
 
 * Download Pure Data Vanilla then open pd.exe (or mac equivalent) then click on "Help" -> "Find external" -> search for "comport" and install it, then search for "ggee" and install that too. You only need these if you're trying to use the external hardware, but it gets rid of the errors in the log so might as well install them.
@@ -22,8 +35,8 @@ There are several features that I haven't implemented yet because I just haven't
 
 * The X/Y pad
 * Lighting up MIDI buttons
-* Audio input
-* Saving / Loading
+* External audio input
+* Saving / Loading songs
 * Probably some other features that I haven't noticed yet
 
 I should be able to have all these features added soon, but I might not be able to work on this until next weekend.
