@@ -1,48 +1,18 @@
 # Raspberry-Pi-Looper-synth-drum-thing
-My first venture into raspberry pi stuff. Running a custom pure data patch I've been working on for a couple years on a Raspberry Pi 3. This project took a couple months and I'm still tweaking stuff here and there but it's pretty much complete, it even survived it's first live show!
+This is a fork of otem's "Raspberry Pi Looper synth drum thing" or "piLooper" as the pd file is called. This fork is designed to run on any computer with PD Vanilla installed with any MIDI controller plugged into it.
 
-I've left out the drum samples and Sessions directoroy. To add your own samples just add .wav files to the piLooper directory with names like:
+ All of the buttons and controls are done using MIDI but it's a bit buried within subpatches to actually find where the samples are being played and where you can change the note values.
 
-kick_01.wav - kick_24.wav
+* Download Pure Data Vanilla then open pd.exe (or mac equivalent) then click on "Help" -> "Find external" -> search for "comport" and install it, then search for "ggee" and install that too. You only need these if you're trying to use the external hardware, but it gets rid of the errors in the log so might as well install them.
+* Download the Raspberry-Pi-Looper-synth-drum-thing zip file and unzip it.
+* Open up piLooper.pd in Pure Data.
+* A winodow with a bunch of controls should now open up. The big buttons start recording for each of the 8 loops, with the corresponding slider next to it, and the little red button is the clear button for each loop. The tall sliders below control the FX parameters.
+* In PD there's normal mode and Edit Mode. Switch between the two with Ctrl + E, Cmd + E, or "Edit" -> "Edit Mode". For now make sure you're not in edit mode to make this easier.
+* Click on the box labeled [pd guts]. This is a subpatch with a bunch of other subpatches in it. Clicking on it should open it, but it if you end up editing the name instead or moving it around, you are in Edit Mode. If you're in Edit Mode you can right-click / cmd-click -> "Open" instead.
+* From here click on [pd set-midi-buttons]
 
-hh_01.wav - hh_12.wav
+Now you should see a 4x4 grid of [samp] objects with a bunch of different arguments. For example, the first one is [samp 60 /btn13 snare_04.wav]. The "60" is the midi node, the "/btn13" I believe is for the screen's GUI so lets ignore it edit: the "/btn13" is for the synth patch to know what note you are pressing, and the "snare_04.wav" is the path to the sample that is played when you hit midi note 60. If you want to edit these values, switch over to edit mode "Edit" -> "Edit Mode" or ctrl + e (cmd + e) and then click the box and change the data.
 
-snare_01.wav - snare_24.wav
+To configure your MIDI controller buttons and knobs, 
 
-crash_01.wav - crash_04.wav
-
-Or change the sample names to whatever you want in the pd patch. 
-The Sessions directory is pointed to where it lives on my pi, you will need to change that to wherever you are storing your patch on your pi.
-
-You will need comport and shell externals in pd.
-
-Here is a list of the main hardware components used (left out some usb male/female connections, push buttons and audio output):
-
-Pi3: https://www.sparkfun.com/products/13825
-
-Teensy 3.6: https://www.sparkfun.com/products/14057
-
-Display: https://www.pjrc.com/store/display_ili9341.html
-
-Mux: https://www.sparkfun.com/products/9056
-
-Buttons: https://www.sparkfun.com/products/7835
-
-Button PCB (I drilled out holes where the leds go to use neopixels): https://www.sparkfun.com/products/8033
-
-NeoPixels: https://www.adafruit.com/product/1612
-
-Encoder: https://www.sparkfun.com/products/9117
-
-Pots: https://www.sparkfun.com/products/9940
-
-Slide Pots: https://www.sparkfun.com/products/11621
-
-Sound Card: https://www.sweetwater.com/store/detail/UCA222
-
-3D Model: http://www.thingiverse.com/thing:2318194
-
-
-
-
-[![IMAGE ALT TEXT HERE](https://i.ytimg.com/vi/_nBK8sAl9nw/0.jpg)](http://www.youtube.com/watch?v=_nBK8sAl9nw)
+Check out his project readme for more details. https://github.com/otem/Raspberry-Pi-Looper-synth-drum-thing
