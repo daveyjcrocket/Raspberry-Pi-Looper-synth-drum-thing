@@ -8,7 +8,7 @@
 -1 -1;
 #X obj 209 170 pack \$1 symbol;
 #X obj 123 75 spigot;
-#X msg 242 47 0;
+#X msg 252 47 0;
 #X msg 156 46 1;
 #X text 172 78 but only create the file if there is a loop here, f
 17;
@@ -19,7 +19,7 @@
 #X obj 63 22 r save;
 #X obj 66 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 242 22 r clear-\$1;
+#X obj 252 22 r clear-\$1;
 #X obj 9 318 s stop;
 #X obj 75 461 s comPortMsg;
 #X msg 75 425 print -sgn_Saving.../;

@@ -4,8 +4,8 @@
 #X obj 51 79 symbol \$1;
 #X obj 51 53 trigger a a;
 #X obj 51 105 pack s s;
-#X obj 123 78 symbol \$2;
-#X obj 124 149 table \$2;
+#X obj 125 78 symbol \$2;
+#X obj 130 149 table \$2;
 #X msg 51 127 read -resize \$1 \$2;
 #X connect 0 0 3 0;
 #X connect 2 0 4 0;
