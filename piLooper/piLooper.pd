@@ -1,4 +1,4 @@
-#N canvas 137 378 594 566 10;
+#N canvas 344 256 594 566 10;
 #X obj 23 34 bng 50 250 50 0 lp-trig-1 lp-trig-1-r empty 17 7 0 10
 -204800 -1 -1;
 #X obj 41 94 bng 15 250 50 0 clear-1 clear-1-r empty 17 7 0 10 -258113
@@ -32,13 +32,13 @@
 #X obj 371 194 bng 15 250 50 0 clear-8 clear-8-r empty 17 7 0 10 -258113
 -1 -1;
 #X obj 78 36 vsl 30 70 0 1 0 0 lp-vol-1 lp-vol-1-r empty 0 -9 0 10
--204800 -1 -1 6900 1;
+-204800 -1 -1 0 1;
 #X obj 188 36 vsl 30 70 0 1 0 0 lp-vol-2 lp-vol-2-r empty 0 -9 0 10
--204786 -1 -1 6900 1;
+-204786 -1 -1 0 1;
 #X obj 298 36 vsl 30 70 0 1 0 0 lp-vol-3 lp-vol-3-r empty 0 -9 0 10
--262130 -1 -1 6900 1;
+-262130 -1 -1 0 1;
 #X obj 408 36 vsl 30 70 0 1 0 0 lp-vol-4 lp-vol-4-r empty 0 -9 0 10
--261234 -1 -1 6900 1;
+-261234 -1 -1 0 1;
 #X obj 78 136 vsl 30 70 0 1 0 0 lp-vol-5 lp-vol-5-r empty 0 -9 0 10
 -204800 -1 -1 0 1;
 #X obj 188 136 vsl 30 70 0 1 0 0 lp-vol-6 lp-vol-6-r empty 0 -9 0 10
@@ -65,7 +65,7 @@
 #X obj 254 365 vsl 30 127 0 127 0 0 fx-distortion fx-distortion-r empty
 0 -9 0 10 -262130 -1 -1 0 1;
 #X obj 364 365 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
-0 10 -261234 -1 -1 2083 1;
+0 10 -261234 -1 -1 0 1;
 #N canvas 968 172 836 603 guts 0;
 #X obj 34 442 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
@@ -2752,7 +2752,7 @@ milliseconds \, based on samplerate.;
 #X msg 120 473 print -inp_right_\$1/;
 #X msg 175 387 print -amp_left_\$1/;
 #X msg 647 378 print -amp_right_\$1/;
-#N canvas 1391 312 427 573 reTrigger 1;
+#N canvas 1391 312 427 573 reTrigger 0;
 #X obj 31 55 inlet~;
 #X obj 41 526 outlet~;
 #X obj 32 210 s~ dryGlitchPre;
@@ -2767,7 +2767,7 @@ milliseconds \, based on samplerate.;
 #X obj 56 393 line~;
 #X obj 41 422 *~;
 #X obj 77 124 r snap;
-#N canvas 201 172 1205 773 timeDivSel 1;
+#N canvas 201 172 1205 773 timeDivSel 0;
 #X obj 728 148 metro;
 #X obj 887 158 metro;
 #X obj 755 70 r tabThirtyTwo;
@@ -3046,7 +3046,7 @@ milliseconds \, based on samplerate.;
 #X obj 91 73 snapshot~;
 #X floatatom 91 95 5 0 0 0 - - -, f 5;
 #X obj 91 52 metro 100;
-#X obj 91 33 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1 1
+#X obj 91 33 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
 #X msg 197 406 \; /eight const 0 \;;
 #X text 204 386 This clears the table;
@@ -3449,21 +3449,21 @@ input might cause problems in the future!;
 #X obj 891 82 vsl 15 128 1 3000 0 0 envAttack empty empty 0 -9 0 10
 -262144 -1 -1 0 1;
 #X obj 917 82 vsl 15 128 1 3000 0 0 envDecay empty empty 0 -9 0 10
--262144 -1 -1 3000 1;
+-262144 -1 -1 0 1;
 #X obj 938 82 vsl 15 128 0 1 0 0 envSustain empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 963 82 vsl 15 128 1 3000 0 0 envRelease empty empty 0 -9 0 10
 -262144 -1 -1 0 1;
 #X obj 282 82 vsl 15 128 0 10 0 0 lfoOneFreq empty empty 0 -9 0 10
--4032 -1 -1 3200 1;
+-4032 -1 -1 0 1;
 #X obj 101 82 vsl 15 127 1 2000 0 0 fmOpOneAmt empty empty 0 -9 0 10
--4032 -1 -1 2000 1;
+-4032 -1 -1 0 1;
 #X obj 150 82 vsl 15 127 1 3000 0 0 fmOpOneAttack empty empty 0 -9
 0 10 -204800 -1 -1 0 1;
 #X obj 180 82 vsl 15 127 1 3000 0 0 fmOpOneDecay empty empty 0 -9 0
-10 -204800 -1 -1 600 1;
+10 -204800 -1 -1 0 1;
 #X obj 210 82 vsl 15 127 1 3000 0 0 fmOpOneSustain empty empty 0 -9
-0 10 -204800 -1 -1 300 1;
+0 10 -204800 -1 -1 0 1;
 #X obj 240 82 vsl 15 127 1 3000 0 0 fmOpOneRelease empty empty 0 -9
 0 10 -204800 -1 -1 0 1;
 #N canvas 385 158 397 250 opPitch 0;
@@ -3507,11 +3507,11 @@ input might cause problems in the future!;
 #X obj 428 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -262130
 -1 -1 5;
 #X obj 501 82 vsl 15 127 1 2000 0 0 fmOpTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 3500 1;
+-257985 -1 -1 0 1;
 #X obj 550 82 vsl 15 127 1 3000 0 0 fmOpTwoAttack empty empty 0 -9
 0 10 -262130 -1 -1 0 1;
 #X obj 580 82 vsl 15 127 1 3000 0 0 fmOpTwoDecay empty empty 0 -9 0
-10 -262130 -1 -1 200 1;
+10 -262130 -1 -1 0 1;
 #X obj 610 82 vsl 15 127 1 3000 0 0 fmOpTwoSustain empty empty 0 -9
 0 10 -262130 -1 -1 0 1;
 #X obj 640 82 vsl 15 127 1 3000 0 0 fmOpTwoRelease empty empty 0 -9
@@ -3580,14 +3580,14 @@ input might cause problems in the future!;
 #X obj 322 82 vsl 15 128 0 0.05 0 0 lfoOneAmt empty empty 0 -9 0 10
 -4032 -1 -1 0 1;
 #X obj 692 82 vsl 15 128 0 10 0 0 lfoTwoFreq empty empty 0 -9 0 10
--257985 -1 -1 2100 1;
+-257985 -1 -1 0 1;
 #X obj 732 82 vsl 15 128 0 0.05 0 0 lfoTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 9100 1;
+-257985 -1 -1 0 1;
 #X obj 28 13 r fmPresets;
 #X obj 60 86 vsl 15 128 0.125 20 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 1013 145 vsl 15 128 0 10 0 0 crossMod empty empty 0 -9 0 10
--262144 -1 -1 300 1;
+-262144 -1 -1 0 1;
 #X obj 278 308 fmVoice 4;
 #X obj 193 308 fmVoice 3;
 #X obj 16 308 fmVoice 1, f 10;
@@ -3595,7 +3595,7 @@ input might cause problems in the future!;
 #X obj 28 47 unpack f f f f f f f f f f f f f f f f f f f f f f, f
 154;
 #X obj 842 116 vsl 15 128 0 1 0 0 envAttackLev empty empty 0 -9 0 10
--262144 -1 -1 12700 1;
+-262144 -1 -1 0 1;
 #X obj 882 363 print;
 #X obj 800 317 delay 120;
 #X connect 0 0 39 0;
@@ -4786,7 +4786,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:, f 197;
 #X msg 568 383 13;
 #X msg 705 384 7;
 #X msg 735 384 11;
-#N canvas 1188 236 405 303 megalon-MIDI-messages 1;
+#N canvas 1188 236 405 303 megalon-MIDI-messages 0;
 #N canvas 549 482 805 405 button-grid 0;
 #X obj 28 323 s \$0-megalon-MIDI-message;
 #N canvas 0 50 988 743 drums 0;
@@ -5443,51 +5443,57 @@ select the instrument corresponding to the button that was pressed
 #X text 142 88 Pressed note is displayed here ->;
 #X text 46 64 Step 1;
 #X text 49 203 Step 2;
-#X obj 134 129 cnv 15 500 800 empty empty empty 20 12 0 14 -261682
+#X obj 134 129 cnv 15 900 550 empty empty empty 20 12 0 14 -261682
 -66577 0;
-#X text 508 222 Top row;
-#X msg 503 245 0 8 16 24;
-#X msg 503 265 1 9 17 25;
-#X msg 503 285 2 10 18 26;
-#X msg 503 305 3 11 19 27;
-#X text 509 328 Bottom row;
-#X obj 147 399 s \$0-midi-row-1;
-#X obj 266 399 s \$0-midi-row-2;
-#X obj 385 399 s \$0-midi-row-3;
-#X obj 504 399 s \$0-midi-row-4;
-#X obj 424 196 loadbang;
-#X msg 437 484 65 73 66 74;
-#X msg 437 504 67 75 68 76;
-#X obj 399 437 loadbang;
-#X text 336 495 Loop buttons;
-#X obj 365 548 s \$0-midi-lb-1;
-#X obj 485 548 s \$0-midi-lb-2;
-#X text 524 484 Top row;
-#X text 526 505 Bottom row;
-#X msg 354 634 64;
-#X text 142 635 Instrument select button;
-#X obj 320 583 loadbang;
-#X obj 439 651 s \$0-midi-inst-sel;
-#X msg 354 651 87;
-#X text 198 652 Clear all button;
-#X obj 439 668 s \$0-midi-clear-all;
-#X text 332 264 4x4 button grid;
+#X text 453 329 Top row;
+#X msg 633 325 0 8 16 24;
+#X msg 633 345 1 9 17 25;
+#X msg 633 365 2 10 18 26;
+#X msg 633 385 3 11 19 27;
+#X text 433 385 Bottom row;
+#X obj 736 342 s \$0-midi-row-1;
+#X obj 754 362 s \$0-midi-row-2;
+#X obj 779 382 s \$0-midi-row-3;
+#X obj 802 402 s \$0-midi-row-4;
+#X obj 573 267 loadbang;
+#X msg 633 444 65 73 66 74;
+#X msg 633 464 67 75 68 76;
+#X text 213 451 Loop buttons;
+#X obj 859 461 s \$0-midi-lb-1;
+#X obj 859 481 s \$0-midi-lb-2;
+#X text 510 445 Top row;
+#X text 493 464 Bottom row;
+#X msg 633 516 64;
+#X text 397 518 Instrument select button;
+#X obj 718 533 s \$0-midi-inst-sel;
+#X msg 633 536 87;
+#X text 453 535 Clear all button;
+#X obj 718 553 s \$0-midi-clear-all;
+#X text 221 355 4x4 button grid;
 #X text 145 143 Change the midi values in these message boxes to match
 your controller;
-#X text 661 249 Switch to edit mode (Edit -> Edit mode) and then click
+#X text 142 180 Switch to edit mode (Edit -> Edit mode) and then click
 on these message boxes to change their values. In this case \, each
 message box represents a row on the 4x4 grid \, where each midi value
 for the individual buttons is separated by a space;
-#X text 596 245 <-----;
-#X text 596 265 <-----;
-#X text 596 285 <-----;
-#X text 596 305 <-----;
-#X obj 439 685 s \$0-midi-fx-pad-active;
-#X msg 354 685 72;
-#X msg 354 668 77;
-#X text 198 670 Activate FX pad;
-#X text 198 686 Activate FX retrig;
-#X obj 439 702 s \$0-midi-fx-retrig-active;
+#X obj 718 573 s \$0-midi-fx-pad-active;
+#X msg 633 576 72;
+#X msg 633 556 77;
+#X text 453 553 Activate FX pad;
+#X text 453 569 Activate FX retrig;
+#X obj 718 593 s \$0-midi-fx-retrig-active;
+#X obj 573 287 bng 30 250 50 0 empty empty UPDATE! 35 7 0 10 -258113
+-1 -1;
+#X text 517 325 ----->;
+#X text 517 345 ----->;
+#X text 517 365 ----->;
+#X text 517 385 ----->;
+#X text 212 552 Other buttons;
+#X text 52 718 Step 3;
+#X obj 133 699 cnv 15 500 60 empty empty empty 20 12 0 14 -233017 -66577
+0;
+#X text 157 713 When finished \, make sure you click the red UPDATE!
+button above;
 #X connect 2 0 3 0;
 #X connect 2 1 1 0;
 #X connect 2 2 4 0;
@@ -5495,23 +5501,25 @@ for the individual buttons is separated by a space;
 #X connect 12 0 17 0;
 #X connect 13 0 18 0;
 #X connect 14 0 19 0;
-#X connect 20 0 11 0;
-#X connect 20 0 12 0;
-#X connect 20 0 13 0;
-#X connect 20 0 14 0;
-#X connect 21 0 25 0;
-#X connect 22 0 26 0;
-#X connect 23 0 21 0;
-#X connect 23 0 22 0;
-#X connect 29 0 32 0;
-#X connect 31 0 29 0;
+#X connect 20 0 43 0;
+#X connect 21 0 24 0;
+#X connect 22 0 25 0;
+#X connect 28 0 30 0;
 #X connect 31 0 33 0;
-#X connect 31 0 45 0;
-#X connect 33 0 35 0;
-#X connect 44 0 48 0;
-#X connect 45 0 43 0;
+#X connect 38 0 42 0;
+#X connect 39 0 37 0;
+#X connect 43 0 11 0;
+#X connect 43 0 12 0;
+#X connect 43 0 13 0;
+#X connect 43 0 14 0;
+#X connect 43 0 21 0;
+#X connect 43 0 22 0;
+#X connect 43 0 28 0;
+#X connect 43 0 31 0;
+#X connect 43 0 39 0;
+#X connect 43 0 38 0;
 #X restore 39 292 pd set-midi-buttons;
-#N canvas 170 69 780 914 set-midi-knobs-or-sliders 0;
+#N canvas 170 69 1219 914 set-midi-knobs-or-sliders 0;
 #X obj 126 9 cnv 15 450 100 empty empty empty 20 12 0 14 -203904 -66577
 0;
 #X floatatom 469 81 0 0 0 0 - - -;
@@ -5519,79 +5527,87 @@ for the individual buttons is separated by a space;
 #X floatatom 543 48 0 0 0 0 - - -;
 #X obj 477 19 ctlin;
 #X text 138 18 Move a knob or slider on your midi controller;
-#X obj 125 116 cnv 15 500 800 empty empty empty 20 12 0 14 -261682
+#X obj 125 116 cnv 15 800 500 empty empty empty 20 12 0 14 -261682
 -66577 0;
-#X obj 281 295 s \$0-midi-knobs-vol-row-1;
-#X obj 293 315 s \$0-midi-knobs-vol-row-2;
-#X obj 293 191 loadbang;
+#X obj 605 289 s \$0-midi-knobs-vol-row-1;
+#X obj 606 309 s \$0-midi-knobs-vol-row-2;
+#X obj 464 191 loadbang;
 #X text 141 123 Change these midi values to match your controller;
-#X msg 309 232 21 20 13 12;
-#X msg 309 252 3 1 0 2;
-#X obj 267 438 s \$0-midi-knobs-fx-row-1;
-#X obj 279 458 s \$0-midi-knobs-fx-row-2;
+#X msg 509 272 21 20 13 12;
+#X msg 509 292 3 1 0 2;
+#X obj 606 347 s \$0-midi-knobs-fx-row-1;
+#X obj 606 367 s \$0-midi-knobs-fx-row-2;
 #X text 231 238 Volume;
-#X text 241 393 FX;
-#X obj 272 351 loadbang;
-#X msg 294 383 23 22 15 14;
-#X msg 294 403 5 7 6 4;
-#X text 327 213 Top row;
-#X text 327 271 Bottom row;
+#X text 271 339 FX;
+#X msg 509 330 23 22 15 14;
+#X msg 509 350 5 7 6 4;
+#X text 399 270 Top row;
+#X text 378 291 Bottom row;
 #X text 141 148 Switch to edit mode (Edit -> Edit mode) and then click
 on these message boxes to change their values.;
 #X text 64 57 Step 1;
 #X text 55 155 Step 2;
 #X text 211 82 The midi number will be here --->;
-#X msg 288 528 17;
-#X obj 349 545 s \$0-midi-knob-main-vol;
-#X obj 262 505 loadbang;
-#X text 152 529 Main volume;
-#X obj 349 562 s \$0-midi-knob-post-verb;
-#X obj 349 579 s \$0-midi-knob-post-bits;
-#X obj 349 596 s \$0-midi-knob-fx-post-vol;
-#X msg 288 579 19;
-#X msg 288 562 11;
-#X msg 288 545 18;
-#X text 152 545 Post Reverb Vol;
-#X text 152 563 Post Bitcrush Vol;
-#X text 152 581 Post FX Vol;
-#X msg 288 596 8;
-#X msg 288 613 10;
-#X obj 349 613 s \$0-midi-knob-fx-x-pad;
-#X obj 349 630 s \$0-midi-knob-fx-y-pad;
-#X text 152 598 FX pad X;
-#X text 152 615 FX pad Y;
-#X obj 349 822 s \$0-midi-knob-l-in-vol;
-#X obj 349 839 s \$0-midi-knob-r-in-vol;
-#X msg 288 805 16;
-#X msg 288 822 9;
-#X text 152 805 Left In Vol;
-#X text 152 821 Right In Vol;
-#X text 203 781 Currently unimplemented;
+#X msg 509 391 17;
+#X obj 570 408 s \$0-midi-knob-main-vol;
+#X text 349 394 Main volume;
+#X obj 570 428 s \$0-midi-knob-post-verb;
+#X obj 570 448 s \$0-midi-knob-post-bits;
+#X obj 570 468 s \$0-midi-knob-fx-post-vol;
+#X msg 509 451 19;
+#X msg 509 431 11;
+#X msg 509 411 18;
+#X text 349 410 Post Reverb Vol;
+#X text 349 428 Post Bitcrush Vol;
+#X text 349 446 Post FX Vol;
+#X msg 509 471 8;
+#X msg 509 491 10;
+#X obj 570 488 s \$0-midi-knob-fx-x-pad;
+#X obj 570 508 s \$0-midi-knob-fx-y-pad;
+#X text 349 463 FX pad X;
+#X text 349 480 FX pad Y;
+#X obj 560 582 s \$0-midi-knob-l-in-vol;
+#X obj 560 599 s \$0-midi-knob-r-in-vol;
+#X msg 499 565 16;
+#X msg 499 582 9;
+#X text 363 565 Left In Vol;
+#X text 363 581 Right In Vol;
+#X text 188 577 Currently unimplemented;
+#X obj 464 213 bng 30 250 50 0 empty empty UPDATE! 35 7 0 10 -258113
+-1 -1;
+#X text 399 330 Top row;
+#X text 378 351 Bottom row;
+#X text 44 645 Step 3;
+#X obj 125 626 cnv 15 500 60 empty empty empty 20 12 0 14 -233017 -66577
+0;
+#X text 149 640 When finished \, make sure you click the red UPDATE!
+button above;
 #X connect 4 0 2 0;
 #X connect 4 1 1 0;
 #X connect 4 2 3 0;
-#X connect 9 0 11 0;
-#X connect 9 0 12 0;
+#X connect 9 0 50 0;
 #X connect 11 0 7 0;
 #X connect 12 0 8 0;
-#X connect 17 0 18 0;
-#X connect 17 0 19 0;
-#X connect 18 0 13 0;
-#X connect 19 0 14 0;
-#X connect 26 0 27 0;
-#X connect 28 0 26 0;
-#X connect 28 0 35 0;
-#X connect 28 0 34 0;
-#X connect 28 0 33 0;
-#X connect 28 0 39 0;
-#X connect 28 0 40 0;
-#X connect 33 0 32 0;
-#X connect 34 0 31 0;
-#X connect 35 0 30 0;
-#X connect 39 0 41 0;
-#X connect 40 0 42 0;
-#X connect 47 0 45 0;
-#X connect 48 0 46 0;
+#X connect 17 0 13 0;
+#X connect 18 0 14 0;
+#X connect 25 0 26 0;
+#X connect 31 0 30 0;
+#X connect 32 0 29 0;
+#X connect 33 0 28 0;
+#X connect 37 0 39 0;
+#X connect 38 0 40 0;
+#X connect 45 0 43 0;
+#X connect 46 0 44 0;
+#X connect 50 0 11 0;
+#X connect 50 0 12 0;
+#X connect 50 0 17 0;
+#X connect 50 0 18 0;
+#X connect 50 0 25 0;
+#X connect 50 0 33 0;
+#X connect 50 0 32 0;
+#X connect 50 0 31 0;
+#X connect 50 0 37 0;
+#X connect 50 0 38 0;
 #X restore 39 309 pd set-midi-knobs-or-sliders;
 #X text 41 273 Open these two subpatches to change midi values;
 #X connect 0 0 1 0;
