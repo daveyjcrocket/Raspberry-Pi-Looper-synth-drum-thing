@@ -1,0 +1,53 @@
+#N canvas 827 78 508 423 10;
+#X obj 33 44 bng 50 250 50 0 lp-trig-1 lp-trig-1-r empty 17 7 0 10
+-204800 -1 -1;
+#X obj 51 104 bng 15 250 50 0 clear-1 clear-1-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 143 44 bng 50 250 50 0 lp-trig-2 lp-trig-2-r empty 17 7 0 10
+-204786 -1 -1;
+#X obj 161 104 bng 15 250 50 0 clear-2 clear-2-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 253 44 bng 50 250 50 0 lp-trig-3 lp-trig-3-r empty 17 7 0 10
+-262130 -1 -1;
+#X obj 271 104 bng 15 250 50 0 clear-3 clear-3-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 363 44 bng 50 250 50 0 lp-trig-4 lp-trig-4-r empty 17 7 0 10
+-261234 -1 -1;
+#X obj 381 104 bng 15 250 50 0 clear-4 clear-4-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 33 144 bng 50 250 50 0 lp-trig-5 lp-trig-5-r empty 17 7 0 10
+-204800 -1 -1;
+#X obj 51 204 bng 15 250 50 0 clear-5 clear-5-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 143 144 bng 50 250 50 0 lp-trig-6 lp-trig-6-r empty 17 7 0 10
+-204786 -1 -1;
+#X obj 161 204 bng 15 250 50 0 celar-6 clear-6-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 253 144 bng 50 250 50 0 lp-trig-7 lp-trig-7-r empty 17 7 0 10
+-262130 -1 -1;
+#X obj 271 204 bng 15 250 50 0 clear-7 clear-7-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 363 144 bng 50 250 50 0 lp-trig-8 lp-trig-8-r empty 17 7 0 10
+-261234 -1 -1;
+#X obj 381 204 bng 15 250 50 0 clear-8 clear-8-r empty 17 7 0 10 -258113
+-1 -1;
+#X obj 88 46 vsl 30 70 0 1 0 0 lp-vol-1 lp-vol-1-r empty 0 -9 0 10
+-204800 -1 -1 0 1;
+#X obj 198 46 vsl 30 70 0 1 0 0 lp-vol-2 lp-vol-2-r empty 0 -9 0 10
+-204786 -1 -1 0 1;
+#X obj 308 46 vsl 30 70 0 1 0 0 lp-vol-3 lp-vol-3-r empty 0 -9 0 10
+-262130 -1 -1 0 1;
+#X obj 418 46 vsl 30 70 0 1 0 0 lp-vol-4 lp-vol-4-r empty 0 -9 0 10
+-261234 -1 -1 0 1;
+#X obj 88 146 vsl 30 70 0 1 0 0 lp-vol-5 lp-vol-5-r empty 0 -9 0 10
+-204800 -1 -1 0 1;
+#X obj 198 146 vsl 30 70 0 1 0 0 lp-vol-6 lp-vol-6-r empty 0 -9 0 10
+-204786 -1 -1 0 1;
+#X obj 308 146 vsl 30 70 0 1 0 0 lp-vol-7 lp-vol-7-r empty 0 -9 0 10
+-262130 -1 -1 0 1;
+#X obj 418 146 vsl 30 70 0 1 0 0 lp-vol-8 lp-vol-8-r empty 0 -9 0 10
+-261234 -1 -1 0 1;
+#X obj 505 53 bng 15 250 50 0 empty clear-all-r CLEAR_ALL 17 7 0 10
+-258113 -1 -1;
+#X obj 505 78 s clearAll;
+#X connect 24 0 25 0;
