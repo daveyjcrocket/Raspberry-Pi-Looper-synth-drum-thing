@@ -66,7 +66,7 @@
 0 -9 0 10 -262130 -1 -1 0 1;
 #X obj 364 365 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
 0 10 -261234 -1 -1 0 1;
-#N canvas 19 510 836 603 guts 1;
+#N canvas 53 99 836 603 guts 1;
 #X obj 34 442 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 34 494 1;
@@ -286,7 +286,7 @@ by incoming ctrls;
 #X connect 52 0 41 0;
 #X connect 53 0 14 0;
 #X restore 468 111 pd MIDI-IO;
-#N canvas 758 64 429 674 audio-IO 1;
+#N canvas 758 64 429 674 audio-IO 0;
 #X obj 184 506 dac~;
 #X obj 14 105 s~ input;
 #X obj 184 28 r~ lp-out-1;
@@ -380,9 +380,9 @@ by incoming ctrls;
 #X obj 310 293 expr 1 - $f1;
 #X obj 296 59 loadbang;
 #X obj 112 119 hsl 128 15 0 1 0 1 empty empty 'roomsize' 20 8 0 10
--262144 -260097 -1 3500 0;
+-262144 -260097 -1 0 0;
 #X obj 127 162 hsl 128 15 0 2.4 0 1 empty empty damp 20 8 0 10 -262144
--260097 -1 4600 0;
+-260097 -1 0 0;
 #X obj 157 255 hsl 128 15 0 1 0 1 empty empty wet 20 8 0 10 -262144
 -260097 -1 0 0;
 #X obj 142 205 hsl 128 15 0 1 0 1 empty empty dry 20 8 0 10 -262144
@@ -1439,7 +1439,7 @@ milliseconds \, based on samplerate.;
 #X connect 13 0 15 0;
 #X connect 16 0 0 0;
 #X restore 184 218 pd post-loop-fx;
-#N canvas 392 36 908 761 drums-input-fx 1;
+#N canvas 392 36 908 761 drums-input-fx 0;
 #X obj 330 735 outlet~;
 #N canvas 394 277 855 384 ss 0;
 #X text 21 62 Bank One;
@@ -2750,8 +2750,8 @@ milliseconds \, based on samplerate.;
 #X msg 645 245 \$1 15;
 #X obj 645 222 r inputTogR;
 #X obj 82 589 s comPortMsg;
-#X msg 35 443 print -inp_left_\$1/;
-#X msg 120 473 print -inp_right_\$1/;
+#X msg 24 398 print -inp_left_\$1/;
+#X msg 173 480 print -inp_right_\$1/;
 #X msg 175 387 print -amp_left_\$1/;
 #X msg 647 378 print -amp_right_\$1/;
 #N canvas 1391 312 427 573 reTrigger 0;
@@ -3075,7 +3075,7 @@ milliseconds \, based on samplerate.;
 #X connect 19 0 17 0;
 #X connect 20 0 19 0;
 #X restore 330 432 pd reTrigger;
-#N canvas 0 41 1289 730 instrumentSelector 1;
+#N canvas 520 134 1289 730 instrumentSelector 0;
 #X obj 152 178 *~;
 #X obj 167 157 line~;
 #X msg 167 127 1 10;
@@ -3272,7 +3272,7 @@ milliseconds \, based on samplerate.;
 #X connect 73 0 53 0;
 #X connect 74 0 53 0;
 #X restore 303 315 pd instrumentSelector;
-#N canvas 160 457 1092 386 noteSelect 1;
+#N canvas 160 457 1092 386 noteSelect 0;
 #X msg 7 32 220 \$1;
 #X obj 466 268 pack 0 0 0;
 #X obj 466 291 route 1 2 3 4;
@@ -3315,7 +3315,7 @@ milliseconds \, based on samplerate.;
 #X obj 466 186 * \$1;
 #X obj 487 162 r oct;
 #X obj 466 209 pack \$1 \$2;
-#X obj 127 173 notein;
+#X obj 116 122 notein;
 #X obj 127 195 mtof;
 #X obj 170 199 sel 0;
 #X msg 170 223 0;
@@ -3380,7 +3380,7 @@ input might cause problems in the future!;
 #X connect 49 0 1 0;
 #X connect 49 1 1 1;
 #X connect 49 2 1 2;
-#X restore 373 184 pd noteSelect;
+#X restore 398 100 pd noteSelect;
 #N canvas 71 98 511 205 LeadSynth 0;
 #X obj 16 162 outlet~;
 #X obj 16 131 *~ 0.5;
@@ -3401,7 +3401,7 @@ input might cause problems in the future!;
 #X connect 7 0 1 0;
 #X connect 8 0 1 0;
 #X connect 9 0 1 0;
-#X restore 373 256 pd LeadSynth;
+#X restore 288 231 pd LeadSynth;
 #N canvas 319 180 1073 586 fmSynth 0;
 #X obj 16 277 inlet;
 #X obj 16 383 outlet~;
@@ -3447,27 +3447,27 @@ input might cause problems in the future!;
 #X connect 14 0 12 0;
 #X restore 28 234 pd opPitch;
 #X obj 28 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -204800 -1
--1 2;
+-1 0;
 #X obj 891 82 vsl 15 128 1 3000 0 0 envAttack empty empty 0 -9 0 10
--262144 -1 -1 4300 1;
+-262144 -1 -1 0 1;
 #X obj 917 82 vsl 15 128 1 3000 0 0 envDecay empty empty 0 -9 0 10
--262144 -1 -1 1300 1;
+-262144 -1 -1 0 1;
 #X obj 938 82 vsl 15 128 0 1 0 0 envSustain empty empty 0 -9 0 10 -262144
--1 -1 2200 1;
+-1 -1 0 1;
 #X obj 963 82 vsl 15 128 1 3000 0 0 envRelease empty empty 0 -9 0 10
--262144 -1 -1 6000 1;
+-262144 -1 -1 0 1;
 #X obj 282 82 vsl 15 128 0 10 0 0 lfoOneFreq empty empty 0 -9 0 10
--4032 -1 -1 1000 1;
+-4032 -1 -1 0 1;
 #X obj 101 82 vsl 15 127 1 2000 0 0 fmOpOneAmt empty empty 0 -9 0 10
--4032 -1 -1 2300 1;
+-4032 -1 -1 0 1;
 #X obj 150 82 vsl 15 127 1 3000 0 0 fmOpOneAttack empty empty 0 -9
-0 10 -204800 -1 -1 4400 1;
+0 10 -204800 -1 -1 0 1;
 #X obj 180 82 vsl 15 127 1 3000 0 0 fmOpOneDecay empty empty 0 -9 0
-10 -204800 -1 -1 2100 1;
+10 -204800 -1 -1 0 1;
 #X obj 210 82 vsl 15 127 1 3000 0 0 fmOpOneSustain empty empty 0 -9
-0 10 -204800 -1 -1 1300 1;
+0 10 -204800 -1 -1 0 1;
 #X obj 240 82 vsl 15 127 1 3000 0 0 fmOpOneRelease empty empty 0 -9
-0 10 -204800 -1 -1 5500 1;
+0 10 -204800 -1 -1 0 1;
 #N canvas 385 158 397 250 opPitch 0;
 #X msg 195 119 1.5;
 #X msg 225 119 2;
@@ -3507,17 +3507,17 @@ input might cause problems in the future!;
 #X connect 11 0 13 0;
 #X restore 428 234 pd opPitch;
 #X obj 428 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -262130
--1 -1 6;
+-1 -1 0;
 #X obj 501 82 vsl 15 127 1 2000 0 0 fmOpTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 6000 1;
+-257985 -1 -1 0 1;
 #X obj 550 82 vsl 15 127 1 3000 0 0 fmOpTwoAttack empty empty 0 -9
-0 10 -262130 -1 -1 5600 1;
+0 10 -262130 -1 -1 0 1;
 #X obj 580 82 vsl 15 127 1 3000 0 0 fmOpTwoDecay empty empty 0 -9 0
-10 -262130 -1 -1 11600 1;
+10 -262130 -1 -1 0 1;
 #X obj 610 82 vsl 15 127 1 3000 0 0 fmOpTwoSustain empty empty 0 -9
-0 10 -262130 -1 -1 1600 1;
+0 10 -262130 -1 -1 0 1;
 #X obj 640 82 vsl 15 127 1 3000 0 0 fmOpTwoRelease empty empty 0 -9
-0 10 -262130 -1 -1 4800 1;
+0 10 -262130 -1 -1 0 1;
 #X obj 108 277 inlet;
 #X obj 193 277 inlet;
 #X obj 278 277 inlet;
@@ -3579,23 +3579,23 @@ input might cause problems in the future!;
 #X obj 800 294 loadbang;
 #X obj 800 388 s snap;
 #X obj 322 82 vsl 15 128 0 0.05 0 0 lfoOneAmt empty empty 0 -9 0 10
--4032 -1 -1 3300 1;
+-4032 -1 -1 0 1;
 #X obj 692 82 vsl 15 128 0 10 0 0 lfoTwoFreq empty empty 0 -9 0 10
--257985 -1 -1 500 1;
+-257985 -1 -1 0 1;
 #X obj 732 82 vsl 15 128 0 0.05 0 0 lfoTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 800 1;
+-257985 -1 -1 0 1;
 #X obj 28 13 r fmPresets;
 #X obj 60 86 vsl 15 128 0.125 20 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 1013 145 vsl 15 128 0 10 0 0 crossMod empty empty 0 -9 0 10
--262144 -1 -1 100 1;
+-262144 -1 -1 0 1;
 #X obj 278 308 fmVoice 4;
 #X obj 193 308 fmVoice 3;
 #X obj 16 308 fmVoice 1;
 #X obj 108 308 fmVoice 2;
 #X obj 28 47 unpack f f f f f f f f f f f f f f f f f f f f f f;
 #X obj 842 116 vsl 15 128 0 1 0 0 envAttackLev empty empty 0 -9 0 10
--262144 -1 -1 2500 1;
+-262144 -1 -1 0 1;
 #X obj 882 363 print;
 #X obj 800 317 delay 120;
 #X connect 0 0 39 0;
@@ -3638,7 +3638,7 @@ input might cause problems in the future!;
 #X connect 41 20 36 0;
 #X connect 41 21 42 0;
 #X connect 44 0 28 0;
-#X restore 471 256 pd fmSynth;
+#X restore 355 253 pd fmSynth;
 #N canvas 0 50 554 303 LeadSynthTwo 0;
 #X obj 77 33 inlet;
 #X obj 125 33 inlet;
@@ -3659,7 +3659,7 @@ input might cause problems in the future!;
 #X connect 7 0 5 0;
 #X connect 8 0 5 0;
 #X connect 9 0 5 0;
-#X restore 456 282 pd LeadSynthTwo;
+#X restore 437 263 pd LeadSynthTwo;
 #N canvas 137 427 665 315 loadSynthThree 0;
 #X obj 67 33 inlet;
 #X obj 135 33 inlet;
@@ -3680,7 +3680,7 @@ input might cause problems in the future!;
 #X connect 7 0 5 0;
 #X connect 8 0 5 0;
 #X connect 9 0 5 0;
-#X restore 465 223 pd loadSynthThree;
+#X restore 506 231 pd loadSynthThree;
 #X obj 330 407 *~ 1;
 #X connect 1 0 45 0;
 #X connect 1 1 45 1;
@@ -3795,7 +3795,7 @@ input might cause problems in the future!;
 #X obj 42 524 hip~ 20000;
 #X obj 42 551 *~ 1.5;
 #X text 4 123 Input to loops;
-#X obj 288 532 record_file;
+#X text 240 515 record file was here;
 #X connect 2 0 21 0;
 #X connect 3 0 21 0;
 #X connect 4 0 21 0;
@@ -3811,8 +3811,6 @@ input might cause problems in the future!;
 #X connect 13 0 0 0;
 #X connect 13 0 0 1;
 #X connect 13 0 33 0;
-#X connect 13 0 36 0;
-#X connect 13 0 36 1;
 #X connect 14 0 22 0;
 #X connect 15 0 14 0;
 #X connect 16 0 14 0;
@@ -3999,7 +3997,7 @@ input might cause problems in the future!;
 #X connect 57 0 25 0;
 #X connect 58 0 55 0;
 #X restore 469 83 pd metros;
-#N canvas 645 116 870 413 loopInt 1;
+#N canvas 645 116 870 413 loopInt 0;
 #X obj 57 94 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 72 143 0;
@@ -4060,7 +4058,7 @@ input might cause problems in the future!;
 #X connect 27 0 28 0;
 #X connect 29 0 3 1;
 #X restore 469 58 pd loopInt;
-#N canvas 886 204 359 225 saveLoad 1;
+#N canvas 886 204 359 225 saveLoad 0;
 #X obj 15 153 loopLoad 1;
 #X obj 94 153 loopLoad 2;
 #X obj 173 153 loopLoad 3;
@@ -4230,7 +4228,7 @@ input might cause problems in the future!;
 #X obj 173 78 loopSave 7;
 #X obj 252 78 loopSave 8;
 #X restore 469 34 pd saveLoad;
-#N canvas 311 146 1174 579 serialControls 0;
+#N canvas 378 72 1174 579 serialControls 0;
 #X obj 983 415 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 983 435 s stop;
@@ -4788,9 +4786,9 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X msg 705 384 7;
 #X msg 735 384 11;
 #N canvas 1188 236 405 303 megalon-MIDI-messages 1;
-#N canvas 88 63 805 405 button-grid 1;
+#N canvas 88 63 805 405 button-grid 0;
 #X obj 28 323 s \$0-megalon-MIDI-message;
-#N canvas 0 50 988 743 drums 0;
+#N canvas 532 289 988 743 drums 0;
 #X floatatom 111 50 5 0 0 0 - - -;
 #X obj 32 195 sel;
 #X obj 82 195 sel;
@@ -4917,7 +4915,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 251 229 r \$0-midi-note-velocity;
 #X obj 28 36 r \$0-midi-note-in;
 #X obj 28 230 route drums instrument-select;
-#N canvas 380 72 988 743 instrument-sel 1;
+#N canvas 380 72 988 743 instrument-sel 0;
 #X floatatom 115 142 5 0 0 0 - - -;
 #X obj 115 195 sel;
 #X obj 165 195 sel;
@@ -5038,7 +5036,7 @@ select the instrument corresponding to the button that was pressed
 #X connect 44 0 27 0;
 #X connect 45 0 27 0;
 #X restore 128 296 pd instrument-sel;
-#N canvas 852 72 450 382 instrument-select-btn 1;
+#N canvas 852 72 450 382 instrument-select-btn 0;
 #X obj 170 41 r \$0-midi-inst-sel;
 #X obj 46 174 r \$0-midi-note-velocity;
 #X obj 28 78 ==;
@@ -5331,7 +5329,7 @@ select the instrument corresponding to the button that was pressed
 #X text 30 23 Handle midi input;
 #N canvas 0 50 548 488 other-knobs 0;
 #X restore 28 187 pd other-knobs;
-#N canvas 586 179 980 666 volume-controls 1;
+#N canvas 586 179 980 666 volume-controls 0;
 #X obj 218 109 r \$0-midi-ctl-in;
 #X obj 23 109 r \$0-midi-ctl-value;
 #X floatatom 218 191 5 0 0 0 - - -;
@@ -5433,7 +5431,7 @@ select the instrument corresponding to the button that was pressed
 #X msg 447 405 0;
 #X obj 29 271 cnv 15 400 60 empty empty empty 20 12 0 14 -232576 -66577
 0;
-#N canvas 191 58 1175 791 set-midi-buttons 0;
+#N canvas 191 58 1175 791 set-midi-buttons 1;
 #X obj 135 21 cnv 15 400 100 empty empty empty 20 12 0 14 -203904 -66577
 0;
 #X floatatom 507 74 0 0 0 0 Vel - -;
@@ -5503,10 +5501,6 @@ button above;
 #X connect 2 1 1 0;
 #X connect 2 2 4 0;
 #X connect 16 0 37 0;
-#X connect 22 0 24 0;
-#X connect 25 0 27 0;
-#X connect 32 0 36 0;
-#X connect 33 0 31 0;
 #X connect 37 0 48 0;
 #X connect 37 0 49 0;
 #X connect 37 0 50 0;
@@ -5520,7 +5514,7 @@ button above;
 #X connect 53 0 18 0;
 #X connect 54 0 19 0;
 #X restore 39 292 pd set-midi-buttons;
-#N canvas 170 22 1219 799 set-midi-knobs-or-sliders 0;
+#N canvas 170 22 1219 799 set-midi-knobs-or-sliders 1;
 #X obj 126 9 cnv 15 450 100 empty empty empty 20 12 0 14 -203904 -66577
 0;
 #X floatatom 469 81 0 0 0 0 - - -;
@@ -5595,7 +5589,7 @@ button above;
 #X text 400 518 Activate FX pad;
 #X text 400 534 Activate FX retrig;
 #X obj 688 553 s \$0-midi-fx-retrig-active;
-#X text 344 483;
+#X text 344 483 comment;
 #X obj 687 490 s \$0-midi-inst-sel;
 #X msg 604 473 109;
 #X msg 604 496 105;
