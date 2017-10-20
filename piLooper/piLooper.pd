@@ -1,4 +1,4 @@
-#N canvas 83 191 594 566 10;
+#N canvas 83 191 826 577 10;
 #X obj 23 34 bng 50 250 50 0 lp-trig-1 lp-trig-1-r empty 17 7 0 10
 -204800 -1 -1;
 #X obj 41 94 bng 15 250 50 0 clear-1 clear-1-r empty 17 7 0 10 -258113
@@ -27,7 +27,7 @@
 -262130 -1 -1;
 #X obj 261 194 bng 15 250 50 0 clear-7 clear-7-r empty 17 7 0 10 -258113
 -1 -1;
-#X obj 353 134 bng 50 250 50 0 lp-trig-8 lp-trig-8-r empty 17 7 0 10
+#X obj 353 135 bng 50 250 50 0 lp-trig-8 lp-trig-8-r empty 17 7 0 10
 -261234 -1 -1;
 #X obj 371 194 bng 15 250 50 0 clear-8 clear-8-r empty 17 7 0 10 -258113
 -1 -1;
@@ -66,7 +66,7 @@
 0 -9 0 10 -262130 -1 -1 0 1;
 #X obj 364 365 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
 0 10 -261234 -1 -1 0 1;
-#N canvas 80 33 836 603 guts 1;
+#N canvas 19 510 836 603 guts 1;
 #X obj 34 442 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 34 494 1;
@@ -286,7 +286,7 @@ by incoming ctrls;
 #X connect 52 0 41 0;
 #X connect 53 0 14 0;
 #X restore 468 111 pd MIDI-IO;
-#N canvas 758 64 429 674 audio-IO 0;
+#N canvas 758 64 429 674 audio-IO 1;
 #X obj 184 506 dac~;
 #X obj 14 105 s~ input;
 #X obj 184 28 r~ lp-out-1;
@@ -380,9 +380,9 @@ by incoming ctrls;
 #X obj 310 293 expr 1 - $f1;
 #X obj 296 59 loadbang;
 #X obj 112 119 hsl 128 15 0 1 0 1 empty empty 'roomsize' 20 8 0 10
--262144 -260097 -1 0 0;
+-262144 -260097 -1 3500 0;
 #X obj 127 162 hsl 128 15 0 2.4 0 1 empty empty damp 20 8 0 10 -262144
--260097 -1 0 0;
+-260097 -1 4600 0;
 #X obj 157 255 hsl 128 15 0 1 0 1 empty empty wet 20 8 0 10 -262144
 -260097 -1 0 0;
 #X obj 142 205 hsl 128 15 0 1 0 1 empty empty dry 20 8 0 10 -262144
@@ -393,7 +393,7 @@ by incoming ctrls;
 #X obj 311 183 r post-verb;
 #X obj 343 222 / 127;
 #X obj 311 267 / 508;
-#N canvas 576 595 634 321 vfreeverbb~ 0;
+#N canvas 565 550 634 321 vfreeverbb~ 0;
 #N canvas 261 50 778 367 combfilters-left1 0;
 #X obj 46 244 +~;
 #X obj 61 219 *~ 0.3;
@@ -1439,18 +1439,18 @@ milliseconds \, based on samplerate.;
 #X connect 13 0 15 0;
 #X connect 16 0 0 0;
 #X restore 184 218 pd post-loop-fx;
-#N canvas 392 36 908 761 drums-input-fx 0;
+#N canvas 392 36 908 761 drums-input-fx 1;
 #X obj 330 735 outlet~;
-#N canvas 912 358 855 384 ss 0;
-#X text 22 116 Bank One;
+#N canvas 394 277 855 384 ss 0;
+#X text 21 62 Bank One;
 #X text 885 117 Bank Two;
-#X obj 319 305 outlet~;
+#X obj 324 346 outlet~;
 #X text 1595 117 Bank Three;
 #X obj 1174 270 outlet~;
 #X obj 1969 295 outlet~;
 #X obj 2719 295 outlet~;
 #X text 2345 117 Bank Four;
-#X obj 9 144 samp 60 /btn13 snare_04.wav;
+#X obj 8 90 samp 60 /btn13 snare_04.wav;
 #X msg 260 33 60;
 #X msg 290 33 61;
 #X msg 320 33 62;
@@ -1459,36 +1459,36 @@ milliseconds \, based on samplerate.;
 #X msg 290 53 57;
 #X msg 320 53 58;
 #X msg 350 53 59;
-#X msg 260 73 52;
-#X msg 290 73 53;
-#X msg 320 73 54;
-#X msg 350 73 55;
-#X msg 260 93 48;
-#X msg 290 93 49;
-#X msg 320 93 50;
-#X msg 350 93 51;
-#X obj 17 229 samp 48 /btn1 kick_01.wav;
-#X obj 209 144 samp 61 /btn14 snare_05.wav;
-#X obj 419 144 samp 62 /btn15 snare_06.wav;
-#X obj 629 144 samp 63 /btn16 crash_01.wav;
-#X obj 617 173 samp 59 /btn12 hh_03.wav;
-#X obj 413 173 samp 58 /btn11 kick_06.wav;
-#X obj 209 173 samp 57 /btn10 kick_05.wav;
-#X obj 19 173 samp 56 /btn9 kick_04.wav;
-#X obj 13 201 samp 52 /btn5 snare_01.wav;
-#X obj 209 201 samp 53 /btn6 snare_02.wav;
-#X obj 414 201 samp 54 /btn7 snare_03.wav;
-#X obj 408 230 samp 50 /btn3 kick_03.wav;
-#X obj 209 230 samp 49 /btn2 kick_02.wav;
+#X msg 260 173 52;
+#X msg 290 173 53;
+#X msg 320 173 54;
+#X msg 350 173 55;
+#X msg 260 193 48;
+#X msg 290 193 49;
+#X msg 320 193 50;
+#X msg 350 193 51;
+#X obj 21 287 samp 48 /btn1 kick_01.wav;
+#X obj 208 90 samp 61 /btn14 snare_05.wav;
+#X obj 418 90 samp 62 /btn15 snare_06.wav;
+#X obj 628 90 samp 63 /btn16 crash_01.wav;
+#X obj 616 119 samp 59 /btn12 hh_03.wav;
+#X obj 412 119 samp 58 /btn11 kick_06.wav;
+#X obj 208 119 samp 57 /btn10 kick_05.wav;
+#X obj 18 119 samp 56 /btn9 kick_04.wav;
+#X obj 17 259 samp 52 /btn5 snare_01.wav;
+#X obj 213 259 samp 53 /btn6 snare_02.wav;
+#X obj 418 259 samp 54 /btn7 snare_03.wav;
+#X obj 412 288 samp 50 /btn3 kick_03.wav;
+#X obj 213 288 samp 49 /btn2 kick_02.wav;
 #X obj 880 229 samp 48 /btn1 kick_07.wav;
 #X obj 1046 229 samp 49 /btn2 kick_08.wav;
 #X obj 1216 229 samp 50 /btn3 kick_09.wav;
-#X obj 611 230 samp 51 /btn4 hh_01.wav;
+#X obj 615 288 samp 51 /btn4 hh_01.wav;
 #X obj 1379 229 samp 51 /btn4 hh_04.wav;
 #X obj 875 200 samp 52 /btn5 snare_07.wav;
 #X obj 1046 200 samp 53 /btn6 snare_08.wav;
 #X obj 1220 200 samp 54 /btn7 snare_09.wav;
-#X obj 617 201 samp 55 /btn8 hh_02.wav;
+#X obj 621 259 samp 55 /btn8 hh_02.wav;
 #X obj 1392 200 samp 55 /btn8 hh_05.wav;
 #X obj 877 172 samp 56 /btn9 kick_10.wav;
 #X obj 1046 172 samp 57 /btn10 kick_11.wav;
@@ -1530,6 +1530,8 @@ milliseconds \, based on samplerate.;
 #X obj 2350 143 samp 60 /btn13 snare_22.wav;
 #X obj 2526 143 samp 61 /btn14 snare_23.wav;
 #X obj 2696 143 samp 62 /btn15 snare_24.wav;
+#X text 127 173 LX25 pad map 2;
+#X text 128 30 LX25 pad map 1;
 #X connect 8 0 2 0;
 #X connect 9 0 8 0;
 #X connect 10 0 26 0;
@@ -3073,7 +3075,7 @@ milliseconds \, based on samplerate.;
 #X connect 19 0 17 0;
 #X connect 20 0 19 0;
 #X restore 330 432 pd reTrigger;
-#N canvas 435 196 1289 730 instrumentSelector 0;
+#N canvas 0 41 1289 730 instrumentSelector 1;
 #X obj 152 178 *~;
 #X obj 167 157 line~;
 #X msg 167 127 1 10;
@@ -3127,7 +3129,7 @@ milliseconds \, based on samplerate.;
 #X text 1119 380 bass;
 #X text 1066 260 padz;
 #X text 1165 503 keyz;
-#X obj 1043 628 s fmPresets;
+#X obj 994 674 s fmPresets;
 #X obj 777 97 sel 5 6 7 9 10 11 13 14 15;
 #X obj 1007 97 sel 8;
 #X msg 1007 123 1 10;
@@ -3140,30 +3142,30 @@ milliseconds \, based on samplerate.;
 #X obj 1107 97 sel 12;
 #X obj 1522 149 sel 6 10 14;
 #X msg 1560 183 0.5;
-#X msg 1062 275 2 365.897 1048.27 500.833 310.421 1310.09 0.787402
+#X msg 1143 218 2 365.897 1048.27 500.833 310.421 1310.09 0.787402
 0.0129921 6 952.905 1333.89 2761.98 381.825 1143.48 0.393701 0.00314961
 1016.41 307.984 0.173228 1417.85 0.0787402 0.19685;
-#X msg 1122 398 4 1 929.262 834.056 120.008 596.04 0 0 2 1 1 1333.89
+#X msg 1162 282 4 1 929.262 834.056 120.008 596.04 0 0 2 1 1 1333.89
 405.627 167.611 9.05512 0.00511811 1 1016.41 0.314961 119.071 0.944882
 1;
-#X msg 1131 433 2 318.302 1 143.81 72.4048 1 2.51969 0 5 556.278 1
+#X msg 1204 438 2 318.302 1 143.81 72.4048 1 2.51969 0 5 556.278 1
 48.6032 1 1 1.65354 0.0358268 1 709.425 0 1 0.23622 1;
-#X msg 1140 461 5 238.976 619.841 1262.48 857.857 1 3.85827 0.0314961
+#X msg 1267 579 5 238.976 619.841 1262.48 857.857 1 3.85827 0.0314961
 2 365.897 667.444 1262.48 453.23 215.214 1.33858 0.0173228 71.8425
 1063.64 0.228346 189.913 0 1;
-#X msg 1101 337 9 1 1 1 72.4048 1548.1 7.16535 0.0110236 9 64.4603
+#X msg 1250 532 9 1 1 1 72.4048 1548.1 7.16535 0.0110236 9 64.4603
 1072.07 572.238 120.008 596.04 3.38583 0.00551181 1040.02 1110.87 0.220472
 1276.17 2.67717 0.362205;
-#X msg 1086 309 4 350.032 3000 1905.13 286.619 477.032 0.551181 0.0133858
+#X msg 1185 389 4 350.032 3000 1905.13 286.619 477.032 0.551181 0.0133858
 4 397.627 2357.36 976.865 667.444 1286.29 0 0 1 709.425 0.204724 1276.17
 0.551181 0.188976;
-#X msg 1167 562 9 1 1 1 500.833 1191.08 0.551181 0.0165354 9 651.468
+#X msg 1232 481 9 1 1 1 500.833 1191.08 0.551181 0.0165354 9 651.468
 1 715.048 596.04 1214.88 6.77165 0.011811 1 284.37 0.110236 1299.78
 3.46457 0.173228;
-#X msg 1178 600 6 746.659 1 548.437 167.611 167.611 5.59055 0.00629921
+#X msg 1278 629 6 746.659 1 548.437 167.611 167.611 5.59055 0.00629921
 4 445.222 1 572.238 48.6032 143.81 5.90551 0.0106299 1 1063.64 0.149606
 1299.78 1.10236 0.251969;
-#X msg 1158 521 4 762.524 1 1809.92 286.619 834.056 0.944882 0.00551181
+#X msg 1176 333 4 762.524 1 1809.92 286.619 834.056 0.944882 0.00551181
 5 1016.37 1 1262.48 167.611 239.016 7.87402 0.0023622 1 544.126 0.15748
 803.882 0.944882 0.307087;
 #X connect 0 0 25 0;
@@ -3270,7 +3272,7 @@ milliseconds \, based on samplerate.;
 #X connect 73 0 53 0;
 #X connect 74 0 53 0;
 #X restore 303 315 pd instrumentSelector;
-#N canvas 132 413 1092 386 noteSelect 0;
+#N canvas 160 457 1092 386 noteSelect 1;
 #X msg 7 32 220 \$1;
 #X obj 466 268 pack 0 0 0;
 #X obj 466 291 route 1 2 3 4;
@@ -3445,27 +3447,27 @@ input might cause problems in the future!;
 #X connect 14 0 12 0;
 #X restore 28 234 pd opPitch;
 #X obj 28 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -204800 -1
--1 0;
+-1 2;
 #X obj 891 82 vsl 15 128 1 3000 0 0 envAttack empty empty 0 -9 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 4300 1;
 #X obj 917 82 vsl 15 128 1 3000 0 0 envDecay empty empty 0 -9 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 1300 1;
 #X obj 938 82 vsl 15 128 0 1 0 0 envSustain empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 2200 1;
 #X obj 963 82 vsl 15 128 1 3000 0 0 envRelease empty empty 0 -9 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 6000 1;
 #X obj 282 82 vsl 15 128 0 10 0 0 lfoOneFreq empty empty 0 -9 0 10
--4032 -1 -1 0 1;
+-4032 -1 -1 1000 1;
 #X obj 101 82 vsl 15 127 1 2000 0 0 fmOpOneAmt empty empty 0 -9 0 10
--4032 -1 -1 0 1;
+-4032 -1 -1 2300 1;
 #X obj 150 82 vsl 15 127 1 3000 0 0 fmOpOneAttack empty empty 0 -9
-0 10 -204800 -1 -1 0 1;
+0 10 -204800 -1 -1 4400 1;
 #X obj 180 82 vsl 15 127 1 3000 0 0 fmOpOneDecay empty empty 0 -9 0
-10 -204800 -1 -1 0 1;
+10 -204800 -1 -1 2100 1;
 #X obj 210 82 vsl 15 127 1 3000 0 0 fmOpOneSustain empty empty 0 -9
-0 10 -204800 -1 -1 0 1;
+0 10 -204800 -1 -1 1300 1;
 #X obj 240 82 vsl 15 127 1 3000 0 0 fmOpOneRelease empty empty 0 -9
-0 10 -204800 -1 -1 0 1;
+0 10 -204800 -1 -1 5500 1;
 #N canvas 385 158 397 250 opPitch 0;
 #X msg 195 119 1.5;
 #X msg 225 119 2;
@@ -3505,17 +3507,17 @@ input might cause problems in the future!;
 #X connect 11 0 13 0;
 #X restore 428 234 pd opPitch;
 #X obj 428 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -262130
--1 -1 0;
+-1 -1 6;
 #X obj 501 82 vsl 15 127 1 2000 0 0 fmOpTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 0 1;
+-257985 -1 -1 6000 1;
 #X obj 550 82 vsl 15 127 1 3000 0 0 fmOpTwoAttack empty empty 0 -9
-0 10 -262130 -1 -1 0 1;
+0 10 -262130 -1 -1 5600 1;
 #X obj 580 82 vsl 15 127 1 3000 0 0 fmOpTwoDecay empty empty 0 -9 0
-10 -262130 -1 -1 0 1;
+10 -262130 -1 -1 11600 1;
 #X obj 610 82 vsl 15 127 1 3000 0 0 fmOpTwoSustain empty empty 0 -9
-0 10 -262130 -1 -1 0 1;
+0 10 -262130 -1 -1 1600 1;
 #X obj 640 82 vsl 15 127 1 3000 0 0 fmOpTwoRelease empty empty 0 -9
-0 10 -262130 -1 -1 0 1;
+0 10 -262130 -1 -1 4800 1;
 #X obj 108 277 inlet;
 #X obj 193 277 inlet;
 #X obj 278 277 inlet;
@@ -3577,23 +3579,23 @@ input might cause problems in the future!;
 #X obj 800 294 loadbang;
 #X obj 800 388 s snap;
 #X obj 322 82 vsl 15 128 0 0.05 0 0 lfoOneAmt empty empty 0 -9 0 10
--4032 -1 -1 0 1;
+-4032 -1 -1 3300 1;
 #X obj 692 82 vsl 15 128 0 10 0 0 lfoTwoFreq empty empty 0 -9 0 10
--257985 -1 -1 0 1;
+-257985 -1 -1 500 1;
 #X obj 732 82 vsl 15 128 0 0.05 0 0 lfoTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 0 1;
+-257985 -1 -1 800 1;
 #X obj 28 13 r fmPresets;
 #X obj 60 86 vsl 15 128 0.125 20 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
 #X obj 1013 145 vsl 15 128 0 10 0 0 crossMod empty empty 0 -9 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 100 1;
 #X obj 278 308 fmVoice 4;
 #X obj 193 308 fmVoice 3;
 #X obj 16 308 fmVoice 1;
 #X obj 108 308 fmVoice 2;
 #X obj 28 47 unpack f f f f f f f f f f f f f f f f f f f f f f;
 #X obj 842 116 vsl 15 128 0 1 0 0 envAttackLev empty empty 0 -9 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 2500 1;
 #X obj 882 363 print;
 #X obj 800 317 delay 120;
 #X connect 0 0 39 0;
@@ -3881,7 +3883,7 @@ input might cause problems in the future!;
 #X msg 121 193 1;
 #X obj 121 168 r play;
 #X obj 20 84 s clearAll;
-#N canvas 1113 50 218 312 BPM_DISPLAY 1;
+#N canvas 1113 50 218 312 BPM_DISPLAY 0;
 #X obj 76 12 r ms;
 #X obj 14 161 /;
 #X msg 14 121 60000;
@@ -3997,7 +3999,7 @@ input might cause problems in the future!;
 #X connect 57 0 25 0;
 #X connect 58 0 55 0;
 #X restore 469 83 pd metros;
-#N canvas 645 116 870 413 loopInt 0;
+#N canvas 645 116 870 413 loopInt 1;
 #X obj 57 94 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 72 143 0;
@@ -4058,7 +4060,7 @@ input might cause problems in the future!;
 #X connect 27 0 28 0;
 #X connect 29 0 3 1;
 #X restore 469 58 pd loopInt;
-#N canvas 886 204 359 225 saveLoad 0;
+#N canvas 886 204 359 225 saveLoad 1;
 #X obj 15 153 loopLoad 1;
 #X obj 94 153 loopLoad 2;
 #X obj 173 153 loopLoad 3;
@@ -4228,7 +4230,7 @@ input might cause problems in the future!;
 #X obj 173 78 loopSave 7;
 #X obj 252 78 loopSave 8;
 #X restore 469 34 pd saveLoad;
-#N canvas 331 279 1174 579 serialControls 0;
+#N canvas 311 146 1174 579 serialControls 0;
 #X obj 983 415 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 983 435 s stop;
@@ -4239,9 +4241,9 @@ input might cause problems in the future!;
 -1 -1;
 #X obj 841 409 s clearAll;
 #X obj 28 17 r comPortMsg;
-#X obj 28 151 list prepend;
-#X obj 28 253 list trim;
-#X obj 28 129 serial_print any;
+#X obj 28 161 list prepend;
+#X obj 216 167 list trim;
+#X obj 28 135 serial_print any;
 #X obj 28 363 unpack f;
 #X obj 130 361 unpack s;
 #X obj 130 413 s songName;
@@ -4282,7 +4284,7 @@ input might cause problems in the future!;
 #X obj 294 408 delay 400;
 #X obj 646 373 s inputTogL;
 #X obj 735 372 s inputTogR;
-#N canvas 37 660 1057 281 analogRouteOne 0;
+#N canvas 125 554 1057 281 analogRouteOne 0;
 #X obj 28 198 s fx-d-time;
 #X obj 64 163 s fx-d-feed;
 #X obj 100 139 s fx-reverb;
@@ -4439,15 +4441,15 @@ A13: A14: A15: A16: A17: A18: A19: A20: A21: A22:;
 #X connect 77 19 71 0;
 #X connect 77 20 73 0;
 #X connect 77 21 42 0;
-#X restore 334 298 pd analogRouteOne;
+#X restore 273 232 pd analogRouteOne;
 #X obj 928 392 sel 1 0;
 #X floatatom 1013 368 5 0 0 0 - - -;
-#X obj 1013 475 s fx-robot;
+#X obj 923 522 s fx-robot;
 #X obj 122 17 r macMsg;
 #X msg 122 43 open \$1;
 #X obj 28 106 comport 1 9600;
 #X msg 185 67 close;
-#X obj 28 334 route Select_Song: Song_Name: Clear_Song: Load_Song:
+#X obj 469 255 route Select_Song: Song_Name: Clear_Song: Load_Song:
 Save_Song: New_Song: Delete_Song: InputOne: InputTwo: Clear: PlayStop:
 RoboDrums:;
 #N canvas 180 110 849 219 digitalRoute 0;
@@ -4494,7 +4496,7 @@ RoboDrums:;
 #X connect 16 6 10 0;
 #X connect 16 7 11 0;
 #X connect 17 0 16 0;
-#X restore 136 301 pd digitalRoute;
+#X restore -20 232 pd digitalRoute;
 #N canvas 367 262 1407 371 drumRoute 0;
 #X obj 10 35 route Dr1: Dr2: Dr3: Dr4: Dr5: Dr6: Dr7: Dr8: Dr9: Dr10:
 Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
@@ -4596,7 +4598,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 31 0 48 0;
 #X connect 49 0 2 0;
 #X connect 49 0 33 0;
-#X restore 44 301 pd drumRoute;
+#X restore -14 197 pd drumRoute;
 #N canvas 800 422 375 193 xyRoute 0;
 #X obj 12 49 route Xval: Yval: postTog:;
 #X obj 12 135 s post-glitch-time;
@@ -4621,9 +4623,9 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 8 0 9 0;
 #X connect 9 0 1 0;
 #X connect 10 0 0 0;
-#X restore 250 299 pd xyRoute;
-#X obj 466 276 route Inst:;
-#X obj 466 299 s bankSelect;
+#X restore 95 231 pd xyRoute;
+#X obj 486 195 route Inst:;
+#X obj 485 219 s bankSelect;
 #X obj 264 32 r play;
 #X obj 359 32 r stop;
 #X msg 264 61 1;
@@ -4651,10 +4653,10 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 1 6 8 0;
 #X connect 1 7 9 0;
 #X connect 10 0 0 0;
-#X restore 462 240 pd routeClears;
+#X restore 172 232 pd routeClears;
 #X msg 51 56 devices;
 #X obj 1016 392 s notez;
-#X obj 50 211 r \$0-megalon-MIDI-message;
+#X obj 216 136 r \$0-megalon-MIDI-message;
 #X connect 0 0 1 0;
 #X connect 2 0 3 0;
 #X connect 4 0 5 0;
@@ -4729,29 +4731,32 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 135 486 s comPortMsg;
 #X obj 135 23 r selectSong;
 #X obj 424 124 r createDirectory;
-#X obj 504 239 r deleteSong;
+#X obj 615 302 r deleteSong;
 #X obj 135 413 ggee/shell;
 #X obj 135 357 spigot 0;
-#X obj 252 357 spigot 0;
-#X obj 165 264 r piMsg;
-#X obj 324 295 r macMsg;
-#X msg 152 53 ls Users/toby/Desktop/newPDPatches/piLooper/Sessions
+#X obj 267 239 spigot 0;
+#X obj 283 340 r piMsg;
+#X obj 334 192 r macMsg;
+#X msg 232 51 ls /Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/newPDPatches/piLooper/Sessions
 ;
-#X msg 135 85 ls /home/pi/Desktop/piLooper/Sessions;
-#X msg 444 151 mkdir /Users/toby/Desktop/newPDPatches/piLooper/Sessions/\$1
+#X msg 23 115 ls /Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/piLooper/Sessions
 ;
-#X msg 424 179 mkdir /home/pi/Desktop/piLooper/Sessions/\$1;
-#X msg 534 273 rm -rf /Users/toby/Desktop/newPDPatches/piLooper/Sessions/\$1
+#X msg 621 147 mkdir //Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/piLooper/Sessions/\$1
 ;
-#X msg 504 304 rm -rf /home/pi/Desktop/piLooper/Sessions/\$1;
+#X msg 624 218 mkdir /Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/piLooper/Sessions/\$1
+;
+#X msg 639 386 rm -rf /Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/piLooper/Sessions/\$1
+;
+#X msg 595 337 rm -rf /Users/davidevans/Documents/LiveLoopSynth/Raspberry-Pi-Looper-synth-drum-thing/newPDPatches/piLooper/Sessions/\$1
+;
 #X connect 0 0 2 0;
 #X connect 1 0 0 0;
-#X connect 3 0 11 0;
 #X connect 3 0 12 0;
+#X connect 3 0 11 0;
 #X connect 4 0 13 0;
 #X connect 4 0 14 0;
-#X connect 5 0 15 0;
 #X connect 5 0 16 0;
+#X connect 5 0 15 0;
 #X connect 6 0 1 0;
 #X connect 7 0 6 0;
 #X connect 8 0 6 0;
@@ -4761,8 +4766,8 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 12 0 7 0;
 #X connect 13 0 8 0;
 #X connect 14 0 7 0;
-#X connect 15 0 8 0;
-#X connect 16 0 7 0;
+#X connect 15 0 7 0;
+#X connect 16 0 8 0;
 #X restore 468 222 pd shelCom;
 #X obj 353 192 Loop 8;
 #X obj 353 91 Loop 4;
@@ -4783,10 +4788,10 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X msg 705 384 7;
 #X msg 735 384 11;
 #N canvas 1188 236 405 303 megalon-MIDI-messages 1;
-#N canvas 224 396 805 405 button-grid 1;
+#N canvas 88 63 805 405 button-grid 1;
 #X obj 28 323 s \$0-megalon-MIDI-message;
 #N canvas 0 50 988 743 drums 0;
-#X floatatom 32 142 5 0 0 0 - - -;
+#X floatatom 111 50 5 0 0 0 - - -;
 #X obj 32 195 sel;
 #X obj 82 195 sel;
 #X obj 132 195 sel;
@@ -4804,7 +4809,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 812 195 sel;
 #X obj 872 195 sel;
 #X obj 328 65 unpack f f f f;
-#X obj 32 265 pack s f;
+#X obj 357 399 pack s f;
 #X obj 458 65 unpack f f f f;
 #X obj 578 65 unpack f f f f;
 #X obj 708 65 unpack f f f f;
@@ -4824,10 +4829,10 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X msg 752 217 Dr14:;
 #X msg 812 217 Dr15:;
 #X msg 872 217 Dr16:;
-#X obj 32 118 inlet;
-#X obj 32 287 outlet;
-#X obj 95 112 inlet velocity;
-#X obj 95 134 > 0;
+#X obj 163 24 inlet;
+#X obj 355 445 outlet;
+#X obj 886 40 inlet velocity;
+#X obj 937 223 > 0;
 #X obj 328 28 r \$0-midi-row-4;
 #X obj 458 28 r \$0-midi-row-3;
 #X obj 578 28 r \$0-midi-row-2;
@@ -4912,7 +4917,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 251 229 r \$0-midi-note-velocity;
 #X obj 28 36 r \$0-midi-note-in;
 #X obj 28 230 route drums instrument-select;
-#N canvas 786 222 988 743 instrument-sel 1;
+#N canvas 380 72 988 743 instrument-sel 1;
 #X floatatom 115 142 5 0 0 0 - - -;
 #X obj 115 195 sel;
 #X obj 165 195 sel;
@@ -5033,7 +5038,7 @@ select the instrument corresponding to the button that was pressed
 #X connect 44 0 27 0;
 #X connect 45 0 27 0;
 #X restore 128 296 pd instrument-sel;
-#N canvas 210 397 450 382 instrument-select-btn 0;
+#N canvas 852 72 450 382 instrument-select-btn 1;
 #X obj 170 41 r \$0-midi-inst-sel;
 #X obj 46 174 r \$0-midi-note-velocity;
 #X obj 28 78 ==;
@@ -5079,7 +5084,7 @@ select the instrument corresponding to the button that was pressed
 #X connect 11 0 3 0;
 #X connect 11 1 10 0;
 #X restore 28 92 pd button-grid;
-#N canvas 121 86 464 264 get-midi-in 1;
+#N canvas 121 86 464 264 get-midi-in 0;
 #X obj 23 20 notein;
 #X obj 82 44 sel 1;
 #X msg 82 72 1;
@@ -5115,7 +5120,7 @@ select the instrument corresponding to the button that was pressed
 #X connect 13 0 14 1;
 #X connect 14 0 10 0;
 #X restore 28 65 pd get-midi-in;
-#N canvas 618 541 472 294 loop-buttons 1;
+#N canvas 618 541 472 294 loop-buttons 0;
 #N canvas 708 234 949 610 trig-loops 0;
 #X floatatom 32 82 5 0 0 0 - - -;
 #X obj 32 135 sel;
@@ -5244,7 +5249,7 @@ select the instrument corresponding to the button that was pressed
 #X connect 9 0 12 0;
 #X connect 13 0 9 0;
 #X restore 28 126 pd modifier-buttons;
-#N canvas 553 132 900 572 fx-controls 1;
+#N canvas 553 132 900 572 fx-controls 0;
 #X obj 218 109 r \$0-midi-ctl-in;
 #X obj 23 109 r \$0-midi-ctl-value;
 #X floatatom 218 191 5 0 0 0 - - -;
@@ -5326,7 +5331,7 @@ select the instrument corresponding to the button that was pressed
 #X text 30 23 Handle midi input;
 #N canvas 0 50 548 488 other-knobs 0;
 #X restore 28 187 pd other-knobs;
-#N canvas 586 179 980 666 volume-controls 0;
+#N canvas 586 179 980 666 volume-controls 1;
 #X obj 218 109 r \$0-midi-ctl-in;
 #X obj 23 109 r \$0-midi-ctl-value;
 #X floatatom 218 191 5 0 0 0 - - -;
@@ -5428,7 +5433,7 @@ select the instrument corresponding to the button that was pressed
 #X msg 447 405 0;
 #X obj 29 271 cnv 15 400 60 empty empty empty 20 12 0 14 -232576 -66577
 0;
-#N canvas 512 87 1175 791 set-midi-buttons 1;
+#N canvas 191 58 1175 791 set-midi-buttons 0;
 #X obj 135 21 cnv 15 400 100 empty empty empty 20 12 0 14 -203904 -66577
 0;
 #X floatatom 507 74 0 0 0 0 Vel - -;
@@ -5493,6 +5498,7 @@ button above;
 #X text 316 447 Lx25 Pad Map 3;
 #X msg 633 444 67 69 71 72;
 #X msg 633 464 60 62 64 65;
+#X text 537 498 disconnected - moved to ctlin;
 #X connect 2 0 3 0;
 #X connect 2 1 1 0;
 #X connect 2 2 4 0;
@@ -5507,10 +5513,6 @@ button above;
 #X connect 37 0 51 0;
 #X connect 37 0 53 0;
 #X connect 37 0 54 0;
-#X connect 37 0 22 0;
-#X connect 37 0 25 0;
-#X connect 37 0 33 0;
-#X connect 37 0 32 0;
 #X connect 48 0 12 0;
 #X connect 49 0 13 0;
 #X connect 50 0 14 0;
@@ -5518,7 +5520,7 @@ button above;
 #X connect 53 0 18 0;
 #X connect 54 0 19 0;
 #X restore 39 292 pd set-midi-buttons;
-#N canvas 170 22 1219 799 set-midi-knobs-or-sliders 1;
+#N canvas 170 22 1219 799 set-midi-knobs-or-sliders 0;
 #X obj 126 9 cnv 15 450 100 empty empty empty 20 12 0 14 -203904 -66577
 0;
 #X floatatom 469 81 0 0 0 0 - - -;
@@ -5554,8 +5556,8 @@ on these message boxes to change their values.;
 #X obj 667 462 s \$0-midi-knob-fx-y-pad;
 #X text 446 417 FX pad X;
 #X text 446 434 FX pad Y;
-#X obj 584 577 s \$0-midi-knob-l-in-vol;
-#X obj 582 598 s \$0-midi-knob-r-in-vol;
+#X obj 686 574 s \$0-midi-knob-l-in-vol;
+#X obj 687 596 s \$0-midi-knob-r-in-vol;
 #X text 363 565 Left In Vol;
 #X text 363 581 Right In Vol;
 #X obj 509 330 bng 30 250 50 0 empty empty UPDATE! 35 7 0 10 -258113
@@ -5581,8 +5583,8 @@ button above;
 #X msg 606 405 5;
 #X msg 606 425 84;
 #X msg 606 445 78;
-#X msg 498 560 77;
-#X msg 499 582 10;
+#X msg 603 558 77;
+#X msg 601 582 10;
 #X text 188 577 Nektar LX25 P1 7&8;
 #X text 160 449 Nektar Lx25 move from note-in to ctl trig;
 #X text 537 473 <Track;
@@ -5602,6 +5604,8 @@ button above;
 #X text 528 504 Undo;
 #X text 529 518 <Patch;
 #X text 532 533 Patch>;
+#X text 538 560 EnvAmt;
+#X text 537 580 LFO;
 #X connect 4 0 2 0;
 #X connect 4 1 1 0;
 #X connect 4 2 3 0;
@@ -5620,6 +5624,8 @@ button above;
 #X connect 36 0 71 0;
 #X connect 36 0 72 0;
 #X connect 36 0 73 0;
+#X connect 36 0 56 0;
+#X connect 36 0 57 0;
 #X connect 44 0 7 0;
 #X connect 45 0 8 0;
 #X connect 46 0 11 0;
