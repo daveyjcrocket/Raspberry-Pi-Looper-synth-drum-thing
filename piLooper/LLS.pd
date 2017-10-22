@@ -3,8 +3,8 @@
 #X obj 97 118 vu 15 120 empty empty -1 -8 0 10 -66577 -1 1 0;
 #X obj 749 121 vu 15 120 empty empty -1 -8 0 10 -66577 -1 1 0;
 #X obj 799 122 vu 15 120 empty empty -1 -8 0 10 -66577 -1 1 0;
-#N canvas 312 460 450 300 internals 1;
-#N canvas 229 235 1241 688 midi-io 0;
+#N canvas 341 53 450 300 internals 1;
+#N canvas 153 160 1241 688 midi-io 0;
 #X obj 33 30 notein;
 #X obj 92 54 sel 1;
 #X msg 92 82 1;
@@ -264,14 +264,11 @@
 #X msg 59 181 1;
 #X msg 118 177 -1;
 #X floatatom 272 200 5 0 0 0 - - -;
-#X text 381 74;
 #X obj 118 128 sel 109;
 #X obj 61 145 sel 110;
 #X obj 193 248 print loop;
-#X text 203 146;
 #X obj 79 76 r midi-btn-ctl-in;
 #X obj 313 247 s selected-loop-r;
-#X obj 363 157 r selected-loop;
 #X connect 2 0 5 0;
 #X connect 3 0 2 0;
 #X connect 4 0 9 0;
@@ -280,14 +277,14 @@
 #X connect 7 0 6 0;
 #X connect 8 0 6 0;
 #X connect 9 0 6 1;
-#X connect 9 0 13 0;
-#X connect 9 0 16 0;
-#X connect 11 0 8 0;
-#X connect 12 0 7 0;
-#X connect 15 0 11 0;
-#X connect 15 0 12 0;
+#X connect 9 0 12 0;
+#X connect 9 0 14 0;
+#X connect 10 0 8 0;
+#X connect 11 0 7 0;
+#X connect 13 0 10 0;
+#X connect 13 0 11 0;
 #X restore 16 65 pd loop-select;
-#N canvas 868 132 494 254 instrument-select 1;
+#N canvas 868 132 494 254 instrument-select 0;
 #X text 30 20 how to select an isntrument with nektar lx25;
 #X obj 210 93 loadbang;
 #X obj 267 58 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
@@ -295,7 +292,7 @@
 #X text 334 44 increment decrement using patch;
 #X obj 35 213 mod 8;
 #X msg 220 130 0;
-#X text 156 116;
+#X text 156 116 comment;
 #X obj 146 218 print instrument;
 #X obj 36 184 +;
 #X msg 12 151 1;
@@ -303,8 +300,8 @@
 #X floatatom 225 170 5 0 0 0 - - -;
 #X obj 14 115 sel 111;
 #X obj 71 98 sel 112;
-#X obj 32 46 r \$0-midi-btn-ctl-in;
 #X obj 266 217 s bankSelect;
+#X obj 32 46 r midi-btn-ctl-in;
 #X connect 1 0 5 0;
 #X connect 2 0 1 0;
 #X connect 4 0 11 0;
@@ -314,66 +311,151 @@
 #X connect 10 0 8 0;
 #X connect 11 0 7 0;
 #X connect 11 0 8 1;
-#X connect 11 0 15 0;
+#X connect 11 0 14 0;
 #X connect 12 0 9 0;
 #X connect 13 0 10 0;
-#X connect 14 0 12 0;
-#X connect 14 0 13 0;
+#X connect 15 0 12 0;
+#X connect 15 0 13 0;
 #X restore 15 40 pd instrument-select;
-#N canvas 925 627 479 109 loop-control 1;
+#N canvas 550 332 766 472 loop-control 1;
 #X text 24 21 how to control a loop on nektar lx25;
 #X text 223 44 use saved value for loop id and set values;
-#X obj 26 53 r \$0-midi-btn-ctl-in;
-#X obj 166 53 r selected-loop;
+#X obj 89 86 r midi-btn-ctl-in;
+#X obj 134 143 sel 107;
+#X obj 198 143 sel 106;
+#X text 207 161 play;
+#X text 139 164 rec;
+#X text 271 156 stop;
+#X obj 260 138 sel 105;
+#X obj 344 138 sel 102;
+#X text 360 156 loop;
+#X obj 170 247 s play;
+#X obj 248 246 s stop;
+#X obj 339 176 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 265 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 201 192 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 131 195 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 103 262 s rec;
+#X obj 33 348 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 33 372 s lp-trig-1;
+#X obj 113 348 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 113 372 s lp-trig-2;
+#X obj 193 348 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 193 372 s lp-trig-3;
+#X obj 273 348 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 273 372 s lp-trig-4;
+#X obj 350 347 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 430 347 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 510 347 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 590 347 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 350 371 s lp-trig-5;
+#X obj 430 371 s lp-trig-6;
+#X obj 510 371 s lp-trig-7;
+#X obj 590 371 s lp-trig-8;
+#X obj 523 231 r selected-loop-r;
+#X obj 307 280 demux 1 2 3 4 5 6 7 8;
+#X connect 2 0 3 0;
+#X connect 2 0 4 0;
+#X connect 2 0 8 0;
+#X connect 2 0 9 0;
+#X connect 3 0 16 0;
+#X connect 4 0 15 0;
+#X connect 8 0 14 0;
+#X connect 9 0 13 0;
+#X connect 13 0 35 0;
+#X connect 14 0 12 0;
+#X connect 15 0 11 0;
+#X connect 16 0 17 0;
+#X connect 18 0 19 0;
+#X connect 20 0 21 0;
+#X connect 22 0 23 0;
+#X connect 24 0 25 0;
+#X connect 26 0 30 0;
+#X connect 27 0 31 0;
+#X connect 28 0 32 0;
+#X connect 29 0 33 0;
+#X connect 34 0 35 1;
+#X connect 35 0 18 0;
+#X connect 35 1 20 0;
+#X connect 35 2 22 0;
+#X connect 35 3 24 0;
+#X connect 35 4 26 0;
+#X connect 35 5 27 0;
+#X connect 35 6 28 0;
+#X connect 35 7 29 0;
 #X restore 15 89 pd loop-control;
-#N canvas 918 216 481 86 instrument-fx 1;
+#N canvas 337 179 869 596 instrument-fx 0;
 #X text 21 14 input controls for instrument effects;
-#X obj 65 48 r \$0-midi-ctl-in;
-#X obj 192 48 r \$0-midi-ctl-value;
+#X obj 283 25 r midi-ctl-in-val-raw;
+#X obj 350 60 r midi-ctl-in-chan-raw;
+#X obj 520 51 r midi-ctl-in-raw;
+#X obj 340 161 spigot;
+#X msg 356 123 1;
+#X msg 397 123 0;
+#X obj 356 94 sel 16;
+#X obj 26 297 s fx-d-time;
+#X obj 5 321 s fx-d-time-r;
+#X obj 128 298 s fx-d-feed;
+#X obj 107 319 s fx-d-feed-r;
+#X obj 241 299 s fx-reverb;
+#X obj 233 329 s fx-reverb-r;
+#X obj 338 297 s fx-cutoff;
+#X obj 338 334 s fx-cutoff-r;
+#X obj 426 299 s fx-ring-mod;
+#X obj 428 331 s fx-ring-mod-r;
+#X obj 551 307 s fx-bit-crush;
+#X obj 542 333 s fx-bit-crush-r;
+#X obj 656 356 s fx-distortion-r;
+#X obj 657 322 s fx-distortion;
+#X obj 752 301 s fx-retrig;
+#X obj 773 336 s fx-retrig-r;
+#X obj 532 122 -56;
+#X obj 321 192 demux 0 1 2 3 4 5 6 7;
+#X connect 1 0 4 0;
+#X connect 2 0 7 0;
+#X connect 3 0 24 0;
+#X connect 4 0 25 0;
+#X connect 5 0 4 1;
+#X connect 6 0 4 1;
+#X connect 7 0 5 0;
+#X connect 7 1 6 0;
+#X connect 24 0 25 1;
+#X connect 25 0 8 0;
+#X connect 25 0 9 0;
+#X connect 25 1 10 0;
+#X connect 25 1 11 0;
+#X connect 25 2 12 0;
+#X connect 25 2 13 0;
+#X connect 25 3 14 0;
+#X connect 25 3 15 0;
+#X connect 25 4 16 0;
+#X connect 25 4 17 0;
+#X connect 25 5 18 0;
+#X connect 25 5 19 0;
+#X connect 25 6 21 0;
+#X connect 25 6 20 0;
+#X connect 25 7 22 0;
+#X connect 25 7 23 0;
 #X restore 16 113 pd instrument-fx;
-#N canvas 523 57 881 561 loop-mixer 1;
+#N canvas 219 201 881 561 loop-mixer 1;
 #X text 24 15 how to control the mixer for each loop channel;
 #X text 201 37 set to mixer - use std knobs;
 #X obj 47 78 r midi-ctl-in-val-raw;
-#X obj 114 133 r midi-ctl-in-chan-raw;
-#X obj 92 107 r midi-ctl-in-raw;
-#X obj 121 258 spigot;
-#X msg 122 215 1;
-#X msg 166 214 0;
-#X obj 115 164 sel 16;
-#X obj 132 392 spigot;
-#X msg 133 349 1;
-#X msg 177 348 0;
-#X obj 126 298 sel 12;
+#X obj 571 82 r midi-ctl-in-chan-raw;
+#X obj 251 67 r midi-ctl-in-raw;
 #X obj -11 478 s lp-vol-1-r;
-#X obj 215 389 spigot;
-#X msg 216 346 1;
-#X msg 260 345 0;
-#X obj 299 390 spigot;
-#X msg 300 347 1;
-#X msg 344 346 0;
-#X obj 383 389 spigot;
-#X msg 384 346 1;
-#X msg 428 345 0;
-#X obj 474 390 spigot;
-#X msg 475 347 1;
-#X msg 519 346 0;
-#X obj 571 389 spigot;
-#X msg 572 346 1;
-#X msg 616 345 0;
-#X obj 657 391 spigot;
-#X msg 658 348 1;
-#X msg 702 347 0;
-#X obj 746 390 spigot;
-#X msg 747 347 1;
-#X msg 791 346 0;
-#X obj 209 295 sel 13;
-#X obj 293 296 sel 14;
-#X obj 377 295 sel 15;
-#X obj 468 296 sel 16;
-#X obj 565 295 sel 17;
-#X obj 651 297 sel 18;
-#X obj 740 296 sel 19;
 #X obj 10 457 s lp-vol-1;
 #X obj 12 426 expr ($f1/127.);
 #X obj 216 429 expr ($f1/127.);
@@ -397,84 +479,46 @@
 #X obj 118 427 expr ($f1/127.);
 #X obj 116 458 s lp-vol-2;
 #X obj 95 479 s lp-vol-2-r;
-#X connect 2 0 9 0;
-#X connect 2 0 14 0;
-#X connect 2 0 17 0;
-#X connect 2 0 20 0;
-#X connect 2 0 23 0;
-#X connect 2 0 26 0;
+#X obj 237 178 spigot;
+#X msg 236 138 1;
+#X msg 277 138 0;
+#X obj 249 111 sel 7;
+#X obj 672 234 print vol;
+#X obj 237 214 demux 0 1 2 3 4 5 6 7 8;
+#X obj 618 200 r lp-vol-8;
 #X connect 2 0 29 0;
-#X connect 2 0 32 0;
-#X connect 3 0 8 0;
-#X connect 4 0 5 0;
-#X connect 5 0 12 0;
-#X connect 5 0 35 0;
-#X connect 5 0 36 0;
-#X connect 5 0 37 0;
-#X connect 5 0 38 0;
-#X connect 5 0 39 0;
-#X connect 5 0 40 0;
-#X connect 5 0 41 0;
-#X connect 6 0 5 1;
-#X connect 7 0 5 1;
-#X connect 8 0 6 0;
-#X connect 8 1 7 0;
-#X connect 9 0 43 0;
-#X connect 10 0 9 1;
-#X connect 11 0 9 1;
-#X connect 12 0 10 0;
-#X connect 12 1 11 0;
-#X connect 14 0 62 0;
-#X connect 15 0 14 1;
-#X connect 16 0 14 1;
-#X connect 17 0 44 0;
-#X connect 18 0 17 1;
-#X connect 19 0 17 1;
-#X connect 20 0 45 0;
-#X connect 21 0 20 1;
-#X connect 22 0 20 1;
-#X connect 23 0 46 0;
-#X connect 24 0 23 1;
-#X connect 25 0 23 1;
-#X connect 26 0 47 0;
-#X connect 27 0 26 1;
-#X connect 28 0 26 1;
-#X connect 29 0 48 0;
+#X connect 3 0 34 1;
+#X connect 4 0 32 0;
+#X connect 7 0 6 0;
+#X connect 7 0 5 0;
+#X connect 8 0 24 0;
+#X connect 8 0 25 0;
+#X connect 9 0 22 0;
+#X connect 9 0 23 0;
+#X connect 10 0 20 0;
+#X connect 10 0 21 0;
+#X connect 11 0 18 0;
+#X connect 11 0 19 0;
+#X connect 12 0 16 0;
+#X connect 12 0 17 0;
+#X connect 13 0 14 0;
+#X connect 13 0 15 0;
+#X connect 26 0 27 0;
+#X connect 26 0 28 0;
+#X connect 29 0 34 0;
 #X connect 30 0 29 1;
 #X connect 31 0 29 1;
-#X connect 32 0 49 0;
-#X connect 33 0 32 1;
-#X connect 34 0 32 1;
-#X connect 35 0 15 0;
-#X connect 35 1 16 0;
-#X connect 36 0 18 0;
-#X connect 36 1 19 0;
-#X connect 37 0 21 0;
-#X connect 37 1 22 0;
-#X connect 38 0 24 0;
-#X connect 38 1 25 0;
-#X connect 39 0 27 0;
-#X connect 39 1 28 0;
-#X connect 40 0 30 0;
-#X connect 40 1 31 0;
-#X connect 41 0 33 0;
-#X connect 41 1 34 0;
-#X connect 43 0 42 0;
-#X connect 43 0 13 0;
-#X connect 44 0 60 0;
-#X connect 44 0 61 0;
-#X connect 45 0 58 0;
-#X connect 45 0 59 0;
-#X connect 46 0 56 0;
-#X connect 46 0 57 0;
-#X connect 47 0 54 0;
-#X connect 47 0 55 0;
-#X connect 48 0 52 0;
-#X connect 48 0 53 0;
-#X connect 49 0 50 0;
-#X connect 49 0 51 0;
-#X connect 62 0 63 0;
-#X connect 62 0 64 0;
+#X connect 32 0 30 0;
+#X connect 32 1 31 0;
+#X connect 34 1 7 0;
+#X connect 34 2 26 0;
+#X connect 34 3 8 0;
+#X connect 34 4 9 0;
+#X connect 34 5 10 0;
+#X connect 34 6 11 0;
+#X connect 34 7 12 0;
+#X connect 34 8 13 0;
+#X connect 35 0 33 0;
 #X restore 15 138 pd loop-mixer;
 #X obj 187 66 Loop 1;
 #X obj 185 87 Loop 2;
@@ -601,7 +645,7 @@
 #X obj 310 293 expr 1 - $f1;
 #X obj 296 59 loadbang;
 #X obj 112 119 hsl 128 15 0 1 0 1 empty empty 'roomsize' 20 8 0 10
--262144 -260097 -1 3100 0;
+-262144 -260097 -1 0 0;
 #X obj 127 162 hsl 128 15 0 2.4 0 1 empty empty damp 20 8 0 10 -262144
 -260097 -1 0 0;
 #X obj 157 255 hsl 128 15 0 1 0 1 empty empty wet 20 8 0 10 -262144
@@ -1660,9 +1704,9 @@ milliseconds \, based on samplerate.;
 #X connect 13 0 15 0;
 #X connect 16 0 0 0;
 #X restore 184 218 pd post-loop-fx;
-#N canvas 392 36 908 761 drums-input-fx 1;
+#N canvas 392 36 908 761 drums-input-fx 0;
 #X obj 330 735 outlet~;
-#N canvas 424 384 855 384 ss 1;
+#N canvas 429 254 855 384 ss 0;
 #X text 21 62 Bank One;
 #X text 885 117 Bank Two;
 #X obj 324 346 outlet~;
@@ -1835,7 +1879,7 @@ milliseconds \, based on samplerate.;
 #X connect 87 0 6 0;
 #X restore 303 287 pd ss;
 #X text 295 269 Drum Pads;
-#N canvas 602 74 378 413 distortion 0;
+#N canvas 602 74 378 413 distortion 1;
 #X obj 11 8 inlet~;
 #X obj 11 358 outlet~;
 #X obj 88 51 *~ 40;
@@ -2133,7 +2177,7 @@ milliseconds \, based on samplerate.;
 #X connect 24 0 14 0;
 #X connect 24 0 17 0;
 #X restore 330 599 pd cutoff;
-#N canvas 417 132 310 435 robotDelay 0;
+#N canvas 417 132 310 435 robotDelay 1;
 #X obj 118 148 vline~;
 #X obj 118 292 *~;
 #X obj 18 224 inlet~;
@@ -2175,13 +2219,13 @@ milliseconds \, based on samplerate.;
 #X obj 310 293 expr 1 - $f1;
 #X obj 296 59 loadbang;
 #X obj 112 119 hsl 128 15 0 1 0 1 empty empty 'roomsize' 20 8 0 10
--262144 -260097 -1 0 0;
+-262144 -260097 -1 6300 0;
 #X obj 127 162 hsl 128 15 0 2.4 0 1 empty empty damp 20 8 0 10 -262144
 -260097 -1 0 0;
 #X obj 157 255 hsl 128 15 0 1 0 1 empty empty wet 20 8 0 10 -262144
--260097 -1 0 0;
+-260097 -1 1575 0;
 #X obj 142 205 hsl 128 15 0 1 0 1 empty empty dry 20 8 0 10 -262144
--260097 -1 10155 0;
+-260097 -1 11125 0;
 #N canvas 526 279 634 321 vfreeverb~ 0;
 #N canvas 261 50 778 367 combfilters-left1 0;
 #X obj 46 244 +~;
@@ -3296,7 +3340,7 @@ milliseconds \, based on samplerate.;
 #X connect 19 0 17 0;
 #X connect 20 0 19 0;
 #X restore 330 432 pd reTrigger;
-#N canvas 520 134 1289 730 instrumentSelector 0;
+#N canvas 151 495 1289 730 instrumentSelector 0;
 #X obj 152 178 *~;
 #X obj 167 157 line~;
 #X msg 167 127 1 10;
@@ -3508,7 +3552,7 @@ milliseconds \, based on samplerate.;
 #X obj -207 123 poly 4 1;
 #X floatatom -309 -9 5 0 0 0 - - -;
 #X obj -142 -18 expr ($f1/127.);
-#X text -79 238;
+#X text -79 238 comment;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 1 3 0;
@@ -3526,7 +3570,7 @@ milliseconds \, based on samplerate.;
 #X connect 11 2 0 2;
 #X connect 13 0 8 1;
 #X restore 398 100 pd noteSelect;
-#N canvas 71 98 511 205 LeadSynth 0;
+#N canvas 71 98 511 205 LeadSynth 1;
 #X obj 16 162 outlet~;
 #X obj 16 131 *~ 0.5;
 #X obj 16 10 inlet;
@@ -3547,10 +3591,10 @@ milliseconds \, based on samplerate.;
 #X connect 8 0 1 0;
 #X connect 9 0 1 0;
 #X restore 288 231 pd LeadSynth;
-#N canvas 319 180 1073 586 fmSynth 0;
-#X obj 16 277 inlet;
-#X obj 16 383 outlet~;
-#X obj 16 358 *~ 0.5;
+#N canvas 253 41 1173 781 fmSynth 0;
+#X obj 849 158 inlet;
+#X obj 849 264 outlet~;
+#X obj 849 239 *~ 0.5;
 #N canvas 385 158 397 250 opPitch 0;
 #X msg 195 119 1.5;
 #X msg 225 119 2;
@@ -3590,29 +3634,29 @@ milliseconds \, based on samplerate.;
 #X connect 11 0 10 0;
 #X connect 11 0 13 0;
 #X connect 14 0 12 0;
-#X restore 28 234 pd opPitch;
-#X obj 28 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -204800 -1
--1 0;
-#X obj 891 82 vsl 15 128 1 3000 0 0 envAttack empty empty 0 -9 0 10
+#X restore 26 206 pd opPitch;
+#X obj 26 50 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -204800 -1
+-1 4;
+#X obj 675 481 vsl 15 128 1 3000 0 0 envAttack empty empty 0 -9 0 10
 -262144 -1 -1 0 1;
-#X obj 917 82 vsl 15 128 1 3000 0 0 envDecay empty empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 938 82 vsl 15 128 0 1 0 0 envSustain empty empty 0 -9 0 10 -262144
--1 -1 0 1;
-#X obj 963 82 vsl 15 128 1 3000 0 0 envRelease empty empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 282 82 vsl 15 128 0 10 0 0 lfoOneFreq empty empty 0 -9 0 10
--4032 -1 -1 0 1;
-#X obj 101 82 vsl 15 127 1 2000 0 0 fmOpOneAmt empty empty 0 -9 0 10
--4032 -1 -1 0 1;
-#X obj 150 82 vsl 15 127 1 3000 0 0 fmOpOneAttack empty empty 0 -9
+#X obj 714 444 vsl 15 128 1 3000 0 0 envDecay empty empty 0 -9 0 10
+-262144 -1 -1 2300 1;
+#X obj 754 418 vsl 15 128 0 1 0 0 envSustain empty empty 0 -9 0 10
+-262144 -1 -1 2000 1;
+#X obj 790 371 vsl 15 128 1 3000 0 0 envRelease empty empty 0 -9 0
+10 -262144 -1 -1 3400 1;
+#X obj 256 210 vsl 15 128 0 10 0 0 lfoOneFreq empty empty 0 -9 0 10
+-4032 -1 -1 1200 1;
+#X obj 116 95 vsl 15 127 1 2000 0 0 fmOpOneAmt empty empty 0 -9 0 10
+-4032 -1 -1 4800 1;
+#X obj 143 113 vsl 15 127 1 3000 0 0 fmOpOneAttack empty empty 0 -9
 0 10 -204800 -1 -1 0 1;
-#X obj 180 82 vsl 15 127 1 3000 0 0 fmOpOneDecay empty empty 0 -9 0
-10 -204800 -1 -1 0 1;
-#X obj 210 82 vsl 15 127 1 3000 0 0 fmOpOneSustain empty empty 0 -9
-0 10 -204800 -1 -1 0 1;
-#X obj 240 82 vsl 15 127 1 3000 0 0 fmOpOneRelease empty empty 0 -9
-0 10 -204800 -1 -1 0 1;
+#X obj 169 131 vsl 15 127 1 3000 0 0 fmOpOneDecay empty empty 0 -9
+0 10 -204800 -1 -1 7600 1;
+#X obj 195 156 vsl 15 127 1 3000 0 0 fmOpOneSustain empty empty 0 -9
+0 10 -204800 -1 -1 1200 1;
+#X obj 225 184 vsl 15 127 1 3000 0 0 fmOpOneRelease empty empty 0 -9
+0 10 -204800 -1 -1 3500 1;
 #N canvas 385 158 397 250 opPitch 0;
 #X msg 195 119 1.5;
 #X msg 225 119 2;
@@ -3650,22 +3694,22 @@ milliseconds \, based on samplerate.;
 #X connect 10 9 4 0;
 #X connect 11 0 10 0;
 #X connect 11 0 13 0;
-#X restore 428 234 pd opPitch;
-#X obj 428 78 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -262130
--1 -1 0;
-#X obj 501 82 vsl 15 127 1 2000 0 0 fmOpTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 0 1;
-#X obj 550 82 vsl 15 127 1 3000 0 0 fmOpTwoAttack empty empty 0 -9
+#X restore 352 402 pd opPitch;
+#X obj 352 246 vradio 15 1 0 10 empty empty empty 0 -8 0 10 -262130
+-1 -1 5;
+#X obj 432 285 vsl 15 127 1 2000 0 0 fmOpTwoAmt empty empty 0 -9 0
+10 -257985 -1 -1 6400 1;
+#X obj 456 308 vsl 15 127 1 3000 0 0 fmOpTwoAttack empty empty 0 -9
 0 10 -262130 -1 -1 0 1;
-#X obj 580 82 vsl 15 127 1 3000 0 0 fmOpTwoDecay empty empty 0 -9 0
-10 -262130 -1 -1 0 1;
-#X obj 610 82 vsl 15 127 1 3000 0 0 fmOpTwoSustain empty empty 0 -9
-0 10 -262130 -1 -1 0 1;
-#X obj 640 82 vsl 15 127 1 3000 0 0 fmOpTwoRelease empty empty 0 -9
-0 10 -262130 -1 -1 0 1;
-#X obj 108 277 inlet;
-#X obj 193 277 inlet;
-#X obj 278 277 inlet;
+#X obj 487 328 vsl 15 127 1 3000 0 0 fmOpTwoDecay empty empty 0 -9
+0 10 -262130 -1 -1 5300 1;
+#X obj 521 354 vsl 15 127 1 3000 0 0 fmOpTwoSustain empty empty 0 -9
+0 10 -262130 -1 -1 700 1;
+#X obj 557 385 vsl 15 127 1 3000 0 0 fmOpTwoRelease empty empty 0 -9
+0 10 -262130 -1 -1 1000 1;
+#X obj 941 158 inlet;
+#X obj 1026 158 inlet;
+#X obj 1111 158 inlet;
 #N canvas 17 50 1368 285 storeFMValues 0;
 #X obj 99 27 r fmOpOneAmt;
 #X obj 180 27 r fmOpOneAttack;
@@ -3716,33 +3760,53 @@ milliseconds \, based on samplerate.;
 #X connect 21 0 23 20;
 #X connect 22 0 23 21;
 #X connect 23 0 24 0;
-#X restore 878 316 pd storeFMValues;
-#X obj 878 293 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 800 365 metro 20;
-#X msg 800 342 1;
-#X obj 800 294 loadbang;
-#X obj 800 388 s snap;
-#X obj 322 82 vsl 15 128 0 0.05 0 0 lfoOneAmt empty empty 0 -9 0 10
--4032 -1 -1 0 1;
-#X obj 692 82 vsl 15 128 0 10 0 0 lfoTwoFreq empty empty 0 -9 0 10
--257985 -1 -1 0 1;
-#X obj 732 82 vsl 15 128 0 0.05 0 0 lfoTwoAmt empty empty 0 -9 0 10
--257985 -1 -1 0 1;
+#X restore 968 41 pd storeFMValues;
+#X obj 968 18 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 890 90 metro 20;
+#X msg 890 67 1;
+#X obj 890 19 loadbang;
+#X obj 890 113 s snap;
+#X obj 287 239 vsl 15 128 0 0.05 0 0 lfoOneAmt empty empty 0 -9 0 10
+-4032 -1 -1 1400 1;
+#X obj 582 403 vsl 15 128 0 10 0 0 lfoTwoFreq empty empty 0 -9 0 10
+-257985 -1 -1 10000 1;
+#X obj 610 434 vsl 15 128 0 0.05 0 0 lfoTwoAmt empty empty 0 -9 0 10
+-257985 -1 -1 1000 1;
 #X obj 28 13 r fmPresets;
-#X obj 60 86 vsl 15 128 0.125 20 0 0 empty empty empty 0 -9 0 10 -262144
+#X obj 58 58 vsl 15 128 0.125 20 0 0 empty empty empty 0 -9 0 10 -262144
 -1 -1 0 1;
-#X obj 1013 145 vsl 15 128 0 10 0 0 crossMod empty empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 278 308 fmVoice 4;
-#X obj 193 308 fmVoice 3;
-#X obj 16 308 fmVoice 1;
-#X obj 108 308 fmVoice 2;
-#X obj 28 47 unpack f f f f f f f f f f f f f f f f f f f f f f;
-#X obj 842 116 vsl 15 128 0 1 0 0 envAttackLev empty empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 882 363 print;
-#X obj 800 317 delay 120;
+#X obj 820 345 vsl 15 128 0 10 0 0 crossMod empty empty 0 -9 0 10 -262144
+-1 -1 1200 1;
+#X obj 1111 189 fmVoice 4;
+#X obj 1026 189 fmVoice 3;
+#X obj 849 189 fmVoice 1;
+#X obj 941 189 fmVoice 2;
+#X obj 403 26 unpack f f f f f f f f f f f f f f f f f f f f f f;
+#X obj 849 311 vsl 15 128 0 1 0 0 envAttackLev empty empty 0 -9 0 10
+-262144 -1 -1 3900 1;
+#X obj 972 88 print;
+#X obj 890 42 delay 120;
+#X text 379 424 fmOpTwoAmt;
+#X text 395 440 fmOpTwoAttack;
+#X text 69 229 fmOpOneAmt;
+#X text 76 245 fmOpOneAttack;
+#X text 108 267 fmOpOneDecay;
+#X text 131 294 fmOpOneSustain;
+#X text 156 321 fmOpOneRelease;
+#X text 216 351 lfoOneFreq;
+#X text 246 376 lfoOneAmt;
+#X text 432 463 fmOpTwoDecay;
+#X text 459 493 fmOpTwoSustain;
+#X text 485 519 fmOpTwoRelease;
+#X text 538 536 lfoTwoFreq;
+#X text 579 570 lfoTwoAmt;
+#X text 674 628 envAttack;
+#X text 714 592 envDecay;
+#X text 751 562 envSustain;
+#X text 782 512 envRelease;
+#X text 816 482 crossMod;
+#X text 848 451 envAttackLev;
 #X connect 0 0 39 0;
 #X connect 2 0 1 0;
 #X connect 4 0 3 0;
@@ -3978,7 +4042,7 @@ milliseconds \, based on samplerate.;
 #X connect 33 0 34 0;
 #X connect 34 0 32 0;
 #X restore 276 139 pd audio-IO;
-#N canvas 314 50 1162 483 metros 0;
+#N canvas 206 50 1162 483 metros 0;
 #X obj 148 219 r ms;
 #X obj 121 272 metro;
 #X msg 38 228 0;
@@ -4026,17 +4090,18 @@ milliseconds \, based on samplerate.;
 #X msg 121 193 1;
 #X obj 121 168 r play;
 #X obj 20 84 s clearAll;
-#N canvas 1113 50 218 312 BPM_DISPLAY 0;
+#N canvas 1113 50 273 453 BPM_DISPLAY 1;
 #X obj 76 12 r ms;
 #X obj 14 161 /;
 #X msg 14 121 60000;
 #X obj 14 82 t b b;
 #X obj 61 119 \$1;
 #X obj 14 209 * 16;
-#X obj 88 188 r clearAll;
-#X msg 87 209 0;
-#X msg 14 232 print -bpm_\$1/;
-#X obj 14 256 s comPortMsg;
+#X obj 89 260 r clearAll;
+#X msg 88 281 0;
+#X msg 15 304 print -bpm_\$1/;
+#X obj 15 328 s comPortMsg;
+#X obj 32 238 s bpm-r;
 #X connect 0 0 4 1;
 #X connect 0 0 3 0;
 #X connect 1 0 5 0;
@@ -4045,6 +4110,7 @@ milliseconds \, based on samplerate.;
 #X connect 3 1 4 0;
 #X connect 4 0 1 1;
 #X connect 5 0 8 0;
+#X connect 5 0 10 0;
 #X connect 6 0 7 0;
 #X connect 7 0 8 0;
 #X connect 8 0 9 0;
@@ -4061,6 +4127,8 @@ milliseconds \, based on samplerate.;
 #X obj 24 252 s comPortMsg;
 #X obj 24 14 r trigMet;
 #X obj 24 131 mod 16;
+#X obj 98 164 print pos;
+#X obj 82 195 s measure_disp-r;
 #X connect 0 0 2 1;
 #X connect 1 0 3 0;
 #X connect 1 0 5 0;
@@ -4071,6 +4139,8 @@ milliseconds \, based on samplerate.;
 #X connect 4 0 5 0;
 #X connect 5 0 6 0;
 #X connect 6 0 7 0;
+#X connect 6 0 11 0;
+#X connect 6 0 12 0;
 #X connect 7 0 8 0;
 #X connect 9 0 2 0;
 #X connect 10 0 6 0;
@@ -4373,7 +4443,7 @@ milliseconds \, based on samplerate.;
 #X obj 173 78 loopSave 7;
 #X obj 252 78 loopSave 8;
 #X restore 277 39 pd saveLoad;
-#N canvas 325 412 1174 579 serialControls 0;
+#N canvas 258 181 1174 579 serialControls 0;
 #X obj 983 415 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 983 435 s stop;
@@ -4738,7 +4808,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 49 0 2 0;
 #X connect 49 0 33 0;
 #X restore -14 197 pd drumRoute;
-#N canvas 800 422 375 193 xyRoute 1;
+#N canvas 800 422 375 193 xyRoute 0;
 #X obj 12 49 route Xval: Yval: postTog:;
 #X obj 12 135 s post-glitch-time;
 #X msg 256 90 1;
@@ -4901,6 +4971,138 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 15 0 8 0;
 #X connect 16 0 8 0;
 #X restore 276 227 pd shelCom;
+#N canvas 503 51 893 571 analog-levels 1;
+#X obj 57 88 r midi-ctl-in-val-raw;
+#X obj 124 143 r midi-ctl-in-chan-raw;
+#X obj 102 117 r midi-ctl-in-raw;
+#X obj 131 268 spigot;
+#X msg 132 225 1;
+#X msg 176 224 0;
+#X obj 125 174 sel 16;
+#X obj 142 402 spigot;
+#X msg 143 359 1;
+#X msg 187 358 0;
+#X obj 225 399 spigot;
+#X msg 226 356 1;
+#X msg 270 355 0;
+#X obj 309 400 spigot;
+#X msg 310 357 1;
+#X msg 354 356 0;
+#X obj 393 399 spigot;
+#X msg 394 356 1;
+#X msg 438 355 0;
+#X obj 484 400 spigot;
+#X msg 485 357 1;
+#X msg 529 356 0;
+#X obj 581 399 spigot;
+#X msg 582 356 1;
+#X msg 626 355 0;
+#X obj 667 401 spigot;
+#X msg 668 358 1;
+#X msg 712 357 0;
+#X obj 756 400 spigot;
+#X msg 757 357 1;
+#X msg 801 356 0;
+#X obj 303 306 sel 14;
+#X obj 387 305 sel 15;
+#X obj 478 306 sel 16;
+#X obj 575 305 sel 17;
+#X obj 661 307 sel 18;
+#X obj 750 306 sel 19;
+#X obj 22 436 expr ($f1/127.);
+#X obj 226 439 expr ($f1/127.);
+#X obj 326 436 expr ($f1/127.);
+#X obj 417 435 expr ($f1/127.);
+#X obj 526 438 expr ($f1/127.);
+#X obj 626 440 expr ($f1/127.);
+#X obj 731 442 expr ($f1/127.);
+#X obj 128 437 expr ($f1/127.);
+#X obj 408 106 / 127;
+#X obj 408 128 s mainVol;
+#X obj 478 130 s l-in-vol;
+#X obj 558 130 s r-in-vol;
+#X obj 478 106 / 31;
+#X obj 558 106 / 31;
+#X obj 413 66 / 8;
+#X obj 617 94 s post-verb;
+#X obj 617 68 / 8;
+#X obj 702 61 / 8;
+#X obj 707 89 s post-bits;
+#X obj 20 467 s mainVol;
+#X obj 136 308 sel 20;
+#X obj 219 305 sel 46;
+#X obj 95 504 s post-verb;
+#X connect 0 0 7 0;
+#X connect 0 0 10 0;
+#X connect 0 0 13 0;
+#X connect 0 0 16 0;
+#X connect 0 0 19 0;
+#X connect 0 0 22 0;
+#X connect 0 0 25 0;
+#X connect 0 0 28 0;
+#X connect 1 0 6 0;
+#X connect 2 0 3 0;
+#X connect 3 0 31 0;
+#X connect 3 0 32 0;
+#X connect 3 0 33 0;
+#X connect 3 0 34 0;
+#X connect 3 0 35 0;
+#X connect 3 0 36 0;
+#X connect 3 0 57 0;
+#X connect 3 0 58 0;
+#X connect 4 0 3 1;
+#X connect 5 0 3 1;
+#X connect 6 0 4 0;
+#X connect 6 1 5 0;
+#X connect 7 0 37 0;
+#X connect 8 0 7 1;
+#X connect 9 0 7 1;
+#X connect 10 0 44 0;
+#X connect 11 0 10 1;
+#X connect 12 0 10 1;
+#X connect 13 0 38 0;
+#X connect 14 0 13 1;
+#X connect 15 0 13 1;
+#X connect 16 0 39 0;
+#X connect 17 0 16 1;
+#X connect 18 0 16 1;
+#X connect 19 0 40 0;
+#X connect 20 0 19 1;
+#X connect 21 0 19 1;
+#X connect 22 0 41 0;
+#X connect 23 0 22 1;
+#X connect 24 0 22 1;
+#X connect 25 0 42 0;
+#X connect 26 0 25 1;
+#X connect 27 0 25 1;
+#X connect 28 0 43 0;
+#X connect 29 0 28 1;
+#X connect 30 0 28 1;
+#X connect 31 0 14 0;
+#X connect 31 1 15 0;
+#X connect 32 0 17 0;
+#X connect 32 1 18 0;
+#X connect 33 0 20 0;
+#X connect 33 1 21 0;
+#X connect 34 0 23 0;
+#X connect 34 1 24 0;
+#X connect 35 0 26 0;
+#X connect 35 1 27 0;
+#X connect 36 0 29 0;
+#X connect 36 1 30 0;
+#X connect 37 0 56 0;
+#X connect 44 0 59 0;
+#X connect 45 0 46 0;
+#X connect 49 0 47 0;
+#X connect 50 0 48 0;
+#X connect 51 0 45 0;
+#X connect 53 0 52 0;
+#X connect 54 0 55 0;
+#X connect 57 0 8 0;
+#X connect 57 1 9 0;
+#X connect 58 0 11 0;
+#X connect 58 1 12 0;
+#X restore 14 165 pd analog-levels;
 #X restore 734 260 pd internals;
 #X obj 208 133 bng 50 250 50 0 lp-trig-1 lp-trig-1-r empty 17 7 0 10
 -204800 -1 -1;
@@ -4935,36 +5137,76 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 556 293 bng 15 250 50 0 clear-8 clear-8-r empty 17 7 0 10 -258113
 -1 -1;
 #X obj 263 135 vsl 30 70 0 1 0 0 lp-vol-1 lp-vol-1-r empty 0 -9 0 10
--204800 -1 -1 6900 1;
+-204800 -1 -1 0 1;
 #X obj 373 135 vsl 30 70 0 1 0 0 lp-vol-2 lp-vol-2-r empty 0 -9 0 10
--204786 -1 -1 1793 1;
+-204786 -1 -1 163 1;
 #X obj 483 135 vsl 30 70 0 1 0 0 lp-vol-3 lp-vol-3-r empty 0 -9 0 10
--262130 -1 -1 3640 1;
+-262130 -1 -1 869 1;
 #X obj 593 135 vsl 30 70 0 1 0 0 lp-vol-4 lp-vol-4-r empty 0 -9 0 10
--261234 -1 -1 6900 1;
+-261234 -1 -1 0 1;
 #X obj 263 235 vsl 30 70 0 1 0 0 lp-vol-5 lp-vol-5-r empty 0 -9 0 10
--204800 -1 -1 6900 1;
+-204800 -1 -1 489 1;
 #X obj 373 235 vsl 30 70 0 1 0 0 lp-vol-6 lp-vol-6-r empty 0 -9 0 10
--204786 -1 -1 6900 1;
+-204786 -1 -1 3531 1;
 #X obj 483 235 vsl 30 70 0 1 0 0 lp-vol-7 lp-vol-7-r empty 0 -9 0 10
--262130 -1 -1 6683 1;
+-262130 -1 -1 0 1;
 #X obj 593 235 vsl 30 70 0 1 0 0 lp-vol-8 lp-vol-8-r empty 0 -9 0 10
--261234 -1 -1 6900 1;
+-261234 -1 -1 0 1;
 #X obj 219 324 vsl 30 127 0 127 0 0 fx-d-time fx-d-time-r empty 0 -9
-0 10 -204800 -1 -1 0 1;
+0 10 -204800 -1 -1 7937 1;
 #X obj 329 324 vsl 30 127 0 127 0 0 fx-d-feed fx-d-feed-r empty 0 -9
-0 10 -204786 -1 -1 0 1;
+0 10 -204786 -1 -1 7639 1;
 #X obj 439 324 vsl 30 127 0 127 0 0 fx-reverb fx-reverb-r empty 0 -9
-0 10 -262130 -1 -1 0 1;
+0 10 -262130 -1 -1 6250 1;
 #X obj 549 324 vsl 30 127 0 127 0 0 fx-cutoff fx-cutoff-r empty 0 -9
-0 10 -261234 -1 -1 0 1;
+0 10 -261234 -1 -1 6449 1;
 #X obj 219 464 vsl 30 127 0 127 0 0 fx-ring-mod fx-ring-mod-r empty
-0 -9 0 10 -204800 -1 -1 0 1;
+0 -9 0 10 -204800 -1 -1 5655 1;
 #X obj 329 464 vsl 30 127 0 127 0 0 fx-bit-crush fx-bit-crush-r empty
-0 -9 0 10 -204786 -1 -1 0 1;
+0 -9 0 10 -204786 -1 -1 6548 1;
 #X obj 439 464 vsl 30 127 0 127 0 0 fx-distortion fx-distortion-r empty
 0 -9 0 10 -262130 -1 -1 0 1;
-#X obj 549 464 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
+#X obj 549 465 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
 0 10 -261234 -1 -1 0 1;
 #X obj 171 36 hradio 60 1 0 8 selected-loop selected-loop-r Loop_Selected
-0 -8 0 10 -262144 -159808 -4160 1;
+0 -8 0 10 -262144 -159808 -4160 0;
+#X obj 24 280 vradio 40 1 0 8 empty bankSelect empty 0 -8 0 10 -262144
+-1 -1 0;
+#X text 87 293 instrument 1;
+#X text 87 333 instrument 2;
+#X text 87 373 instrument 3;
+#X text 87 413 instrument 4;
+#X text 87 453 instrument 5;
+#X text 87 493 instrument 6;
+#X text 87 533 instrument 7;
+#X text 87 573 instrument 8;
+#X obj 694 50 nbx 5 14 -1e+37 1e+37 0 0 empty bpm-r empty 0 -8 0 10
+-262144 -1 -1 0 256;
+#X obj 694 79 nbx 5 14 -1e+37 1e+37 0 0 empty measure-disp-r empty
+0 -8 0 10 -262144 -1 -1 0 256;
+#X text 763 51 bpm;
+#X text 770 79 measure;
+#X text 222 112 set to pr2 to adj vol;
+#X obj 663 415 vsl 15 128 0 127 0 0 empty mainVol empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 709 390 vsl 15 128 0 127 0 0 empty l-in-vol empty 0 -9 0 10
+-262144 -1 -1 0 1;
+#X obj 764 358 vsl 15 128 0 127 0 0 empty r-in-vol empty 0 -9 0 10
+-262144 -1 -1 0 1;
+#X obj 802 324 vsl 15 128 0 127 0 0 empty post-verb empty 0 -9 0 10
+-262144 -1 -1 0 1;
+#X text 257 437 fx-d-time;
+#X text 255 575 fx-ring-mod;
+#X text 372 441 fx-d-feed;
+#X text 363 576 fx-bit-crush;
+#X text 479 436 fx-reverb;
+#X text 469 579 fx-distortion;
+#X text 586 382 fx-cutoff;
+#X text 581 580 fx-retrig;
+#X obj 848 291 vsl 15 128 0 127 0 0 empty post-bits empty 0 -9 0 10
+-262144 -1 -1 0 1;
+#X text 669 561 mainVol;
+#X text 715 535 l-in-vol;
+#X text 761 511 r-in-vol;
+#X text 801 477 post-verb;
+#X text 831 441 post-bits;
