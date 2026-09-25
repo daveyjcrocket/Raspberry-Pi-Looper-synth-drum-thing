@@ -64,7 +64,12 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 - **keep first N** and **N**: see section 5.
 - **auto-record** and **threshold dB**: see section 4.
 
-**EFFECTS.** Eight effects on everything you play: delay time, delay feedback, reverb, cutoff, ring mod, bit crush, distortion and retrigger. The eight LX25+ knobs move these sliders.
+**Knob rows.** Two rows of eight sliders, which follow the LX25+ knobs. The row the knobs last moved is highlighted.
+
+- **SYNTH KNOBS (Inst mode):** sound settings for the selected instrument. The labels change with the instrument (section 6).
+- **INPUT FX KNOBS (Preset mode):** reverb and delay amounts for the mic input, input 2 and the synths/drums, plus delay time and feedback (section 6).
+
+Next to the looper controls are **learn Preset knobs** (section 6) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
 
 **Right column**
 
@@ -85,10 +90,10 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 | **Loop** | Mute/unmute the layer marked **>**. |
 | **Track < / >** | Move the **>** marker to another layer. |
 | **Patch − / +** | Change instrument (25 banks, listed in the right column). |
-| **Knobs 1–8** | The eight effects. |
+| **Knobs 1–8** | Depends on the LX25+ knob mode (the **Mixer / Inst / Preset** buttons): **Inst** = synth sound, **Preset** = input reverb/delay, **Mixer** = layer volumes. See section 6. |
 | **Fader** | Volume of layer N, where N is the MIDI channel the fader sends on (1–8). |
 
-The patch expects these messages on MIDI channel 16 (the LX25+ in its DAW/Pd setup): Record CC 107, Play 106, Stop 105, Fast-forward 104, Rewind 103, Loop 102, Track < / > CC 109 / 110, Patch − / + CC 111 / 112, knobs CC 56–63. If a button does nothing, watch the Pd console: the `midi-raw` lines show what each control actually sends.
+The patch expects these messages on MIDI channel 16 (the LX25+ in its DAW/Pd setup): Record CC 107, Play 106, Stop 105, Fast-forward 104, Rewind 103, Loop 102, Track < / > CC 109 / 110, Patch − / + CC 111 / 112, Inst-mode knobs CC 56–63. Preset-mode knobs are learned (section 6). If a button does nothing, watch the Pd console: the `midi-raw` lines show what each control actually sends.
 
 ## 4. Recording a loop, step by step
 
@@ -115,7 +120,48 @@ Overdub adds on every pass: if you keep playing the same part while a layer reco
 
 To mute or unmute single layers, click a layer's **mute** button, or use **Track < / >** to move the **>** marker and press **Loop**.
 
-## 6. Instruments
+## 6. The knobs
+
+The LX25+ knob-mode buttons pick what the eight knobs do.
+
+### Inst mode: shape the synth you're playing
+
+The knobs control the instrument selected in the INSTRUMENT BANK:
+
+| Instrument | Knob 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| Basses, Supersaw, Warm pad, Pluck (banks 16–18, 22–24) | cutoff | resonance | filter env | attack | release | detune | LFO rate | LFO depth |
+| Organs (banks 19–21) | 16' | 5 1/3' | 8' | 4' | 2 2/3' | 2' | 1 3/5' | 1 1/3' |
+| FM presets (banks 5–7, 9–11, 13–15) | mod 1 amt | mod 2 amt | cross mod | attack | decay | release | LFO rate | LFO depth |
+| Drum kits and the lead synths | – | | | | | | | |
+
+- **When changes apply:** cutoff, resonance, filter env, detune and the drawbars change the sound immediately, even on held notes. Attack and release apply from the next note.
+- **LFO:** LFO depth wobbles the filter, and LFO rate sets the speed.
+- **Selecting an instrument restores its preset sound.**
+
+### Preset mode: reverb and delay on your inputs
+
+| Knob | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| | mic reverb | mic delay | input 2 reverb | input 2 delay | synth/drums reverb | synth/drums delay | delay time | delay feedback |
+
+Each source has its own reverb and delay amount, and they share one reverb and one delay. Delay time runs from about 60 ms to 1.5 s. The effects are recorded into the loop along with the dry sound.
+
+**One-time setup: teach the patch your Preset-mode knobs.** The patch doesn't know in advance what the LX25+ sends in Preset mode, so:
+
+1. Press **Preset** on the LX25+.
+2. Click **learn Preset knobs** on screen. The box next to it says *turn Preset knob 1*.
+3. Turn knob 1, then knob 2, and so on up to knob 8. The box counts along and then shows *Preset knobs learned*.
+
+This is saved in `piLooper/knobmap.txt` and loads at every start. To redo it, click **learn Preset knobs** again.
+
+### Mixer mode
+
+The knobs and fader set layer volumes, as before.
+
+The **mouse** works too: dragging any knob-row slider does the same as turning the knob.
+
+## 7. Instruments
 
 | Bank | Instrument | Bank | Instrument |
 |---|---|---|---|
@@ -131,17 +177,18 @@ To mute or unmute single layers, click a layer's **mute** button, or use **Track
 
 You can change instrument while a layer is recording, for example to record a bass line and then pads into the next layer.
 
-## 7. Saving and loading songs
+## 8. Saving and loading songs
 
 Songs are saved as folders under `piLooper/Sessions/`, one audio file (stem) per layer plus the loop length. Loading a song brings back its layers and loop length. The looper then shows **STOPPED**, so press **Play**.
 
 **Not yet mapped:** save, load, new song and song select were driven by the old Teensy front panel, and no LX25+ button triggers them yet.
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 | Problem | Try |
 |---|---|
 | No sound from the inputs | Check the UMC22 gain knobs, the **inputs on** ticks and the IN1/IN2 meters. On a Mac, allow microphone access for Pd (System Settings → Privacy & Security → Microphone). |
+| Preset-mode knobs do nothing | Do the one-time learn in section 6. |
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |

@@ -67,17 +67,28 @@ A('#X obj 180 262 tgl 20 0 keepActive keepActive-gui keep\\ first\\ N\\ (FF) 24 
 A('#X obj 180 288 nbx 2 18 1 7 0 0 keepN keepN-gui N\\ (REW) 32 9 0 10 #fcfcfc #000000 #000000 1 256;')
 A('#X obj 330 262 tgl 20 1 looper-auto empty auto-record 24 10 0 10 #fcfcfc #000000 #000000 1 1;')
 A('#X obj 330 288 nbx 3 18 -80 0 0 1 looper-thr empty threshold\\ dB 40 9 0 10 #fcfcfc #000000 #000000 -40 256;')
+A('#X obj 470 262 bng 20 250 50 0 knob-learn empty learn\\ Preset\\ knobs 24 10 0 10 #fcfcfc #000000 #000000;')
+cnv(470, 288, 170, 18, 'knob-learn-cnv', 'not learned - click learn', 5, 9, 10, '#2a2a2a', '#dddddd')
+A('#X obj 660 266 hsl 70 14 0 127 0 0 fx-cutoff fx-cutoff-r master\\ cutoff 0 -8 0 10 #dcdcdc #1f3a5f #000000 0 1;')
+A('#X obj 660 298 hsl 70 14 0 127 0 0 fx-retrig fx-retrig-r retrigger 0 -8 0 10 #dcdcdc #1f3a5f #000000 0 1;')
 text(10, 518, 'LX25+ BUTTONS  |  Record = start recording / start the next layer  |  Play = play-through (stop recording)', 125)
 text(10, 534, 'Stop = fade out over one loop  |  Stop again = stop now  |  Stop when stopped = clear everything', 125)
 text(10, 550, 'Fast-fwd = keep first N on / off (off unmutes all)  |  Rewind = change N  |  Loop = mute > layer  |  Track < > = move >', 125)
 
-# ---------------- effects ----------------
-text(10, 322, 'EFFECTS')
-fx = [('fx-d-time', 'delay time'), ('fx-d-feed', 'delay fdbk'), ('fx-reverb', 'reverb'), ('fx-cutoff', 'cutoff'),
-      ('fx-ring-mod', 'ring mod'), ('fx-bit-crush', 'bit crush'), ('fx-distortion', 'distortion'), ('fx-retrig', 'retrigger')]
-for i, (name, label) in enumerate(fx):
+# ---------------- knobs: synth page (Inst mode) and input FX page (Preset mode) ----------------
+cnv(10, 322, 740, 16, 'knobtitle-synth', 'SYNTH KNOBS (LX25+ Inst mode) - no knob controls for this instrument',
+    6, 8, 11, '#dcdcdc', '#000000')
+for i in range(8):
     x = 10 + i * 92 + 20
-    A(f'#X obj {x} 340 vsl 30 120 0 127 0 0 {name} {name}-r {sp(label)} -8 132 0 10 {palette[i % 4]} #000000 #000000 0 1;')
+    A(f'#X obj {x} 344 vsl 26 50 0 127 0 0 knob-{i + 1} knob-{i + 1}-r - -8 60 0 10 {palette[i % 4]} #000000 #000000 0 1;')
+cnv(10, 416, 740, 16, 'knobtitle-fx', 'INPUT FX KNOBS (LX25+ Preset mode) - reverb and delay per source',
+    6, 8, 11, '#dcdcdc', '#000000')
+fxin = [('mic verb', 0), ('mic delay', 0), ('in 2 verb', 0), ('in 2 delay', 0), ('synth verb', 0),
+        ('synth delay', 0), ('delay time', 50), ('feedback', 50)]
+for i, (label, default) in enumerate(fxin):
+    x = 10 + i * 92 + 20
+    pos = round(default / 127 * 49 * 100)
+    A(f'#X obj {x} 438 vsl 26 50 0 127 0 1 fxin-{i + 1} fxin-{i + 1}-r {sp(label)} -8 60 0 10 {palette[i % 4]} #000000 #000000 {pos} 1;')
 
 # ---------------- right column: instruments, meters, levels ----------------
 text(770, 92, 'INSTRUMENT BANK')
@@ -102,5 +113,6 @@ for k, (recv, label) in enumerate((('mainVol', 'main'), ('l-in-vol', 'in 1'), ('
 A(f'#X obj {W + 40} 60 declare -lib zexy;')
 A(f'#X obj {W + 40} 90 instrumentName;')
 A(f'#X obj {W + 40} 120 looper;')
+A(f'#X obj {W + 40} 150 knobs;')
 
 open(PATCH, 'w').write('\n'.join(L) + '\n' + internals)
