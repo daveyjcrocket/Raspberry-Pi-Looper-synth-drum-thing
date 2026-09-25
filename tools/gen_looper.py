@@ -225,6 +225,37 @@ C(hc, O('v $0-L', 760, 225), 1); C(p.lines.__len__() - 1, mx); C(mx, setL(760, 2
 hs0 = O('v $0-state', 700, 225); C(hc, hs0, 0)
 h0 = O('sel 0', 700, 250); C(hs0, h0); C(h0, setst(5, 700, 300))
 
+
+# ---------------- front panel: state box, hint line, loop position, loop length ----------------
+looks = [('#505050', 'READY', 'play or press REC to record'),
+         ('#c62828', 'RECORDING', 'REC = set loop length + next layer'),
+         ('#ef6c00', 'OVERDUB', 'REC = next layer   PLAY = stop recording'),
+         ('#2e7d32', 'PLAYING', 'REC = add a layer   STOP = fade out'),
+         ('#1565c0', 'FADING', 'STOP = stop now   PLAY = keep playing'),
+         ('#303030', 'STOPPED', 'PLAY = restart   STOP = clear all')]
+cnvS = O('s looper-cnv', 20, 1060); hintS = O('s looper-hint', 400, 1060)
+for i, (bg, word, hint) in enumerate(looks):
+    m = M(f'color {bg} #ffffff, label {word}', 20 + i * 130, 1000); C(stSel, m, i); C(m, cnvS)
+    h = M('label ' + hint.replace(' ', '\\ '), 20 + i * 130, 1030); C(stSel, h, i); C(h, hintS)
+
+# loop position bar: fraction of the cycle (while recording the first layer: fraction of the 20 s maximum)
+tPos = O('timer', 1000, 1000); C(O('r f', 1000, 975), tPos)
+tRec = O('timer', 1080, 1000); C(r1, tRec, 1)
+pm = O('metro 50', 900, 975); C(O('loadbang', 900, 950), pm)
+pt = O('t b b b b', 900, 1025); C(pm, pt)
+pos = O('expr if($f4>=2 && $f4<=4 && $f3>0, min($f1/$f3, 1), if($f4==1, min($f2/%d, 1), 0))' % MAX_FIRST_MS, 900, 1075)
+C(pt, O('v $0-state', 1160, 1050), 3); C(p.lines.__len__() - 1, pos, 0, 3)
+C(pt, O('v $0-len', 1100, 1050), 2); C(p.lines.__len__() - 1, pos, 0, 2)
+C(pt, tRec, 1, 1); C(tRec, pos, 0, 1)
+C(pt, tPos, 0, 1); C(tPos, pos, 0, 0)
+C(pos, O('s loop-pos', 900, 1100))
+
+# loop length in seconds (also when a saved song sets it)
+lenIn = O('r ms', 1100, 1125)
+C(lenIn, O('v $0-len', 1100, 1150))
+C(lenIn, O('/ 1000', 1180, 1150)); C(p.lines.__len__() - 1, O('s loop-len-s', 1180, 1175))
+z1 = M('0', 1260, 1150); C(O('r clearAll', 1260, 1125), z1); C(z1, O('s loop-len-s', 1260, 1175))
+
 # ---------------- init ----------------
 lb = O('loadbang', 700, 30)
 C(lb, M('; looper-auto 1; keepN 1; keepN-gui set 1', 700, 55))

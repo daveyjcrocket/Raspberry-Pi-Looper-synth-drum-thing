@@ -15,6 +15,8 @@ Hardware it's set up for:
 - **Controller:** Nektar Impact LX25+ (USB MIDI)
 - **Audio interface:** Behringer U-Phoria UMC22 (USB). Input 1 is the XLR mic jack and input 2 is the 1/4" instrument/line jack. Both go into the loopers and the output drives your speakers or headphones.
 
+**New here? Read the [user manual](docs/USER_MANUAL.md).**
+
 This is a fork of otem's [Raspberry Pi Looper synth drum thing](https://github.com/otem/Raspberry-Pi-Looper-synth-drum-thing), via megalon's MIDI-controller version.
 
 ## Drum kits

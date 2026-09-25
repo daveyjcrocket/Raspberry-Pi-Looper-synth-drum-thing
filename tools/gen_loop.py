@@ -143,11 +143,12 @@ C(O('r lp-vol-$1', 700, 435), volF)
 g = O('expr $f1*(1-(($f2!=0)||(($f3!=0)&&( $1 > $f4 ))))', 700, 490)
 C(volF, g, 0, 0)
 gm = M('$1 15', 700, 515); C(g, gm); C(gm, gainLine)
-for rname, inlet, x in (('keepActive', 2, 880), ('keepN', 3, 980)):
+for rname, inlet, x, vname in (('keepActive', 2, 880, 'ka'), ('keepN', 3, 980, 'kn')):
     t = O('t b f', x, 435); C(O(f'r {rname}', x, 410), t); C(t, g, 1, inlet); C(t, volF, 0, 0)
+    C(t, O(f'v $0-{vname}', x + 40, 460), 1)
 tog = O('f', 780, 380); togInv = O('== 0', 780, 405); manT = O('t b f', 780, 435)
 C(O('r lp-trig-$1', 780, 355), tog); C(tog, togInv); C(togInv, tog, 0, 1); C(togInv, manT)
-C(manT, g, 1, 1); C(manT, volF, 0, 0)
+C(manT, g, 1, 1); C(manT, volF, 0, 0); C(manT, O('v $0-man', 830, 460), 1)
 unmute = M('0', 840, 355); C(unmute, tog, 0, 1); C(unmute, manT)
 C(clearT, unmute, 0)
 C(O('r unmuteAll', 840, 330), unmute)
@@ -167,5 +168,24 @@ lbT = O('t b b b', 300, 40)
 C(lb, lbT)
 fade1 = M('1', 300, 65); C(fade1, fadeLine)
 C(lbT, fade1, 2); C(lbT, pA, 1); C(lbT, wB, 1); C(lbT, volF, 0)
+
+# ---------------- front-panel cell: empty / playing / REC / muted, ">" = selected ----------------
+sel = O('r selected-loop-r', 20, 860)
+selP = O('+ 1', 20, 885); C(sel, selP)
+selEq = O('== $1', 20, 910); C(selP, selEq); C(selEq, O('v $0-sel', 20, 935))
+poll = O('metro 120', 200, 860); C(lb, poll)
+pt = O('t b b b b b b b', 200, 885); C(poll, pt)
+code = O('expr if($f1||$f2, 2, if($f3 && ($f4 || ($f5 && ( $1 > $f6 ))), 3, if($f3, 1, 0))) + 10*$f7', 200, 960)
+for k, name in enumerate(['rec', 'clos', 'cont', 'man', 'ka', 'kn', 'sel']):
+    v = O(f'v $0-{name}', 200 + k * 70, 910); C(pt, v, k); C(v, code, 0, k)
+ch = O('change -1', 200, 985); C(code, ch)
+cs = O('sel 0 1 2 3 10 11 12 13', 200, 1010); C(ch, cs)
+look = {0: ('#3c3c3c', '#8c8c8c', 'empty'), 1: ('#2e7d32', '#ffffff', 'playing'),
+        2: ('#c62828', '#ffffff', 'REC'), 3: ('#455a64', '#b0bec5', 'muted')}
+out = O('s lyr-$1-cnv', 200, 1080)
+for i, c in enumerate([0, 1, 2, 3, 10, 11, 12, 13]):
+    bg, fg, word = look[c % 10]
+    label = ('>\\ ' if c >= 10 else '') + word
+    m = M(f'color {bg} {fg}, label {label}', 200 + i * 110, 1040); C(cs, m, i); C(m, out)
 
 p.save(os.path.join(os.path.dirname(__file__), '..', 'piLooper', 'Loop.pd'))

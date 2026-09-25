@@ -1,11 +1,102 @@
-#N canvas 223 138 897 720 10;
+#N canvas 40 40 1010 600 10;
 #X declare -lib zexy;
-#X obj 39 118 vu 15 120 l-in-sig empty -1 -8 0 10 -66577 -1 1 0;
-#X obj 97 118 vu 15 120 r-in-sig empty -1 -8 0 10 -66577 -1 1 0;
-#X obj 749 121 vu 15 120 l-out-db empty -1 -8 0 10 -66577 -1 1 0;
-#X obj 799 122 vu 15 120 empty empty -1 -8 0 10 -66577 -1 1 0;
-#N canvas 341 53 450 300 internals 1;
-#N canvas 153 160 1241 688 midi-io 1;
+#X obj 10 10 cnv 15 250 74 empty looper-cnv READY 14 37 0 26 #505050 #ffffff 0;
+#X obj 275 18 hsl 470 24 0 1 0 0 empty loop-pos loop\ position 0 -9 0 10 #dcdcdc #2e7d32 #000000 0 1;
+#X obj 275 46 cnv 15 470 20 empty looper-hint play\ or\ press\ REC\ to\ record 8 10 0 11 #2a2a2a #dddddd 0;
+#X floatatom 275 70 5 0 0 1 loop\ length\ (s) loop-len-s -;
+#X floatatom 420 70 2 0 0 1 layers\ used looper-layers -;
+#X obj 760 10 cnv 15 240 50 empty instr-cnv GMRock\ kit 10 25 0 18 #1f3a5f #ffffff 0;
+#X text 760 64 instrument (LX25+ patch - / +);
+#X text 10 92 LAYERS  |  big button = mute / unmute  |  red = clear  |  slider = volume  |  > = the layer the LX25+ Loop button mutes, f 125;
+#X text 10 108 layer 1;
+#X obj 10 124 cnv 15 84 24 empty lyr-1-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 10 154 bng 45 250 50 0 lp-trig-1 lp-trig-1-r mute 7 22 0 11 #b3e5fc #000000 #000000;
+#X obj 10 205 bng 16 250 50 0 clear-1 clear-1-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 68 154 vsl 22 67 0 1 0 1 lp-vol-1 lp-vol-1-r vol 0 76 0 10 #b3e5fc #000000 #000000 6600 1;
+#X text 102 108 layer 2;
+#X obj 102 124 cnv 15 84 24 empty lyr-2-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 102 154 bng 45 250 50 0 lp-trig-2 lp-trig-2-r mute 7 22 0 11 #c8e6c9 #000000 #000000;
+#X obj 102 205 bng 16 250 50 0 clear-2 clear-2-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 160 154 vsl 22 67 0 1 0 1 lp-vol-2 lp-vol-2-r vol 0 76 0 10 #c8e6c9 #000000 #000000 6600 1;
+#X text 194 108 layer 3;
+#X obj 194 124 cnv 15 84 24 empty lyr-3-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 194 154 bng 45 250 50 0 lp-trig-3 lp-trig-3-r mute 7 22 0 11 #fff9c4 #000000 #000000;
+#X obj 194 205 bng 16 250 50 0 clear-3 clear-3-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 252 154 vsl 22 67 0 1 0 1 lp-vol-3 lp-vol-3-r vol 0 76 0 10 #fff9c4 #000000 #000000 6600 1;
+#X text 286 108 layer 4;
+#X obj 286 124 cnv 15 84 24 empty lyr-4-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 286 154 bng 45 250 50 0 lp-trig-4 lp-trig-4-r mute 7 22 0 11 #ffcdd2 #000000 #000000;
+#X obj 286 205 bng 16 250 50 0 clear-4 clear-4-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 344 154 vsl 22 67 0 1 0 1 lp-vol-4 lp-vol-4-r vol 0 76 0 10 #ffcdd2 #000000 #000000 6600 1;
+#X text 378 108 layer 5;
+#X obj 378 124 cnv 15 84 24 empty lyr-5-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 378 154 bng 45 250 50 0 lp-trig-5 lp-trig-5-r mute 7 22 0 11 #b3e5fc #000000 #000000;
+#X obj 378 205 bng 16 250 50 0 clear-5 clear-5-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 436 154 vsl 22 67 0 1 0 1 lp-vol-5 lp-vol-5-r vol 0 76 0 10 #b3e5fc #000000 #000000 6600 1;
+#X text 470 108 layer 6;
+#X obj 470 124 cnv 15 84 24 empty lyr-6-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 470 154 bng 45 250 50 0 lp-trig-6 lp-trig-6-r mute 7 22 0 11 #c8e6c9 #000000 #000000;
+#X obj 470 205 bng 16 250 50 0 clear-6 clear-6-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 528 154 vsl 22 67 0 1 0 1 lp-vol-6 lp-vol-6-r vol 0 76 0 10 #c8e6c9 #000000 #000000 6600 1;
+#X text 562 108 layer 7;
+#X obj 562 124 cnv 15 84 24 empty lyr-7-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 562 154 bng 45 250 50 0 lp-trig-7 lp-trig-7-r mute 7 22 0 11 #fff9c4 #000000 #000000;
+#X obj 562 205 bng 16 250 50 0 clear-7 clear-7-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 620 154 vsl 22 67 0 1 0 1 lp-vol-7 lp-vol-7-r vol 0 76 0 10 #fff9c4 #000000 #000000 6600 1;
+#X text 654 108 layer 8;
+#X obj 654 124 cnv 15 84 24 empty lyr-8-cnv empty 6 12 0 12 #3c3c3c #8c8c8c 0;
+#X obj 654 154 bng 45 250 50 0 lp-trig-8 lp-trig-8-r mute 7 22 0 11 #ffcdd2 #000000 #000000;
+#X obj 654 205 bng 16 250 50 0 clear-8 clear-8-r clear 20 8 0 10 #e53935 #000000 #000000;
+#X obj 712 154 vsl 22 67 0 1 0 1 lp-vol-8 lp-vol-8-r vol 0 76 0 10 #ffcdd2 #000000 #000000 6600 1;
+#X obj 10 262 bng 44 250 50 0 looper-rec empty REC 9 22 0 13 #c62828 #ffffff #ffffff;
+#X obj 62 262 bng 44 250 50 0 looper-play empty PLAY 5 22 0 13 #2e7d32 #ffffff #ffffff;
+#X obj 114 262 bng 44 250 50 0 looper-stop empty STOP 5 22 0 13 #424242 #ffffff #ffffff;
+#X obj 180 262 tgl 20 0 keepActive keepActive-gui keep\ first\ N\ (FF) 24 10 0 10 #fcfcfc #000000 #000000 0 1;
+#X obj 180 288 nbx 2 18 1 7 0 0 keepN keepN-gui N\ (REW) 32 9 0 10 #fcfcfc #000000 #000000 1 256;
+#X obj 330 262 tgl 20 1 looper-auto empty auto-record 24 10 0 10 #fcfcfc #000000 #000000 1 1;
+#X obj 330 288 nbx 3 18 -80 0 0 1 looper-thr empty threshold\ dB 40 9 0 10 #fcfcfc #000000 #000000 -40 256;
+#X text 10 518 LX25+ BUTTONS  |  Record = start recording / start the next layer  |  Play = play-through (stop recording), f 125;
+#X text 10 534 Stop = fade out over one loop  |  Stop again = stop now  |  Stop when stopped = clear everything, f 125;
+#X text 10 550 Fast-fwd = keep first N on / off (off unmutes all)  |  Rewind = change N  |  Loop = mute > layer  |  Track < > = move >, f 125;
+#X text 10 322 EFFECTS;
+#X obj 30 340 vsl 30 120 0 127 0 0 fx-d-time fx-d-time-r delay\ time -8 132 0 10 #b3e5fc #000000 #000000 0 1;
+#X obj 122 340 vsl 30 120 0 127 0 0 fx-d-feed fx-d-feed-r delay\ fdbk -8 132 0 10 #c8e6c9 #000000 #000000 0 1;
+#X obj 214 340 vsl 30 120 0 127 0 0 fx-reverb fx-reverb-r reverb -8 132 0 10 #fff9c4 #000000 #000000 0 1;
+#X obj 306 340 vsl 30 120 0 127 0 0 fx-cutoff fx-cutoff-r cutoff -8 132 0 10 #ffcdd2 #000000 #000000 0 1;
+#X obj 398 340 vsl 30 120 0 127 0 0 fx-ring-mod fx-ring-mod-r ring\ mod -8 132 0 10 #b3e5fc #000000 #000000 0 1;
+#X obj 490 340 vsl 30 120 0 127 0 0 fx-bit-crush fx-bit-crush-r bit\ crush -8 132 0 10 #c8e6c9 #000000 #000000 0 1;
+#X obj 582 340 vsl 30 120 0 127 0 0 fx-distortion fx-distortion-r distortion -8 132 0 10 #fff9c4 #000000 #000000 0 1;
+#X obj 674 340 vsl 30 120 0 127 0 0 fx-retrig fx-retrig-r retrigger -8 132 0 10 #ffcdd2 #000000 #000000 0 1;
+#X text 770 92 INSTRUMENT BANK;
+#X obj 770 108 vradio 12 1 0 25 empty bankSelect empty 0 -8 0 10 #fcfcfc #000000 #000000 0;
+#X text 787 106 0-1 drum kits \, 2-3 own samples;
+#X text 787 154 4 lead;
+#X text 787 166 5-7 FM;
+#X text 787 202 8 lead 2;
+#X text 787 214 9-11 FM;
+#X text 787 250 12 synth 3;
+#X text 787 262 13-15 FM;
+#X text 787 298 16-18 bass;
+#X text 787 334 19-21 organ;
+#X text 787 370 22-24 lead / pad / pluck;
+#X text 770 418 IN1 IN2 OUT;
+#X obj 772 436 vu 15 100 l-in-sig empty -1 -8 0 10 #404040 #000000 0 0;
+#X obj 797 436 vu 15 100 r-in-sig empty -1 -8 0 10 #404040 #000000 0 0;
+#X obj 822 436 vu 15 100 l-out-db empty -1 -8 0 10 #404040 #000000 1 0;
+#X obj 770 546 tgl 15 1 inputTogL empty 1 3 22 0 10 #fcfcfc #000000 #000000 1 1;
+#X obj 795 546 tgl 15 1 inputTogR empty 2 3 22 0 10 #fcfcfc #000000 #000000 1 1;
+#X text 840 546 inputs on;
+#X text 900 418 LEVELS;
+#X obj 900 438 hsl 60 12 0 127 0 0 empty mainVol main 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;
+#X obj 900 458 hsl 60 12 0 127 0 0 empty l-in-vol in\ 1 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;
+#X obj 900 478 hsl 60 12 0 127 0 0 empty r-in-vol in\ 2 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;
+#X obj 900 498 hsl 60 12 0 127 0 0 empty post-verb verb 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;
+#X obj 900 518 hsl 60 12 0 127 0 0 empty post-bits bits 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;
+#X obj 1050 60 declare -lib zexy;
+#X obj 1050 90 instrumentName;
+#X obj 1050 120 looper;
+#N canvas 341 53 450 300 internals 0;
+#N canvas 153 160 1241 688 midi-io 0;
 #X obj 33 30 notein;
 #X obj 92 54 sel 1;
 #X msg 92 82 1;
@@ -256,7 +347,7 @@
 #X connect 80 0 86 0;
 #X connect 105 0 106 0;
 #X restore 17 15 pd midi-io;
-#N canvas 426 94 491 317 loop-select 1;
+#N canvas 426 94 491 317 loop-select 0;
 #X text 30 19 how to select a loop with nektar lx25;
 #X text 199 42 increment decrement using track;
 #X obj 257 123 loadbang;
@@ -288,7 +379,7 @@
 #X connect 13 0 10 0;
 #X connect 13 0 11 0;
 #X restore 16 65 pd loop-select;
-#N canvas 868 132 494 254 instrument-select 1;
+#N canvas 868 132 494 254 instrument-select 0;
 #X text 30 20 how to select an isntrument with nektar lx25;
 #X obj 210 93 loadbang;
 #X obj 267 58 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
@@ -321,7 +412,7 @@
 #X connect 15 0 12 0;
 #X connect 15 0 13 0;
 #X restore 15 40 pd instrument-select;
-#N canvas 550 332 766 472 loop-control 1;
+#N canvas 550 332 766 472 loop-control 0;
 #X text 24 21 how to control a loop on nektar lx25;
 #X text 223 44 use saved value for loop id and set values;
 #X obj 89 86 r midi-btn-ctl-in;
@@ -471,7 +562,7 @@
 #X connect 33 7 22 0;
 #X connect 33 7 23 0;
 #X restore 16 113 pd instrument-fx;
-#N canvas 219 201 881 561 loop-mixer 1;
+#N canvas 219 201 881 561 loop-mixer 0;
 #X text 24 15 how to control the mixer for each loop channel;
 #X text 201 37 set to mixer - use std knobs;
 #X obj 47 78 r midi-ctl-in-val-raw;
@@ -550,7 +641,7 @@
 #X obj 183 174 Loop 6;
 #X obj 183 198 Loop 7;
 #X obj 182 221 Loop 8;
-#N canvas 143 386 787 142 clearAll 1;
+#N canvas 143 386 787 142 clearAll 0;
 #X obj 645 5 r clearAll;
 #X obj 645 80 s comPortMsg;
 #X msg 645 34 print -sgn_/;
@@ -573,7 +664,7 @@
 #X connect 0 0 3 0;
 #X connect 2 0 1 0;
 #X restore 276 164 pd clearAll;
-#N canvas 951 43 429 674 audio-IO 1;
+#N canvas 951 43 429 674 audio-IO 0;
 #X obj 184 506 dac~;
 #X obj 14 105 s~ input;
 #X obj 184 28 r~ lp-out-1;
@@ -1726,9 +1817,9 @@ milliseconds \, based on samplerate.;
 #X connect 13 0 15 0;
 #X connect 16 0 0 0;
 #X restore 184 218 pd post-loop-fx;
-#N canvas 42 62 908 761 drums-input-fx 1;
+#N canvas 42 62 908 761 drums-input-fx 0;
 #X obj 330 735 outlet~;
-#N canvas 429 254 855 384 ss 1;
+#N canvas 429 254 855 384 ss 0;
 #X text 21 62 Bank One;
 #X text 885 117 Bank Two;
 #X obj 324 346 outlet~;
@@ -1901,7 +1992,7 @@ milliseconds \, based on samplerate.;
 #X connect 87 0 6 0;
 #X restore 303 287 pd ss;
 #X text 295 269 Drum Pads;
-#N canvas 602 74 378 413 distortion 1;
+#N canvas 602 74 378 413 distortion 0;
 #X obj 11 8 inlet~;
 #X obj 11 358 outlet~;
 #X obj 88 51 *~ 40;
@@ -2199,7 +2290,7 @@ milliseconds \, based on samplerate.;
 #X connect 24 0 14 0;
 #X connect 24 0 17 0;
 #X restore 330 599 pd cutoff;
-#N canvas 417 132 310 435 robotDelay 1;
+#N canvas 417 132 310 435 robotDelay 0;
 #X obj 118 148 vline~;
 #X obj 118 292 *~;
 #X obj 18 224 inlet~;
@@ -3557,7 +3648,7 @@ milliseconds \, based on samplerate.;
 #X connect 73 0 53 0;
 #X connect 74 0 53 0;
 #X restore 303 315 pd instrumentSelector;
-#N canvas 195 314 1092 386 noteSelect 1;
+#N canvas 195 314 1092 386 noteSelect 0;
 #X obj -207 149 pack 0 0 0;
 #X obj -207 172 route 1 2 3 4;
 #X obj -207 208 outlet;
@@ -4136,7 +4227,7 @@ milliseconds \, based on samplerate.;
 #X msg 121 193 1;
 #X obj 121 168 r play;
 #X obj 20 84 s clearAll;
-#N canvas 1113 50 273 453 BPM_DISPLAY 1;
+#N canvas 1113 50 273 453 BPM_DISPLAY 0;
 #X obj 76 12 r ms;
 #X obj 14 161 /;
 #X msg 14 121 60000;
@@ -4258,7 +4349,7 @@ milliseconds \, based on samplerate.;
 #X connect 57 0 25 0;
 #X connect 58 0 55 0;
 #X restore 277 88 pd metros;
-#N canvas 645 116 870 413 loopInt 1;
+#N canvas 645 116 870 413 loopInt 0;
 #X obj 57 94 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 72 143 0;
@@ -4319,7 +4410,7 @@ milliseconds \, based on samplerate.;
 #X connect 27 0 28 0;
 #X connect 29 0 3 1;
 #X restore 277 63 pd loopInt;
-#N canvas 886 204 359 225 saveLoad 1;
+#N canvas 886 204 359 225 saveLoad 0;
 #X obj 15 153 loopLoad 1;
 #X obj 94 153 loopLoad 2;
 #X obj 173 153 loopLoad 3;
@@ -4752,7 +4843,7 @@ RoboDrums:;
 #X connect 16 7 11 0;
 #X connect 17 0 16 0;
 #X restore -20 232 pd digitalRoute;
-#N canvas 326 486 1407 371 drumRoute 1;
+#N canvas 326 486 1407 371 drumRoute 0;
 #X obj 10 35 route Dr1: Dr2: Dr3: Dr4: Dr5: Dr6: Dr7: Dr8: Dr9: Dr10:
 Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 10 7 inlet;
@@ -4854,7 +4945,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 49 0 2 0;
 #X connect 49 0 33 0;
 #X restore -14 197 pd drumRoute;
-#N canvas 800 422 375 193 xyRoute 1;
+#N canvas 800 422 375 193 xyRoute 0;
 #X obj 12 49 route Xval: Yval: postTog:;
 #X obj 12 135 s post-glitch-time;
 #X msg 256 90 1;
@@ -4886,7 +4977,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X msg 264 61 1;
 #X msg 359 61 0;
 #X msg 264 86 print -ply_\$1/;
-#N canvas 774 461 450 300 routeClears 1;
+#N canvas 774 461 450 300 routeClears 0;
 #X obj 40 38 route clearSingle:;
 #X obj 40 63 sel 1 2 3 4 5 6 7 8;
 #X obj 40 149 s clear-1;
@@ -4974,7 +5065,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 61 0 8 0;
 #X restore 277 202 pd serialControls;
 #X obj 276 227 sessionFiles;
-#N canvas 547 86 893 571 analog-levels 1;
+#N canvas 547 86 893 571 analog-levels 0;
 #X obj 57 88 r midi-ctl-in-val-raw;
 #X obj 124 143 r midi-ctl-in-chan-raw;
 #X obj 102 117 r midi-ctl-in-raw;
@@ -5095,138 +5186,12 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X connect 51 0 29 0;
 #X connect 51 1 30 0;
 #X restore 14 165 pd analog-levels;
-#N canvas 796 110 450 300 pad-controls-map1 1;
+#N canvas 796 110 450 300 pad-controls-map1 0;
 #X restore 13 193 pd pad-controls-map1;
-#N canvas 796 110 450 300 pad-controls-map2 1;
+#N canvas 796 110 450 300 pad-controls-map2 0;
 #X restore 11 219 pd pad-controls-map2;
-#N canvas 586 317 450 300 pad-controls-map3 1;
+#N canvas 586 317 450 300 pad-controls-map3 0;
 #X restore 11 243 pd pad-controls-map3;
-#N canvas 594 322 450 300 pad-controls-map4 1;
+#N canvas 594 322 450 300 pad-controls-map4 0;
 #X restore 9 268 pd pad-controls-map4;
-#X restore 734 260 pd internals;
-#X obj 208 133 bng 50 250 50 0 lp-trig-1 lp-trig-1-r empty 17 7 0 10
--204800 -1 -1;
-#X obj 226 193 bng 15 250 50 0 clear-1 clear-1-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 318 133 bng 50 250 50 0 lp-trig-2 lp-trig-2-r empty 17 7 0 10
--204786 -1 -1;
-#X obj 336 193 bng 15 250 50 0 clear-2 clear-2-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 428 133 bng 50 250 50 0 lp-trig-3 lp-trig-3-r empty 17 7 0 10
--262130 -1 -1;
-#X obj 446 193 bng 15 250 50 0 clear-3 clear-3-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 538 133 bng 50 250 50 0 lp-trig-4 lp-trig-4-r empty 17 7 0 10
--261234 -1 -1;
-#X obj 556 193 bng 15 250 50 0 clear-4 clear-4-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 208 233 bng 50 250 50 0 lp-trig-5 lp-trig-5-r empty 17 7 0 10
--204800 -1 -1;
-#X obj 226 293 bng 15 250 50 0 clear-5 clear-5-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 318 233 bng 50 250 50 0 lp-trig-6 lp-trig-6-r empty 17 7 0 10
--204786 -1 -1;
-#X obj 336 293 bng 15 250 50 0 celar-6 clear-6-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 428 233 bng 50 250 50 0 lp-trig-7 lp-trig-7-r empty 17 7 0 10
--262130 -1 -1;
-#X obj 446 293 bng 15 250 50 0 clear-7 clear-7-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 538 234 bng 50 250 50 0 lp-trig-8 lp-trig-8-r empty 17 7 0 10
--261234 -1 -1;
-#X obj 556 293 bng 15 250 50 0 clear-8 clear-8-r empty 17 7 0 10 -258113
--1 -1;
-#X obj 263 135 vsl 30 70 0 1 0 0 lp-vol-1 lp-vol-1-r empty 0 -9 0 10
--204800 -1 -1 0 1;
-#X obj 373 135 vsl 30 70 0 1 0 0 lp-vol-2 lp-vol-2-r empty 0 -9 0 10
--204786 -1 -1 0 1;
-#X obj 483 135 vsl 30 70 0 1 0 0 lp-vol-3 lp-vol-3-r empty 0 -9 0 10
--262130 -1 -1 0 1;
-#X obj 593 135 vsl 30 70 0 1 0 0 lp-vol-4 lp-vol-4-r empty 0 -9 0 10
--261234 -1 -1 0 1;
-#X obj 263 235 vsl 30 70 0 1 0 0 lp-vol-5 lp-vol-5-r empty 0 -9 0 10
--204800 -1 -1 0 1;
-#X obj 373 235 vsl 30 70 0 1 0 0 lp-vol-6 lp-vol-6-r empty 0 -9 0 10
--204786 -1 -1 0 1;
-#X obj 483 235 vsl 30 70 0 1 0 0 lp-vol-7 lp-vol-7-r empty 0 -9 0 10
--262130 -1 -1 0 1;
-#X obj 593 235 vsl 30 70 0 1 0 0 lp-vol-8 lp-vol-8-r empty 0 -9 0 10
--261234 -1 -1 0 1;
-#X obj 219 324 vsl 30 127 0 127 0 0 fx-d-time fx-d-time-r empty 0 -9
-0 10 -204800 -1 -1 0 1;
-#X obj 329 324 vsl 30 127 0 127 0 0 fx-d-feed fx-d-feed-r empty 0 -9
-0 10 -204786 -1 -1 0 1;
-#X obj 439 324 vsl 30 127 0 127 0 0 fx-reverb fx-reverb-r empty 0 -9
-0 10 -262130 -1 -1 0 1;
-#X obj 549 324 vsl 30 127 0 127 0 0 fx-cutoff fx-cutoff-r empty 0 -9
-0 10 -261234 -1 -1 0 1;
-#X obj 219 464 vsl 30 127 0 127 0 0 fx-ring-mod fx-ring-mod-r empty
-0 -9 0 10 -204800 -1 -1 0 1;
-#X obj 329 464 vsl 30 127 0 127 0 0 fx-bit-crush fx-bit-crush-r empty
-0 -9 0 10 -204786 -1 -1 0 1;
-#X obj 439 464 vsl 30 127 0 127 0 0 fx-distortion fx-distortion-r empty
-0 -9 0 10 -262130 -1 -1 0 1;
-#X obj 549 465 vsl 30 127 0 127 0 0 fx-retrig fx-retrig-r empty 0 -9
-0 10 -261234 -1 -1 0 1;
-#X obj 171 36 hradio 60 1 0 8 selected-loop selected-loop-r Loop_Selected
-0 -8 0 10 -262144 -159808 -4160 0;
-#X obj 24 280 vradio 12 1 0 25 empty bankSelect empty 0 -8 0 10 -262144
--1 -1 0;
-#X text 40 280 0-3 drums;
-#X text 40 328 4 lead;
-#X text 40 340 5-7 FM;
-#X text 40 376 8 lead 2;
-#X text 40 388 9-11 FM;
-#X text 40 424 12 synth 3;
-#X text 40 436 13-15 FM;
-#X text 40 472 16-18 bass;
-#X obj 694 50 nbx 5 14 -1e+37 1e+37 0 0 empty bpm-r empty 0 -8 0 10
--262144 -1 -1 0 256;
-#X obj 694 79 nbx 5 14 -1e+37 1e+37 0 0 empty measure-disp-r empty
-0 -8 0 10 -262144 -1 -1 0 256;
-#X text 763 51 bpm;
-#X text 770 79 measure;
-#X text 222 112 set to pr2 to adj vol;
-#X obj 663 415 vsl 15 128 0 127 0 0 empty mainVol empty 0 -9 0 10 -262144
--1 -1 0 1;
-#X obj 709 390 vsl 15 128 0 127 0 0 empty l-in-vol empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 764 358 vsl 15 128 0 127 0 0 empty r-in-vol empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X obj 802 324 vsl 15 128 0 127 0 0 empty post-verb empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X text 257 437 fx-d-time;
-#X text 255 575 fx-ring-mod;
-#X text 372 441 fx-d-feed;
-#X text 363 576 fx-bit-crush;
-#X text 479 436 fx-reverb;
-#X text 469 579 fx-distortion;
-#X text 586 382 fx-cutoff;
-#X text 581 580 fx-retrig;
-#X obj 848 291 vsl 15 128 0 127 0 0 empty post-bits empty 0 -9 0 10
--262144 -1 -1 0 1;
-#X text 669 561 mainVol;
-#X text 715 535 l-in-vol;
-#X text 761 511 r-in-vol;
-#X text 801 477 post-verb;
-#X text 831 441 post-bits;
-#X text 259 334 set to inst;
-#X text 640 329 set to mixer;
-#X obj 700 20 declare -lib zexy;
-#X obj 39 250 tgl 15 1 inputTogL empty IN1 17 7 0 10 -262144 -1 -1 1 1;
-#X obj 97 250 tgl 15 1 inputTogR empty IN2 17 7 0 10 -262144 -1 -1 1 1;
-#X text 40 508 19-21 organ;
-#X text 40 544 22-24 lead/pad/pluck;
-#X symbolatom 24 258 14 0 0 0 - instrument-name - 0;
-#X obj 24 610 instrumentName;
-#X text 180 628 LOOPER - LX25+: Record = rec/next layer \, Play = play-through \, Stop = fade (again: hard stop \, when stopped: clear) \, FF = keep first N \, Rew = N;
-#X obj 180 650 bng 35 250 50 0 looper-rec empty REC 3 -8 0 12 -258113 -1 -1;
-#X obj 230 650 bng 35 250 50 0 looper-play empty PLAY 1 -8 0 12 -204786 -1 -1;
-#X obj 280 650 bng 35 250 50 0 looper-stop empty STOP 1 -8 0 12 -262144 -1 -1;
-#X symbolatom 330 658 10 0 0 0 - looper-status - 0;
-#X floatatom 430 658 2 0 0 2 layers looper-layers -;
-#X obj 480 658 tgl 20 0 keepActive keepActive-gui KEEP 0 -8 0 10 -262144 -1 -1 0 1;
-#X obj 520 658 nbx 1 20 1 7 0 0 keepN keepN-gui first_N 0 -8 0 10 -262144 -1 -1 1 256;
-#X obj 590 658 tgl 20 1 looper-auto empty AUTO-REC 0 -8 0 10 -262144 -1 -1 1 1;
-#X obj 660 658 nbx 3 20 -80 0 0 1 looper-thr empty threshold_dB 0 -8 0 10 -262144 -1 -1 -40 256;
-#X obj 780 658 looper;
+#X restore 1050 20 pd internals;
