@@ -294,7 +294,7 @@
 #X obj 267 58 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X text 334 44 increment decrement using patch;
-#X obj 35 213 mod 8;
+#X obj 35 213 mod 25;
 #X msg 220 130 0;
 #X text 156 116 comment;
 #X obj 146 218 print instrument;
@@ -3994,6 +3994,18 @@ milliseconds \, based on samplerate.;
 #X connect 54 0 53 0;
 #X connect 55 0 31 0;
 #X connect 55 0 52 0;
+#X obj 560 300 analogSynth;
+#X obj 560 325 organSynth;
+#X connect 44 0 56 0;
+#X connect 44 0 57 0;
+#X connect 44 1 56 1;
+#X connect 44 1 57 1;
+#X connect 44 2 56 2;
+#X connect 44 2 57 2;
+#X connect 44 3 56 3;
+#X connect 44 3 57 3;
+#X connect 56 0 49 0;
+#X connect 57 0 49 0;
 #X restore 33 22 pd drums-input-fx;
 #N canvas 355 86 193 286 microFade 0;
 #X obj 24 233 *~;
@@ -5158,16 +5170,16 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 0 10 -261234 -1 -1 0 1;
 #X obj 171 36 hradio 60 1 0 8 selected-loop selected-loop-r Loop_Selected
 0 -8 0 10 -262144 -159808 -4160 0;
-#X obj 24 280 vradio 40 1 0 8 empty bankSelect empty 0 -8 0 10 -262144
+#X obj 24 280 vradio 12 1 0 25 empty bankSelect empty 0 -8 0 10 -262144
 -1 -1 0;
-#X text 87 293 instrument 1;
-#X text 87 333 instrument 2;
-#X text 87 373 instrument 3;
-#X text 87 413 instrument 4;
-#X text 87 453 instrument 5;
-#X text 87 493 instrument 6;
-#X text 87 533 instrument 7;
-#X text 87 573 instrument 8;
+#X text 40 280 0-3 drums;
+#X text 40 328 4 lead;
+#X text 40 340 5-7 FM;
+#X text 40 376 8 lead 2;
+#X text 40 388 9-11 FM;
+#X text 40 424 12 synth 3;
+#X text 40 436 13-15 FM;
+#X text 40 472 16-18 bass;
 #X obj 694 50 nbx 5 14 -1e+37 1e+37 0 0 empty bpm-r empty 0 -8 0 10
 -262144 -1 -1 0 256;
 #X obj 694 79 nbx 5 14 -1e+37 1e+37 0 0 empty measure-disp-r empty
@@ -5203,3 +5215,7 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X obj 700 20 declare -lib zexy;
 #X obj 39 250 tgl 15 1 inputTogL empty IN1 17 7 0 10 -262144 -1 -1 1 1;
 #X obj 97 250 tgl 15 1 inputTogR empty IN2 17 7 0 10 -262144 -1 -1 1 1;
+#X text 40 508 19-21 organ;
+#X text 40 544 22-24 lead/pad/pluck;
+#X symbolatom 24 258 14 0 0 0 - instrument-name - 0;
+#X obj 24 610 instrumentName;

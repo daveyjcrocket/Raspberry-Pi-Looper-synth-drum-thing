@@ -79,6 +79,24 @@ Settings, as environment variables:
 - The big buttons record each of the 8 loops, the slider next to each sets its volume, and the small red button clears it. The tall sliders control the FX.
 - Songs are saved as folders in `piLooper/Sessions/`.
 
+### Instruments
+
+The two instrument buttons on the LX25+ step through 25 banks. The selected bank's name is shown above the instrument column in the main window.
+
+| Bank | Instrument | Bank | Instrument |
+|---|---|---|---|
+| 0–3 | Drum kits 1–4 | 16 | Moog bass |
+| 4 | Lead synth | 17 | Acid bass (resonant, with glide) |
+| 5–7, 9–11, 13–15 | FM synth presets 1–9 | 18 | Reese bass (detuned saws + sub) |
+| 8 | Lead synth 2 | 19 | Jazz organ (888000000, 3rd-harmonic percussion, slow Leslie) |
+| 12 | Synth 3 | 20 | Gospel organ (all drawbars, fast Leslie) |
+| | | 21 | Church organ (principal chorus, slow attack) |
+| | | 22 | Supersaw lead |
+| | | 23 | Warm pad |
+| | | 24 | Pluck |
+
+Banks 16–18 and 22–24 come from `analogSynth.pd`, a 4-voice subtractive synth. Banks 19–21 come from `organSynth.pd`, a 4-voice drawbar organ. Each engine turns its DSP off while another instrument is selected, which saves CPU on the Pi. The presets are the message boxes inside those two files, and the parameter list is written next to them.
+
 ### MIDI mapping
 
-MIDI is handled in `[pd internals] → [pd midi-io]` inside `LiveLoopSynth.pd`. The note and CC numbers there came from an earlier controller, so some LX25+ pads, knobs or buttons may need remapping. The `print midi-raw-*` objects in that subpatch show what each control sends in the Pd console.
+MIDI is handled in `[pd internals]` inside `LiveLoopSynth.pd`. `[pd midi-io]` reads the controller, and `[pd instrument-select]`, `[pd loop-control]` and `[pd loop-select]` map the LX25+ buttons. The drum pads play notes 48–63 across the LX25+'s two pad maps. The `print midi-raw-*` objects in `[pd midi-io]` show what each control sends in the Pd console.
