@@ -1,4 +1,4 @@
-#N canvas 223 138 897 627 10;
+#N canvas 223 138 897 720 10;
 #X declare -lib zexy;
 #X obj 39 118 vu 15 120 l-in-sig empty -1 -8 0 10 -66577 -1 1 0;
 #X obj 97 118 vu 15 120 r-in-sig empty -1 -8 0 10 -66577 -1 1 0;
@@ -333,8 +333,8 @@
 #X obj 260 138 sel 105;
 #X obj 344 138 sel 102;
 #X text 360 156 loop;
-#X obj 170 247 s play;
-#X obj 248 246 s stop;
+#X obj 170 247 s looper-play;
+#X obj 248 246 s looper-stop;
 #X obj 339 176 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 265 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
@@ -343,7 +343,7 @@
 -1 -1;
 #X obj 131 195 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 103 262 s rec;
+#X obj 103 262 s looper-rec;
 #X obj 33 348 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X obj 33 372 s lp-trig-1;
@@ -4266,15 +4266,15 @@ milliseconds \, based on samplerate.;
 #X obj 57 169 f;
 #X obj 94 169 + 1;
 #X obj 57 233 s tapOne;
-#X obj 57 49 r lp-trig-1;
-#X obj 150 49 r lp-trig-2;
-#X obj 243 49 r lp-trig-3;
-#X obj 337 49 r lp-trig-4;
+#X obj 57 49 r looper-legacy-tap;
+#X obj 150 49 r looper-legacy-tap;
+#X obj 243 49 r looper-legacy-tap;
+#X obj 337 49 r looper-legacy-tap;
 #X obj 72 119 r clearAll;
-#X obj 431 49 r lp-trig-5;
-#X obj 527 49 r lp-trig-6;
-#X obj 617 49 r lp-trig-7;
-#X obj 707 49 r lp-trig-8;
+#X obj 431 49 r looper-legacy-tap;
+#X obj 527 49 r looper-legacy-tap;
+#X obj 617 49 r looper-legacy-tap;
+#X obj 707 49 r looper-legacy-tap;
 #X obj 120 233 s tapTwo;
 #X obj 240 192 timer;
 #X msg 240 167 bang;
@@ -5219,3 +5219,14 @@ Dr11: Dr12: Dr13: Dr14: Dr15: Dr16:;
 #X text 40 544 22-24 lead/pad/pluck;
 #X symbolatom 24 258 14 0 0 0 - instrument-name - 0;
 #X obj 24 610 instrumentName;
+#X text 180 628 LOOPER - LX25+: Record = rec/next layer \, Play = play-through \, Stop = fade (again: hard stop \, when stopped: clear) \, FF = keep first N \, Rew = N;
+#X obj 180 650 bng 35 250 50 0 looper-rec empty REC 3 -8 0 12 -258113 -1 -1;
+#X obj 230 650 bng 35 250 50 0 looper-play empty PLAY 1 -8 0 12 -204786 -1 -1;
+#X obj 280 650 bng 35 250 50 0 looper-stop empty STOP 1 -8 0 12 -262144 -1 -1;
+#X symbolatom 330 658 10 0 0 0 - looper-status - 0;
+#X floatatom 430 658 2 0 0 2 layers looper-layers -;
+#X obj 480 658 tgl 20 0 keepActive keepActive-gui KEEP 0 -8 0 10 -262144 -1 -1 0 1;
+#X obj 520 658 nbx 1 20 1 7 0 0 keepN keepN-gui first_N 0 -8 0 10 -262144 -1 -1 1 256;
+#X obj 590 658 tgl 20 1 looper-auto empty AUTO-REC 0 -8 0 10 -262144 -1 -1 1 1;
+#X obj 660 658 nbx 3 20 -80 0 0 1 looper-thr empty threshold_dB 0 -8 0 10 -262144 -1 -1 -40 256;
+#X obj 780 658 looper;
