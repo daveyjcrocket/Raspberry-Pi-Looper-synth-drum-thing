@@ -17,14 +17,18 @@ Hardware it's set up for:
 
 This is a fork of otem's [Raspberry Pi Looper synth drum thing](https://github.com/otem/Raspberry-Pi-Looper-synth-drum-thing), via megalon's MIDI-controller version.
 
-## Drum samples
+## Drum kits
 
-No samples are included. Add your own `.wav` files to `piLooper/` named like:
+Two kits come with the project, in `piLooper/kits/`:
 
-    kick_01.wav  - kick_24.wav
-    hh_01.wav    - hh_12.wav
-    snare_01.wav - snare_24.wav
-    crash_01.wav - crash_04.wav
+- **Bank 0:** GMRockKit (GPL, from the Hydrogen drum machine)
+- **Bank 1:** Virtuosity Drums (CC0)
+
+Each kit has eight sounds on the LX25+ pads, with the same layout on both pad maps: kick, snare, closed hi-hat, open hi-hat, rimshot, high tom, low tom, ride. See [`piLooper/kits/README.md`](piLooper/kits/README.md) for the pad-to-note map, credits and licenses.
+
+Drum banks 2 and 3 still use their own samples, which aren't included. To use them, add `.wav` files to `piLooper/` named `kick_13.wav`–`kick_24.wav`, `snare_13.wav`–`snare_24.wav`, `hh_07.wav`–`hh_12.wav` and `crash_03.wav`–`crash_04.wav`.
+
+Pd plays samples at its own sample rate, so keep Pd at 48 kHz (both modes below use it). Otherwise the drums play off-pitch.
 
 ## Mac mode
 
@@ -85,13 +89,13 @@ The two instrument buttons on the LX25+ step through 25 banks. The selected bank
 
 | Bank | Instrument | Bank | Instrument |
 |---|---|---|---|
-| 0–3 | Drum kits 1–4 | 16 | Moog bass |
-| 4 | Lead synth | 17 | Acid bass (resonant, with glide) |
-| 5–7, 9–11, 13–15 | FM synth presets 1–9 | 18 | Reese bass (detuned saws + sub) |
-| 8 | Lead synth 2 | 19 | Jazz organ (888000000, 3rd-harmonic percussion, slow Leslie) |
-| 12 | Synth 3 | 20 | Gospel organ (all drawbars, fast Leslie) |
-| | | 21 | Church organ (principal chorus, slow attack) |
-| | | 22 | Supersaw lead |
+| 0 | GMRock kit | 16 | Moog bass |
+| 1 | Virtuosity kit | 17 | Acid bass (resonant, with glide) |
+| 2–3 | Drum kits 3–4 (your own samples) | 18 | Reese bass (detuned saws + sub) |
+| 4 | Lead synth | 19 | Jazz organ (888000000, 3rd-harmonic percussion, slow Leslie) |
+| 5–7, 9–11, 13–15 | FM synth presets 1–9 | 20 | Gospel organ (all drawbars, fast Leslie) |
+| 8 | Lead synth 2 | 21 | Church organ (principal chorus, slow attack) |
+| 12 | Synth 3 | 22 | Supersaw lead |
 | | | 23 | Warm pad |
 | | | 24 | Pluck |
 

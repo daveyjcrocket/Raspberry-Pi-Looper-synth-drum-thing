@@ -1,7 +1,7 @@
 #N canvas 100 100 560 260 10;
 #X obj 20 20 r bankSelect;
 #X obj 20 45 t b f;
-#X msg 20 75 list Drums_1 Drums_2 Drums_3 Drums_4 Lead_synth FM_1 FM_2 FM_3 Lead_synth_2 FM_4 FM_5 FM_6 Synth_three FM_7 FM_8 FM_9 Moog_bass Acid_bass Reese_bass Jazz_organ Gospel_organ Church_organ Supersaw_lead Warm_pad Pluck;
+#X msg 20 75 list GMRock_kit Virtuosity_kit Drums_3 Drums_4 Lead_synth FM_1 FM_2 FM_3 Lead_synth_2 FM_4 FM_5 FM_6 Synth_three FM_7 FM_8 FM_9 Moog_bass Acid_bass Reese_bass Jazz_organ Gospel_organ Church_organ Supersaw_lead Warm_pad Pluck;
 #X obj 20 130 list split;
 #X obj 70 155 list split 1;
 #X msg 70 180 symbol \$1;
