@@ -83,6 +83,16 @@ else
       cur == c && $1 ~ /^[0-9]+$/ { print $1 }'); do
     aconnect "$kb_client:$port" "$pd_client:0" && echo "Connected MIDI $kb_client:$port -> Pd"
   done
+  # Pd's MIDI output -> keyboard (used by the optional "light the LX25+ pads" switch)
+  pd_out="$(aconnect -i | awk -v c="$pd_client" '
+      /^client [0-9]+:/ { cur = $2; sub(/:/, "", cur); next }
+      cur == c && $1 ~ /^[0-9]+$/ { print $1; exit }')"
+  kb_in="$(aconnect -o | awk -v c="$kb_client" '
+      /^client [0-9]+:/ { cur = $2; sub(/:/, "", cur); next }
+      cur == c && $1 ~ /^[0-9]+$/ { print $1; exit }')"
+  if [ -n "$pd_out" ] && [ -n "$kb_in" ]; then
+    aconnect "$pd_client:$pd_out" "$kb_client:$kb_in" && echo "Connected MIDI Pd -> $kb_client:$kb_in"
+  fi
 fi
 
 wait "$pd_pid"

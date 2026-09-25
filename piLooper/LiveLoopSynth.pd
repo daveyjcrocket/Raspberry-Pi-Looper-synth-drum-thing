@@ -1,4 +1,4 @@
-#N canvas 40 40 1010 600 10;
+#N canvas 40 40 1010 660 10;
 #X declare -lib zexy;
 #X obj 10 10 cnv 15 250 74 empty looper-cnv READY 14 37 0 26 #505050 #ffffff 0;
 #X obj 275 18 hsl 470 24 0 1 0 0 empty loop-pos loop\ position 0 -9 0 10 #dcdcdc #2e7d32 #000000 0 1;
@@ -80,6 +80,16 @@
 #X obj 490 438 vsl 26 50 0 127 0 1 fxin-6 fxin-6-r synth\ delay -8 60 0 10 #c8e6c9 #000000 #000000 0 1;
 #X obj 582 438 vsl 26 50 0 127 0 1 fxin-7 fxin-7-r delay\ time -8 60 0 10 #fff9c4 #000000 #000000 1929 1;
 #X obj 674 438 vsl 26 50 0 127 0 1 fxin-8 fxin-8-r feedback -8 60 0 10 #ffcdd2 #000000 #000000 1929 1;
+#X text 10 578 DRUM PADS  |  flash when hit  |  color = drum kit  |  grey = a synth is selected, f 80;
+#X obj 520 577 tgl 15 0 pad-led-echo empty light\ the\ LX25+\ pads\ (experimental) 19 7 0 10 #fcfcfc #000000 #000000 0 1;
+#X obj 10 598 cnv 15 84 34 empty pad-1-cnv kick 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 102 598 cnv 15 84 34 empty pad-2-cnv snare 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 194 598 cnv 15 84 34 empty pad-3-cnv hat\ closed 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 286 598 cnv 15 84 34 empty pad-4-cnv hat\ open 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 378 598 cnv 15 84 34 empty pad-5-cnv rimshot 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 470 598 cnv 15 84 34 empty pad-6-cnv tom\ high 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 562 598 cnv 15 84 34 empty pad-7-cnv tom\ low 6 17 0 11 #6d3a0f #ffe0b2 0;
+#X obj 654 598 cnv 15 84 34 empty pad-8-cnv ride 6 17 0 11 #6d3a0f #ffe0b2 0;
 #X text 770 92 INSTRUMENT BANK;
 #X obj 770 108 vradio 12 1 0 25 empty bankSelect empty 0 -8 0 10 #fcfcfc #000000 #000000 0;
 #X text 787 106 0-1 drum kits \, 2-3 own samples;
@@ -109,6 +119,8 @@
 #X obj 1050 90 instrumentName;
 #X obj 1050 120 looper;
 #X obj 1050 150 knobs;
+#X obj 1050 180 padDisplay;
+#X obj 1050 210 wheels;
 #N canvas 341 53 450 300 internals 0;
 #N canvas 153 160 1241 688 midi-io 0;
 #X obj 33 30 notein;

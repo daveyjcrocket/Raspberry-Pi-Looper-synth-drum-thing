@@ -10,7 +10,7 @@ import os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PATCH = os.path.join(HERE, '..', 'piLooper', 'LiveLoopSynth.pd')
-W, H = 1010, 600
+W, H = 1010, 660
 
 
 def sp(text):          # Pd label/text: escape spaces inside one symbol
@@ -90,6 +90,13 @@ for i, (label, default) in enumerate(fxin):
     pos = round(default / 127 * 49 * 100)
     A(f'#X obj {x} 438 vsl 26 50 0 127 0 1 fxin-{i + 1} fxin-{i + 1}-r {sp(label)} -8 60 0 10 {palette[i % 4]} #000000 #000000 {pos} 1;')
 
+
+# ---------------- drum pads (flash when hit, color = drum kit) ----------------
+text(10, 578, 'DRUM PADS  |  flash when hit  |  color = drum kit  |  grey = a synth is selected', 80)
+A('#X obj 520 577 tgl 15 0 pad-led-echo empty light\\ the\\ LX25+\\ pads\\ (experimental) 19 7 0 10 #fcfcfc #000000 #000000 0 1;')
+for i, name in enumerate(['kick', 'snare', 'hat closed', 'hat open', 'rimshot', 'tom high', 'tom low', 'ride']):
+    cnv(10 + i * 92, 598, 84, 34, f'pad-{i + 1}-cnv', name, 6, 17, 11, '#6d3a0f', '#ffe0b2')
+
 # ---------------- right column: instruments, meters, levels ----------------
 text(770, 92, 'INSTRUMENT BANK')
 A('#X obj 770 108 vradio 12 1 0 25 empty bankSelect empty 0 -8 0 10 #fcfcfc #000000 #000000 0;')
@@ -114,5 +121,7 @@ A(f'#X obj {W + 40} 60 declare -lib zexy;')
 A(f'#X obj {W + 40} 90 instrumentName;')
 A(f'#X obj {W + 40} 120 looper;')
 A(f'#X obj {W + 40} 150 knobs;')
+A(f'#X obj {W + 40} 180 padDisplay;')
+A(f'#X obj {W + 40} 210 wheels;')
 
 open(PATCH, 'w').write('\n'.join(L) + '\n' + internals)

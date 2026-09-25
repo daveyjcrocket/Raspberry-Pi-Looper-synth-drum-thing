@@ -71,6 +71,10 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 
 Next to the looper controls are **learn Preset knobs** (section 6) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
 
+**DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth.
+
+![Drum pads with the GMRock kit, two pads being hit](img/pads.png)
+
 **Right column**
 
 - **INSTRUMENT BANK:** the selected instrument is filled in. Change it with the LX25+ **Patch − / +** buttons.
@@ -90,10 +94,21 @@ Next to the looper controls are **learn Preset knobs** (section 6) and two maste
 | **Loop** | Mute/unmute the layer marked **>**. |
 | **Track < / >** | Move the **>** marker to another layer. |
 | **Patch − / +** | Change instrument (25 banks, listed in the right column). |
+| **Pitch wheel** | Bends synth notes up to an octave up or down (analog synths, organs, FM presets). |
+| **Mod wheel** | Vibrato on the analog synths and organs. |
 | **Knobs 1–8** | Depends on the LX25+ knob mode (the **Mixer / Inst / Preset** buttons): **Inst** = synth sound, **Preset** = input reverb/delay, **Mixer** = layer volumes. See section 6. |
 | **Fader** | Volume of layer N, where N is the MIDI channel the fader sends on (1–8). |
 
 The patch expects these messages on MIDI channel 16 (the LX25+ in its DAW/Pd setup): Record CC 107, Play 106, Stop 105, Fast-forward 104, Rewind 103, Loop 102, Track < / > CC 109 / 110, Patch − / + CC 111 / 112, Inst-mode knobs CC 56–63. Preset-mode knobs are learned (section 6). If a button does nothing, watch the Pd console: the `midi-raw` lines show what each control actually sends.
+
+### Lighting the LX25+ pads (experimental)
+
+The screen always shows the pads lighting up. Whether the LX25+'s own pads can be lit by the software is untested; it depends on the keyboard accepting incoming MIDI. To try it:
+
+1. **Connect the patch's MIDI output to the keyboard.** On the Pi, `run-pi.sh` does this for you. On the Mac, set **Media → MIDI Settings → Output device 1** to *Impact LX25+*.
+2. **Tick "light the LX25+ pads (experimental)"** above the pad row.
+
+Each pad hit is then sent back to the keyboard as a note with a different velocity per kit. If the pads light (or change color), it works. If nothing changes, the keyboard ignores incoming MIDI; untick it, and nothing is harmed.
 
 ## 4. Recording a loop, step by step
 
@@ -138,6 +153,13 @@ The knobs control the instrument selected in the INSTRUMENT BANK:
 - **When changes apply:** cutoff, resonance, filter env, detune and the drawbars change the sound immediately, even on held notes. Attack and release apply from the next note.
 - **LFO:** LFO depth wobbles the filter, and LFO rate sets the speed.
 - **Selecting an instrument restores its preset sound.**
+
+**Wheels:**
+
+- **Pitch wheel:** bends the analog synths, organs and FM presets up to an octave up or down.
+- **Mod wheel:** adds vibrato to the analog synths and organs.
+
+Neither affects the lead synths (banks 4, 8 and 12) or the drums.
 
 ### Preset mode: reverb and delay on your inputs
 
