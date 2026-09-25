@@ -38,7 +38,9 @@ C(O('r $0-kitvel', 220, 110), kv)
 
 # ---- incoming notes: flash pad 1-8 for notes 48-63 ----
 ni = O('notein', 20, 230)
-pk = O('pack f f f', 20, 260); C(ni, pk, 2, 2); C(ni, pk, 1, 1); C(ni, pk, 0, 0)
+pk = O('pack f f f', 20, 260)
+tfl = O('tapFilter', 20, 245); C(ni, tfl, 0, 0); C(ni, tfl, 1, 1); C(ni, tfl, 2, 2)
+C(ni, pk, 2, 2); C(tfl, pk, 1, 1); C(tfl, pk, 0, 0)
 pn = O('expr if($f1>=48 && $f1<=63 && $f2>0, ($f1-48)%8+1, 0)', 20, 290); C(pk, pn)
 test = O('r pads-test-note', 120, 260); C(test, pn)
 psel = O('sel 1 2 3 4 5 6 7 8', 20, 315); C(pn, psel)

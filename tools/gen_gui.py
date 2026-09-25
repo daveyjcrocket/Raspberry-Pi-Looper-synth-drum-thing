@@ -44,6 +44,12 @@ A('#X obj 275 18 hsl 470 24 0 1 0 0 empty loop-pos loop\\ position 0 -9 0 10 #dc
 cnv(275, 46, 470, 20, 'looper-hint', 'play or press REC to record', 8, 10, 11, '#2a2a2a', '#dddddd')
 A('#X floatatom 275 70 5 0 0 1 loop\\ length\\ (s) loop-len-s -;')
 A('#X floatatom 420 70 2 0 0 1 layers\\ used looper-layers -;')
+# tempo: TAP (or the tap pad), light, bpm (type a value, 0 = free), click, count-in
+A('#X obj 516 66 bng 22 250 50 0 looper-tap empty TAP 2 11 0 8 #fff59d #000000 #000000;')
+cnv(541, 71, 12, 12, 'tap-led', '', 0, 0, 8, '#555555', '#000000')
+A('#X floatatom 558 70 5 0 0 1 bpm tempo-bpm-gui tempo-set;')
+A('#X obj 632 70 tgl 15 1 tempo-click empty click 17 7 0 10 #fcfcfc #000000 #000000 1 1;')
+A('#X obj 682 70 tgl 15 0 tempo-countin empty count-in 17 7 0 10 #fcfcfc #000000 #000000 0 1;')
 cnv(760, 10, 240, 50, 'instr-cnv', 'GMRock kit', 10, 25, 18, '#1f3a5f', '#ffffff')
 text(760, 64, 'instrument (LX25+ patch - / +)')
 
@@ -67,7 +73,8 @@ A('#X obj 180 262 tgl 20 0 keepActive keepActive-gui keep\\ first\\ N\\ (FF) 24 
 A('#X obj 180 288 nbx 2 18 1 7 0 0 keepN keepN-gui N\\ (REW) 32 9 0 10 #fcfcfc #000000 #000000 1 256;')
 A('#X obj 330 262 tgl 20 1 looper-auto empty auto-record 24 10 0 10 #fcfcfc #000000 #000000 1 1;')
 A('#X obj 330 288 nbx 3 18 -80 0 0 1 looper-thr empty threshold\\ dB 40 9 0 10 #fcfcfc #000000 #000000 -40 256;')
-A('#X obj 470 262 bng 20 250 50 0 knob-learn empty learn\\ Preset\\ knobs 24 10 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 470 262 bng 20 250 50 0 knob-learn empty learn\\ knobs 24 10 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 555 262 bng 20 250 50 0 tap-learn empty learn\\ tap\\ pad 24 10 0 10 #fcfcfc #000000 #000000;')
 cnv(470, 288, 170, 18, 'knob-learn-cnv', 'not learned - click learn', 5, 9, 10, '#2a2a2a', '#dddddd')
 A('#X obj 660 266 hsl 70 14 0 127 0 0 fx-cutoff fx-cutoff-r master\\ cutoff 0 -8 0 10 #dcdcdc #1f3a5f #000000 0 1;')
 A('#X obj 660 298 hsl 70 14 0 127 0 0 fx-retrig fx-retrig-r retrigger 0 -8 0 10 #dcdcdc #1f3a5f #000000 0 1;')
@@ -81,8 +88,9 @@ cnv(10, 322, 740, 16, 'knobtitle-synth', 'SYNTH KNOBS (LX25+ Inst mode) - no kno
 for i in range(8):
     x = 10 + i * 92 + 20
     A(f'#X obj {x} 344 vsl 26 50 0 127 0 0 knob-{i + 1} knob-{i + 1}-r - -8 60 0 10 {palette[i % 4]} #000000 #000000 0 1;')
-cnv(10, 416, 740, 16, 'knobtitle-fx', 'INPUT FX KNOBS (LX25+ Preset mode) - reverb and delay per source',
+cnv(10, 416, 570, 16, 'knobtitle-fx', 'INPUT FX KNOBS (LX25+ Preset mode) - reverb and delay per source',
     6, 8, 11, '#dcdcdc', '#000000')
+A('#X obj 590 416 nbx 3 16 0 250 0 1 reverb-predelay empty reverb\\ pre-delay\\ ms 36 8 0 10 #fcfcfc #000000 #000000 20 256;')
 fxin = [('mic verb', 0), ('mic delay', 0), ('in 2 verb', 0), ('in 2 delay', 0), ('synth verb', 0),
         ('synth delay', 0), ('delay time', 50), ('feedback', 50)]
 for i, (label, default) in enumerate(fxin):
@@ -113,7 +121,7 @@ A('#X obj 795 546 tgl 15 1 inputTogR empty 2 3 22 0 10 #fcfcfc #000000 #000000 1
 text(840, 546, 'inputs on')
 text(900, 418, 'LEVELS')
 for k, (recv, label) in enumerate((('mainVol', 'main'), ('l-in-vol', 'in 1'), ('r-in-vol', 'in 2'),
-                                   ('post-verb', 'verb'), ('post-bits', 'bits'))):
+                                   ('post-bits', 'bits'))):
     A(f'#X obj 900 {438 + k * 20} hsl 60 12 0 127 0 0 empty {recv} {sp(label)} 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;')
 
 # ---------------- hidden helpers (off-screen) ----------------
@@ -123,5 +131,6 @@ A(f'#X obj {W + 40} 120 looper;')
 A(f'#X obj {W + 40} 150 knobs;')
 A(f'#X obj {W + 40} 180 padDisplay;')
 A(f'#X obj {W + 40} 210 wheels;')
+A(f'#X obj {W + 40} 240 tempo;')
 
 open(PATCH, 'w').write('\n'.join(L) + '\n' + internals)

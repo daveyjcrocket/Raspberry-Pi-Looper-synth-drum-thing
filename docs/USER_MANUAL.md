@@ -40,6 +40,12 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 - **Hint line.** Under the position bar, it says what the next button press will do.
 - **Loop position.** The marker sweeps from left to right once per loop. While you record the first layer it shows how much of the 20-second maximum you've used.
 - **Loop length (s)** and **layers used.**
+- **Tempo controls:**
+  - **TAP** and its light.
+  - **bpm:** type a value, or 0 for no tempo.
+  - **click** and **count-in** switches.
+
+  See section 5.
 - **Instrument box (top-right).** The instrument the keys and pads are playing.
 
 **LAYERS: eight columns, one per layer**
@@ -61,15 +67,15 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 **Looper controls**
 
 - **REC**, **PLAY** and **STOP** do the same as the LX25+ transport buttons (next section).
-- **keep first N** and **N**: see section 5.
+- **keep first N** and **N**: see section 6.
 - **auto-record** and **threshold dB**: see section 4.
 
 **Knob rows.** Two rows of eight sliders, which follow the LX25+ knobs. The row the knobs last moved is highlighted.
 
-- **SYNTH KNOBS (Inst mode):** sound settings for the selected instrument. The labels change with the instrument (section 6).
-- **INPUT FX KNOBS (Preset mode):** reverb and delay amounts for the mic input, input 2 and the synths/drums, plus delay time and feedback (section 6).
+- **SYNTH KNOBS (Inst mode):** sound settings for the selected instrument. The labels change with the instrument (section 7).
+- **INPUT FX KNOBS (Preset mode):** reverb and delay amounts for the mic input, input 2 and the synths/drums, plus delay time and feedback (section 7).
 
-Next to the looper controls are **learn Preset knobs** (section 6) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
+Next to the looper controls are **learn knobs** (section 7) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
 
 **DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth.
 
@@ -85,21 +91,22 @@ Next to the looper controls are **learn Preset knobs** (section 6) and two maste
 
 | LX25+ control | What it does |
 |---|---|
-| **Keys / pads** | Play the selected instrument. The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). |
+| **Keys / pads** | Play the selected instrument (drum kits respond to the pads and to keys C3-D#4). The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). |
 | **Record** | Start recording. Press again to set the loop length and start the next layer. Each later press starts a new layer. |
 | **Play** | Play-through: stop recording and keep the loop going, so you can play along without adding to it. It also restarts after a Stop. |
 | **Stop** | Fade out over one loop, then stop. **Press again** to stop immediately. **Press while stopped** to clear everything. |
-| **Fast-forward** | Keep first N on/off (section 5). Turning it off also unmutes every layer. |
+| **Fast-forward** | Keep first N on/off (section 6). Turning it off also unmutes every layer. |
 | **Rewind** | Change N (1 → 2 → … → 7 → 1). |
+| **Pad 8 on pad map 2** | **Tap tempo** while the looper is READY. While the first layer records, it **completes the loop** (same as Record), so you can close a loop without leaving the pads. |
 | **Loop** | Mute/unmute the layer marked **>**. |
 | **Track < / >** | Move the **>** marker to another layer. |
 | **Patch − / +** | Change instrument (25 banks, listed in the right column). |
 | **Pitch wheel** | Bends synth notes up to an octave up or down (analog synths, organs, FM presets). |
 | **Mod wheel** | Vibrato on the analog synths and organs. |
-| **Knobs 1–8** | Depends on the LX25+ knob mode (the **Mixer / Inst / Preset** buttons): **Inst** = synth sound, **Preset** = input reverb/delay, **Mixer** = layer volumes. See section 6. |
+| **Knobs 1–8** | Depends on the LX25+ knob mode (the **Mixer / Inst / Preset** buttons): **Inst** = synth sound, **Preset** = input reverb/delay, **Mixer** = layer volumes. See section 7. |
 | **Fader** | Volume of layer N, where N is the MIDI channel the fader sends on (1–8). |
 
-The patch expects these messages on MIDI channel 16 (the LX25+ in its DAW/Pd setup): Record CC 107, Play 106, Stop 105, Fast-forward 104, Rewind 103, Loop 102, Track < / > CC 109 / 110, Patch − / + CC 111 / 112, Inst-mode knobs CC 56–63. Preset-mode knobs are learned (section 6). If a button does nothing, watch the Pd console: the `midi-raw` lines show what each control actually sends.
+The patch expects these messages on MIDI channel 16 (the LX25+ in its DAW/Pd setup): Record CC 107, Play 106, Stop 105, Fast-forward 104, Rewind 103, Loop 102, Track < / > CC 109 / 110, Patch − / + CC 111 / 112, Inst-mode knobs CC 56–63. Preset-mode knobs are learned (section 7). If a button does nothing, watch the Pd console: the `midi-raw` lines show what each control actually sends.
 
 ### Lighting the LX25+ pads (experimental)
 
@@ -123,7 +130,24 @@ Each pad hit is then sent back to the keyboard as a note with a different veloci
 
 Overdub adds on every pass: if you keep playing the same part while a layer records, it gets louder each time around. Press **Record** (next layer) or **Play** (play-through) when a layer sounds right.
 
-## 5. Breakdowns: keep first N
+## 5. Tempo: tap, bar snapping, click and count-in (optional)
+
+Without a tempo the looper works as described above: the loop is exactly as long as you play it (a *natural* loop). Set a tempo and loops become *timed*.
+
+1. **Tap the tempo while the looper shows READY.** Tap pad 8 on pad map 2 (or click **TAP**) in time, four or more times. The bpm box shows the tempo from the second tap onward. It averages your last four taps, ignores a tap that's way off, and starts a fresh count after a 2-second pause. You can also type a bpm into the box; type 0 to go back to natural loops.
+2. **Record as usual.** When you close the first layer (Record, or the tap pad), the loop length **snaps to the nearest whole number of bars** (4/4). Close a little early and it keeps recording to the bar line. Close a little late and playback carries on from the right place. Either way, the loop is in time.
+3. **Click:** with **click** ticked, a metronome plays while the first layer records. The downbeat is higher-pitched. The click goes to the speakers only and is never recorded, and it stops once the loop plays.
+4. **Count-in:** with **count-in** ticked, pressing **Record** in READY gives one bar of clicks (the hint line counts 1-2-3-4), then recording starts on the downbeat. Auto-record doesn't use the count-in, because it starts on your first note.
+5. **The tempo is locked** once a loop exists; tapping then shows "tempo is locked". Clear everything (Stop until READY) to set a new one.
+
+**With a tempo set:**
+
+- **Natural loops:** the tap pad is also a hands-free "finish the loop" trigger while the first layer records.
+- **Delay time:** Preset knob 7 picks a note value (1/16, 1/8, dotted 1/8, 1/4, dotted 1/4, 1/2). The slider label shows which.
+
+**The tap pad.** By default it's note 55 on MIDI channel 10 (pad 8, pad map 2). It's silent: tapping plays no drum or synth note and doesn't start auto-record. If your keyboard sends something different, click **learn tap pad** and hit the pad; the patch remembers it (`piLooper/tappad.txt`). If the **G3 key** goes quiet, your pads and keys share a MIDI channel: set the LX25+ pads to their own channel and learn the tap pad again.
+
+## 6. Breakdowns: keep first N
 
 ![Keep first 2: layer 3 is muted](img/main-keep.png)
 
@@ -135,7 +159,7 @@ Overdub adds on every pass: if you keep playing the same part while a layer reco
 
 To mute or unmute single layers, click a layer's **mute** button, or use **Track < / >** to move the **>** marker and press **Loop**.
 
-## 6. The knobs
+## 7. The knobs
 
 The LX25+ knob-mode buttons pick what the eight knobs do.
 
@@ -167,15 +191,15 @@ Neither affects the lead synths (banks 4, 8 and 12) or the drums.
 |---|---|---|---|---|---|---|---|---|
 | | mic reverb | mic delay | input 2 reverb | input 2 delay | synth/drums reverb | synth/drums delay | delay time | delay feedback |
 
-Each source has its own reverb and delay amount, and they share one reverb and one delay. Delay time runs from about 60 ms to 1.5 s. The effects are recorded into the loop along with the dry sound.
+Each source has its own reverb and delay amount, and they share one reverb and one delay. Delay time runs from about 60 ms to 1.5 s, or follows the tempo (section 5). **Reverb pre-delay** (next to the INPUT FX title, 0-250 ms, default 20) sets how long the reverb waits before it starts, which keeps vocals and instruments clear in front of the reverb. The effects are recorded into the loop along with the dry sound.
 
 **One-time setup: teach the patch your Preset-mode knobs.** The patch doesn't know in advance what the LX25+ sends in Preset mode, so:
 
 1. Press **Preset** on the LX25+.
-2. Click **learn Preset knobs** on screen. The box next to it says *turn Preset knob 1*.
+2. Click **learn knobs** on screen. The box next to it says *turn Preset knob 1*.
 3. Turn knob 1, then knob 2, and so on up to knob 8. The box counts along and then shows *Preset knobs learned*.
 
-This is saved in `piLooper/knobmap.txt` and loads at every start. To redo it, click **learn Preset knobs** again.
+This is saved in `piLooper/knobmap.txt` and loads at every start. To redo it, click **learn knobs** again.
 
 ### Mixer mode
 
@@ -183,7 +207,7 @@ The knobs and fader set layer volumes, as before.
 
 The **mouse** works too: dragging any knob-row slider does the same as turning the knob.
 
-## 7. Instruments
+## 8. Instruments
 
 | Bank | Instrument | Bank | Instrument |
 |---|---|---|---|
@@ -199,18 +223,19 @@ The **mouse** works too: dragging any knob-row slider does the same as turning t
 
 You can change instrument while a layer is recording, for example to record a bass line and then pads into the next layer.
 
-## 8. Saving and loading songs
+## 9. Saving and loading songs
 
 Songs are saved as folders under `piLooper/Sessions/`, one audio file (stem) per layer plus the loop length. Loading a song brings back its layers and loop length. The looper then shows **STOPPED**, so press **Play**.
 
 **Not yet mapped:** save, load, new song and song select were driven by the old Teensy front panel, and no LX25+ button triggers them yet.
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Problem | Try |
 |---|---|
 | No sound from the inputs | Check the UMC22 gain knobs, the **inputs on** ticks and the IN1/IN2 meters. On a Mac, allow microphone access for Pd (System Settings → Privacy & Security → Microphone). |
-| Preset-mode knobs do nothing | Do the one-time learn in section 6. |
+| Preset-mode knobs do nothing | Do the one-time learn in section 7. |
+| G3 key is silent | Your pads and keys share a MIDI channel; see *The tap pad* in section 5. |
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |

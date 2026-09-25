@@ -3,3 +3,4 @@
 .DS*
 !kits/**/*.wav
 knobmap.txt
+tappad.txt

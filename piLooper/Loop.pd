@@ -54,7 +54,7 @@
 #X obj 900 150 t b b b;
 #X msg 960 180 0;
 #X obj 960 202 v \$0-src;
-#X obj 560 40 route rec close;
+#X obj 560 40 route rec close preview;
 #X obj 560 15 r layer-\$1;
 #X obj 560 70 t f b b b b;
 #X msg 760 100 const 0;
@@ -151,6 +151,9 @@
 #X msg 750 1040 color #2e7d32 #ffffff \, label >\ playing;
 #X msg 860 1040 color #c62828 #ffffff \, label >\ REC;
 #X msg 970 1040 color #455a64 #b0bec5 \, label >\ muted;
+#X obj 1000 700 t f b;
+#X obj 1000 725 v \$0-src;
+#X obj 1000 750 sel 0 1;
 #X connect 3 0 7 0;
 #X connect 4 0 5 0;
 #X connect 6 0 5 1;
@@ -348,3 +351,9 @@
 #X connect 150 0 143 0;
 #X connect 142 7 151 0;
 #X connect 151 0 143 0;
+#X connect 55 2 152 0;
+#X connect 152 1 153 0;
+#X connect 153 0 154 0;
+#X connect 154 0 15 0;
+#X connect 154 1 14 0;
+#X connect 152 0 3 0;

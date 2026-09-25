@@ -13,6 +13,7 @@ from pdgen import Patch
 
 p = Patch(1300, 900)
 O, M, C = p.obj, p.msg, p.conn
+last = lambda: len(p.lines) - 1
 p.text('Looper controller. See tools/gen_looper.py (this file is generated).', 20, 5)
 
 MAX_LAYERS = 8
@@ -24,7 +25,7 @@ def send(name, x, y):
 # ---------------- state + status ----------------
 setstate = O('r $0-setstate', 20, 30)
 stT = O('t f f', 20, 55)
-C(setstate, stT); C(stT, O('v $0-state', 100, 80), 1)
+C(setstate, stT); C(stT, O('v $0-state', 100, 80), 1); C(stT, O('s looper-state', 180, 80), 1)
 stSel = O('sel 0 1 2 3 4 5', 20, 80)
 C(stT, stSel)
 status = send('looper-status', 20, 130)
@@ -96,12 +97,53 @@ eb = O('t b b', 400, 565); C(e1, eb, 0)
 C(eb, M('stop', 520, 565), 1); C(p.lines.__len__() - 1, maxD)
 C(eb, tLen, 0, 1)
 lm = O('moses 250', 400, 590); C(tLen, lm)       # ignore double-taps shorter than 250 ms
-lt = O('t b f f', 400, 615); C(lm, lt, 1)
-C(lt, O('v $0-len', 520, 640), 2)
-C(lt, M('; layer-1 close; ms $1; play bang', 400, 640), 1)
+def ending(value, x, y):
+    m = M(str(value), x, y); C(m, O('v $0-ending', x, y + 22)); return m
+
+# finish the first layer with loop length <len>
+lt = O('t b b f f', 400, 615)
+C(lt, O('v $0-len', 520, 640), 3)
+C(lt, M('; layer-1 close; ms $1; play bang', 400, 640), 2)
+C(lt, ending(0, 470, 665), 1)
 C(lt, modeF, 0); ms = O('sel 1 0', 500, 665); C(modeF, ms)
 z = M('0', 500, 690); C(ms, z, 0); C(z, send('$0-startLayer', 500, 715))
 C(ms, setst(3, 560, 690), 1)
+
+# With a tempo, the length snaps to the nearest whole number of 4/4 bars (max 20 s).
+# Pressed early: keep recording until the bar line. Pressed late: close now, play the
+# loop from where the performance has got to, and start the loop clock at the next bar line.
+sn = O('t f f', 200, 590); C(lm, sn, 1)
+diff = O('-', 200, 690); C(sn, diff, 1, 1)                  # len -> right inlet (cold)
+snx = O('expr if($f2>0, max(1, min(rint($f1*$f2/240000), floor(%d*$f2/240000)))*240000/$f2, $f1)' % MAX_FIRST_MS, 200, 640)
+snt = O('t f b', 200, 615); C(sn, snt, 0)
+C(snt, O('v $0-bpm', 260, 630), 1); C(last(), snx, 0, 1); C(snt, snx, 0, 0)
+sS = O('f', 60, 740); sL = O('f', 30, 870)   # snapped length: early path / late path
+plus = O('+', 300, 760)
+st2 = O('t f f f', 200, 665); C(snx, st2)
+C(st2, sS, 2, 1); C(st2, sL, 2, 1); C(st2, plus, 1, 1); C(st2, diff, 0, 0)    # snapped: store, then diff = snapped - len
+dm = O('moses 0', 200, 715); C(diff, dm)
+# early (diff >= 0): wait diff ms, then finish with the snapped length
+pp = O('pipe', 60, 790)
+et = O('t b b f', 260, 740); C(dm, et, 1)
+C(et, pp, 2, 1); C(et, ending(1, 330, 765), 1); C(et, sS, 0); C(sS, pp, 0, 0); C(pp, lt)
+# late (diff < 0): d = -diff, wait = snapped - d
+dS, wS = O('f', 120, 820), O('f', 300, 820)
+lat = O('t b b b f', 120, 740); C(dm, lat, 0)
+lf = O('t f f', 200, 790); C(lat, lf, 3)
+C(lf, O('* -1', 160, 815), 1); C(last(), dS, 0, 1)
+C(lf, plus, 0, 0); C(plus, wS, 0, 1)
+C(lat, ending(1, 400, 765), 2)
+lpk = O('pack f f', 120, 900)
+lg = O('t b b b', 120, 845); C(lat, lg, 1)
+C(lg, dS, 2); C(dS, lpk, 0, 1)
+C(lg, sL, 1); lsf = O('t f f', 60, 895); C(sL, lsf)
+C(lsf, O('v $0-len', 30, 920), 1); C(lsf, lpk, 0, 0)
+C(lpk, M('; layer-1 close; layer-1 preview $2; ms $1', 120, 925))
+C(lg, setst(3, 240, 870), 0)
+lateD = O('delay', 300, 845); C(lat, wS, 0); C(wS, lateD)
+ld = O('t b b', 300, 870); C(lateD, ld)
+C(ld, M('; play bang', 360, 895), 1)
+C(ld, ending(0, 300, 895), 0); C(ld, modeF, 0)
 
 # ---------------- fade / stop / clear ----------------
 fadeD = O('delay', 800, 450)
@@ -128,6 +170,11 @@ C(O('r $0-clear', 800, 680), clr)
 C(clr, M('stop', 880, 725), 2); C(p.lines.__len__() - 1, fadeD)
 C(clr, M('stop', 920, 725), 1); C(p.lines.__len__() - 1, maxD)
 C(clr, M('; clearAll bang; loopFade 1 0', 800, 750), 0)
+C(O('r clearAll', 900, 780), O('t b b b', 900, 800)); cz = last()
+C(cz, M('clear', 900, 825), 2); C(last(), pp)
+C(cz, M('stop', 950, 825), 1); C(last(), lateD)
+C(cz, ending(0, 1000, 825), 0)
+C(cz, M('0', 1050, 825), 0); C(last(), O('v $0-counting', 1050, 850))
 
 # clearAll from anywhere (also sent at load): back to READY with no layers
 ca = O('t b b', 1000, 700)
@@ -137,7 +184,9 @@ C(ca, setst(0, 1000, 725), 0)
 
 # ---------------- buttons ----------------
 def dispatch(recv, x, y):
-    t = O('v $0-state', x, y + 25); C(O(f'r {recv}', x, y), t)
+    g = O('v $0-ending', x, y + 12); C(O(f'r {recv}', x, y), g)   # ignored while a bar-snapped finish is pending
+    gs = O('sel 0', x + 90, y + 12); C(g, gs)
+    t = O('v $0-state', x, y + 25); C(gs, t)
     s = O('sel 0 1 2 3 4 5', x, y + 50); C(t, s); return s
 
 def go(name):
@@ -155,7 +204,23 @@ def bangmsg(text):
 
 # Record
 rs = dispatch('looper-rec', 20, 800)
-chain(rs, 0, 'rec1', x=20, y=875)
+# READY: with a tempo and count-in on, count in first
+rc = O('t b b b', 20, 875); C(rs, rc, 0)
+cx = O('expr if($f1, 2, if($f2>0 && $f3, 1, 0))', 20, 925)
+C(rc, O('v $0-bpm', 120, 900), 2); C(last(), cx, 0, 1)
+C(rc, O('v $0-countin', 180, 900), 1); C(last(), cx, 0, 2)
+C(rc, O('v $0-counting', 60, 900), 0); C(last(), cx, 0, 0)
+cxs = O('sel 0 1', 20, 950); C(cx, cxs)
+C(cxs, go('rec1'), 0)
+cit = O('t b b b', 100, 975); C(cxs, cit, 1)
+C(cit, M('1', 100, 1000), 2); C(last(), O('v $0-counting', 100, 1020))
+C(cit, M('0', 140, 1000), 1); C(last(), O('v $0-armed', 140, 1020))
+C(cit, M('; tempo-countin-start bang', 180, 1000), 0)
+cd = O('t b b', 300, 975); C(O('r looper-countin-done', 300, 950), cd)
+C(cd, M('0', 300, 1000), 1); C(last(), O('v $0-counting', 300, 1020))
+C(cd, O('v $0-state', 360, 1000), 0); C(last(), O('sel 0', 360, 1020)); C(last(), go('rec1'))
+C(O('r tempo-bpm', 450, 950), O('v $0-bpm', 450, 975))
+C(O('r tempo-countin', 550, 950), O('v $0-countin', 550, 975))
 m1 = M('1', 90, 875); C(rs, m1, 1); C(m1, go('end1'))
 chain(rs, 2, 'close', 'onset', x=160, y=875)
 chain(rs, 3, 'onset', x=240, y=875)
@@ -172,6 +237,12 @@ chain(ps, 5, M('; play bang', 860, 900), setst(3, 940, 900), x=860, y=875)
 
 # Stop
 ss = dispatch('looper-stop', 1000, 800)
+# READY: Stop cancels a count-in
+sc0 = O('v $0-counting', 1000, 875); C(ss, sc0, 0)
+C(sc0, O('sel 1', 1000, 900)); sct = O('t b b b', 1000, 925); C(last() - 1, sct)
+C(sct, M('0', 1000, 950), 2); C(last(), O('v $0-counting', 1000, 970))
+C(sct, M('; tempo-countin-cancel bang', 1040, 950), 1)
+C(sct, setst(0, 1100, 950), 0)
 chain(ss, 1, 'clear', x=1070, y=875)
 chain(ss, 2, 'close', 'fade', x=1120, y=875)
 chain(ss, 3, 'fade', x=1180, y=875)
@@ -197,8 +268,9 @@ C(n1, M('; keepN $1; keepN-gui set $1', 1100, 535))
 C(O('r keepN', 1200, 435), O('v $0-keepN', 1200, 460))
 
 # ---------------- auto-record on first sound ----------------
-ni = O('notein', 20, 560)
-vp = O('> 0', 20, 585); C(ni, vp, 1)
+ni = O('notein', 20, 540)
+tfl = O('tapFilter', 20, 560); C(ni, tfl, 0, 0); C(ni, tfl, 1, 1); C(ni, tfl, 2, 2)
+vp = O('> 0', 20, 585); C(tfl, vp, 1)
 nsel = O('sel 1', 20, 610); C(vp, nsel)
 envIn = O('r~ input', 120, 560)
 env = O('env~ 256 128', 120, 585); C(envIn, env)

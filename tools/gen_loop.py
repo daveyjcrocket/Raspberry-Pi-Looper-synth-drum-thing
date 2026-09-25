@@ -98,7 +98,7 @@ srcA = setter('src', 0, 960, 180)
 C(loaded, srcA, 2); C(loaded, contOn, 1); C(loaded, pA, 1); C(loaded, wB, 1); C(loaded, fN, 0)
 
 # ---------------- rec / close commands ----------------
-rt = O('route rec close', 560, 40)
+rt = O('route rec close preview', 560, 40)
 C(O('r layer-$1', 560, 15), rt)
 recT = O('t f b b b b', 560, 70)
 C(rt, recT, 0)
@@ -187,5 +187,12 @@ for i, c in enumerate([0, 1, 2, 3, 10, 11, 12, 13]):
     bg, fg, word = look[c % 10]
     label = ('>\\ ' if c >= 10 else '') + word
     m = M(f'color {bg} {fg}, label {label}', 200 + i * 110, 1040); C(cs, m, i); C(m, out)
+
+# preview <onset>: play the take being written (the first layer, pressed late with a tempo)
+pv = O('t f b', 1000, 700); C(rt, pv, 2)
+pvs = O('v $0-src', 1000, 725); C(pv, pvs, 1)
+pvsel = O('sel 0 1', 1000, 750); C(pvs, pvsel)
+C(pvsel, pB, 0); C(pvsel, pA, 1)          # src 0 writes table b, src 1 writes table a
+C(pv, play, 0, 0)
 
 p.save(os.path.join(os.path.dirname(__file__), '..', 'piLooper', 'Loop.pd'))
