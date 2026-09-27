@@ -48,8 +48,8 @@ A('#X floatatom 420 70 2 0 0 1 layers\\ used looper-layers -;')
 A('#X obj 516 66 bng 22 250 50 0 looper-tap empty TAP 2 11 0 8 #fff59d #000000 #000000;')
 cnv(541, 71, 12, 12, 'tap-led', '', 0, 0, 8, '#555555', '#000000')
 A('#X floatatom 558 70 5 0 0 1 bpm tempo-bpm-gui tempo-set;')
-A('#X obj 632 70 tgl 15 1 tempo-click empty click 17 7 0 10 #fcfcfc #000000 #000000 1 1;')
-A('#X obj 682 70 tgl 15 0 tempo-countin empty count-in 17 7 0 10 #fcfcfc #000000 #000000 0 1;')
+A('#X obj 632 70 tgl 15 1 tempo-click tempo-click-r click 17 7 0 10 #fcfcfc #000000 #000000 1 1;')
+A('#X obj 682 70 tgl 15 0 tempo-countin tempo-countin-r count-in 17 7 0 10 #fcfcfc #000000 #000000 0 1;')
 cnv(760, 10, 240, 50, 'instr-cnv', 'GMRock kit', 10, 25, 18, '#1f3a5f', '#ffffff')
 text(760, 64, 'instrument (LX25+ patch - / +)')
 
@@ -71,8 +71,8 @@ A('#X obj 62 262 bng 44 250 50 0 looper-play empty PLAY 5 22 0 13 #2e7d32 #fffff
 A('#X obj 114 262 bng 44 250 50 0 looper-stop empty STOP 5 22 0 13 #424242 #ffffff #ffffff;')
 A('#X obj 180 262 tgl 20 0 keepActive keepActive-gui keep\\ first\\ N\\ (FF) 24 10 0 10 #fcfcfc #000000 #000000 0 1;')
 A('#X obj 180 288 nbx 2 18 1 7 0 0 keepN keepN-gui N\\ (REW) 32 9 0 10 #fcfcfc #000000 #000000 1 256;')
-A('#X obj 330 262 tgl 20 1 looper-auto empty auto-record 24 10 0 10 #fcfcfc #000000 #000000 1 1;')
-A('#X obj 330 288 nbx 3 18 -80 0 0 1 looper-thr empty threshold\\ dB 40 9 0 10 #fcfcfc #000000 #000000 -40 256;')
+A('#X obj 330 262 tgl 20 1 looper-auto looper-auto-r auto-record 24 10 0 10 #fcfcfc #000000 #000000 1 1;')
+A('#X obj 330 288 nbx 3 18 -80 0 0 1 looper-thr looper-thr-r threshold\\ dB 40 9 0 10 #fcfcfc #000000 #000000 -40 256;')
 A('#X obj 470 262 bng 20 250 50 0 knob-learn empty learn\\ knobs 24 10 0 10 #fcfcfc #000000 #000000;')
 A('#X obj 555 262 bng 20 250 50 0 tap-learn empty learn\\ tap\\ pad 24 10 0 10 #fcfcfc #000000 #000000;')
 cnv(470, 288, 170, 18, 'knob-learn-cnv', 'not learned - click learn', 5, 9, 10, '#2a2a2a', '#dddddd')
@@ -90,7 +90,7 @@ for i in range(8):
     A(f'#X obj {x} 344 vsl 26 50 0 127 0 0 knob-{i + 1} knob-{i + 1}-r - -8 60 0 10 {palette[i % 4]} #000000 #000000 0 1;')
 cnv(10, 416, 570, 16, 'knobtitle-fx', 'INPUT FX KNOBS (LX25+ Preset mode) - reverb and delay per source',
     6, 8, 11, '#dcdcdc', '#000000')
-A('#X obj 590 416 nbx 3 16 0 250 0 1 reverb-predelay empty reverb\\ pre-delay\\ ms 36 8 0 10 #fcfcfc #000000 #000000 20 256;')
+A('#X obj 590 416 nbx 3 16 0 250 0 1 reverb-predelay reverb-predelay-r reverb\\ pre-delay\\ ms 36 8 0 10 #fcfcfc #000000 #000000 20 256;')
 fxin = [('mic verb', 0), ('mic delay', 0), ('in 2 verb', 0), ('in 2 delay', 0), ('synth verb', 0),
         ('synth delay', 0), ('delay time', 50), ('feedback', 50)]
 for i, (label, default) in enumerate(fxin):
@@ -101,7 +101,7 @@ for i, (label, default) in enumerate(fxin):
 
 # ---------------- drum pads (flash when hit, color = drum kit) ----------------
 text(10, 578, 'DRUM PADS  |  flash when hit  |  color = drum kit  |  grey = a synth is selected', 80)
-A('#X obj 520 577 tgl 15 0 pad-led-echo empty light\\ the\\ LX25+\\ pads\\ (experimental) 19 7 0 10 #fcfcfc #000000 #000000 0 1;')
+A('#X obj 520 577 tgl 15 0 pad-led-echo pad-led-echo-r light\\ the\\ LX25+\\ pads\\ (experimental) 19 7 0 10 #fcfcfc #000000 #000000 0 1;')
 for i, name in enumerate(['kick', 'snare', 'hat closed', 'hat open', 'rimshot', 'tom high', 'tom low', 'ride']):
     cnv(10 + i * 92, 598, 84, 34, f'pad-{i + 1}-cnv', name, 6, 17, 11, '#6d3a0f', '#ffe0b2')
 
@@ -116,13 +116,13 @@ text(770, 418, 'IN1 IN2 OUT')
 A('#X obj 772 436 vu 15 100 l-in-sig empty -1 -8 0 10 #404040 #000000 0 0;')
 A('#X obj 797 436 vu 15 100 r-in-sig empty -1 -8 0 10 #404040 #000000 0 0;')
 A('#X obj 822 436 vu 15 100 l-out-db empty -1 -8 0 10 #404040 #000000 1 0;')
-A('#X obj 770 546 tgl 15 1 inputTogL empty 1 3 22 0 10 #fcfcfc #000000 #000000 1 1;')
-A('#X obj 795 546 tgl 15 1 inputTogR empty 2 3 22 0 10 #fcfcfc #000000 #000000 1 1;')
+A('#X obj 770 546 tgl 15 1 inputTogL inputTogL-r 1 3 22 0 10 #fcfcfc #000000 #000000 1 1;')
+A('#X obj 795 546 tgl 15 1 inputTogR inputTogR-r 2 3 22 0 10 #fcfcfc #000000 #000000 1 1;')
 text(840, 546, 'inputs on')
 text(900, 418, 'LEVELS')
-for k, (recv, label) in enumerate((('mainVol', 'main'), ('l-in-vol', 'in 1'), ('r-in-vol', 'in 2'),
-                                   ('post-bits', 'bits'))):
-    A(f'#X obj 900 {438 + k * 20} hsl 60 12 0 127 0 0 empty {recv} {sp(label)} 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;')
+for k, (recv, label, top) in enumerate((('mainVol', 'main', 1), ('l-in-vol', 'in 1', 2), ('r-in-vol', 'in 2', 2),
+                                        ('post-bits', 'bits', 1))):     # the ranges Pd uses (gains; inputs start at 2)
+    A(f'#X obj 900 {438 + k * 20} hsl 60 12 0 {top} 0 0 empty {recv} {sp(label)} 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;')
 
 # ---------------- hidden helpers (off-screen) ----------------
 A(f'#X obj {W + 40} 60 declare -lib zexy;')
@@ -132,5 +132,6 @@ A(f'#X obj {W + 40} 150 knobs;')
 A(f'#X obj {W + 40} 180 padDisplay;')
 A(f'#X obj {W + 40} 210 wheels;')
 A(f'#X obj {W + 40} 240 tempo;')
+A(f'#X obj {W + 40} 270 remote;')      # web remote (remote/server.py)
 
 open(PATCH, 'w').write('\n'.join(L) + '\n' + internals)

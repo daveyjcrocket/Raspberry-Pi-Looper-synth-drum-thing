@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Looper">
+<title>LiveLoopSynth</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-row">
+    <div class="state" id="state"><span class="state-dot"></span><span id="state-word">READY</span></div>
+    <div class="hint" id="hint">play or press REC to record</div>
+    <div class="conn" id="conn" title="connection"><span></span><b id="conn-text">connecting</b></div>
+  </div>
+  <div class="progress"><div id="pos"></div></div>
+  <div class="transport">
+    <button class="tbtn rec" data-bang="looper-rec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>REC</button>
+    <button class="tbtn play" data-bang="looper-play"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>PLAY</button>
+    <button class="tbtn stop" data-bang="looper-stop"><svg viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>STOP</button>
+    <div class="tempo">
+      <button class="tap" data-bang="looper-tap" id="tap">TAP</button>
+      <div class="bpm">
+        <button class="step" data-step="tempo" data-d="-1" aria-label="slower">&minus;</button>
+        <input id="bpm" type="number" inputmode="numeric" min="0" max="300" value="0" aria-label="bpm">
+        <button class="step" data-step="tempo" data-d="1" aria-label="faster">+</button>
+        <span class="unit">bpm</span>
+      </div>
+    </div>
+  </div>
+  <div class="facts">
+    <span><b id="len">0</b> s loop</span>
+    <span><b id="layers">0</b> layers</span>
+    <label class="sw"><input type="checkbox" data-tgl="tempo-click"><i></i>click</label>
+    <label class="sw"><input type="checkbox" data-tgl="tempo-countin"><i></i>count-in</label>
+  </div>
+</header>
+
+<main>
+  <div class="col col-main">
+  <section class="card layers-card">
+    <div class="card-head"><h2>Layers</h2><span class="sub">tap = mute &middot; &times; = clear &middot; &#9656; = the layer the LX25+ Loop button mutes</span></div>
+    <div class="layers" id="layers-grid"></div>
+  </section>
+
+  <section class="card knobs-card">
+    <div class="tabs" role="tablist">
+      <button class="tab" data-page="synth" role="tab">Synth <i class="live" title="LX25+ knobs are on this page"></i></button>
+      <button class="tab" data-page="fx" role="tab">Input FX <i class="live" title="LX25+ knobs are on this page"></i></button>
+    </div>
+    <p class="page-title" id="page-title"></p>
+    <div class="knob-page" id="page-synth"></div>
+    <div class="knob-page" id="page-fx" hidden></div>
+  </section>
+
+  <section class="card pads-card">
+    <div class="card-head"><h2>Drum pads</h2>
+      <label class="sw small"><input type="checkbox" data-tgl="pad-led-echo"><i></i>light the LX25+ pads</label>
+    </div>
+    <div class="pads" id="pads"></div>
+  </section>
+
+  </div>
+  <div class="col col-side">
+  <section class="card instrument">
+    <div class="card-head"><h2>Instrument</h2><span class="sub">LX25+ patch &minus; / +</span></div>
+    <div class="inst-row">
+      <button class="round" data-bank="-1" aria-label="previous instrument">&lsaquo;</button>
+      <div class="inst-name">
+        <div id="instr">GMRock kit</div>
+        <select id="bank" aria-label="instrument bank"></select>
+      </div>
+      <button class="round" data-bank="1" aria-label="next instrument">&rsaquo;</button>
+    </div>
+  </section>
+
+  <section class="card mix-card">
+    <div class="card-head"><h2>Master</h2></div>
+    <div class="mix">
+      <div class="knob-row" id="master-knobs"></div>
+      <div class="meters">
+        <div class="meter"><div class="bar"><div id="m-in1"></div></div><span>IN1</span></div>
+        <div class="meter"><div class="bar"><div id="m-in2"></div></div><span>IN2</span></div>
+        <div class="meter"><div class="bar"><div id="m-out"></div></div><span>OUT</span></div>
+      </div>
+    </div>
+    <div class="row-switches">
+      <label class="sw"><input type="checkbox" data-tgl="inputTogL"><i></i>input 1</label>
+      <label class="sw"><input type="checkbox" data-tgl="inputTogR"><i></i>input 2</label>
+    </div>
+  </section>
+
+  <section class="card options-card">
+    <div class="card-head"><h2>Looper</h2></div>
+    <div class="opt">
+      <label class="sw"><input type="checkbox" data-tgl="keepActive" data-send="keepActive-gui"><i></i>keep first N</label>
+      <div class="stepper"><button class="step" data-step="keepN" data-d="-1">&minus;</button><b id="keepN">1</b><button class="step" data-step="keepN" data-d="1">+</button><span>N</span></div>
+    </div>
+    <div class="opt">
+      <label class="sw"><input type="checkbox" data-tgl="looper-auto"><i></i>auto-record</label>
+      <div class="stepper"><button class="step" data-step="thr" data-d="-2">&minus;</button><b id="thr">-40</b><button class="step" data-step="thr" data-d="2">+</button><span>dB</span></div>
+    </div>
+    <div class="opt">
+      <button class="pill" data-bang="knob-learn">learn knobs</button>
+      <button class="pill" data-bang="tap-learn">learn tap pad</button>
+    </div>
+    <div class="status" id="learn">not learned</div>
+  </section>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -2,12 +2,14 @@
 # One-time setup for Raspberry Pi OS (Bookworm or newer, desktop version).
 #   scripts/setup-pi.sh              install Pd + externals
 #   scripts/setup-pi.sh --autostart  also start LiveLoopSynth when the desktop logs in
+#   scripts/setup-pi.sh --autostart --remote     ... with the web remote as well
+#   scripts/setup-pi.sh --autostart --headless   ... with the web remote and no Pd window
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 sudo apt-get update
-sudo apt-get install -y puredata pd-zexy alsa-utils
+sudo apt-get install -y puredata pd-zexy alsa-utils python3
 
 # [file] (used for song folders) needs Pd 0.52+.
 ver="$(pd -version 2>&1 | sed -n 's/^Pd-\([0-9]*\.[0-9]*\).*/\1/p' | head -n 1)"
@@ -24,10 +26,10 @@ if [ "${1:-}" = "--autostart" ]; then
 [Desktop Entry]
 Type=Application
 Name=LiveLoopSynth
-Exec=$HERE/scripts/run-pi.sh
+Exec=$HERE/scripts/run-pi.sh ${2:-}
 Terminal=false
 DESKTOP
   echo "Autostart installed: $HOME/.config/autostart/liveloopsynth.desktop"
 fi
 
-echo "Done. Start it with: $HERE/scripts/run-pi.sh"
+echo "Done. Start it with: $HERE/scripts/run-pi.sh   (add --remote or --headless for the phone remote)"

@@ -9,6 +9,7 @@ LiveLoopSynth is a live looper with drum kits, synths and effects. You play it f
 | | Mac | Raspberry Pi |
 |---|---|---|
 | Start | Double-click `scripts/run-mac.command` | `scripts/run-pi.sh`, or automatically at login if you ran `scripts/setup-pi.sh --autostart` |
+| Phone remote | Also run `python3 remote/server.py` | `scripts/run-pi.sh --remote` (or `--headless`: no Pd window). See [section 10](#10-the-web-remote-phone-or-tablet). |
 | First time only | In Pd: **Media → Audio Settings**, pick the UMC22 (it may show as *USB Audio CODEC*) for input and output at 48000 Hz. **Media → MIDI Settings**, pick *Impact LX25+*. Click **Save All Settings** in both. Allow microphone access if macOS asks. | Nothing: the script finds the UMC22 and the LX25+ itself. |
 
 Plug the UMC22 and the LX25+ in before you start. When the window opens, the big box in the top-left says **READY**.
@@ -229,7 +230,27 @@ Songs are saved as folders under `piLooper/Sessions/`, one audio file (stem) per
 
 **Not yet mapped:** save, load, new song and song select were driven by the old Teensy front panel, and no LX25+ button triggers them yet.
 
-## 10. Troubleshooting
+## 10. The web remote (phone or tablet)
+
+You can control everything on the main screen from a phone, a tablet or another computer's browser.
+
+1. Start the Pi with `scripts/run-pi.sh --remote` (the Pd window as well) or `scripts/run-pi.sh --headless` (no Pd window). On the Mac, start the patch and run `python3 remote/server.py`.
+2. On your phone, joined to the same Wi-Fi, open `http://raspberrypi.local:8080/` (use your Pi's name). The script also prints the address.
+3. Optional: use **Add to Home Screen** in the browser menu, so it opens full-screen like an app.
+
+![Web remote on a phone](img/remote-phone.png)
+
+- **Top bar:** it stays on screen while you scroll. It has the state (READY, RECORDING and so on), the loop position, **REC / PLAY / STOP**, **TAP**, the tempo (− / + or type a number, 0 = free time), and the click and count-in switches. The buttons react on touch, not on release, so they land on the beat.
+- **Layers:** tap the round button to mute or unmute a layer, and × to clear it. Drag the fader to set its volume, or touch the fader where you want it. ▸ marks the layer the LX25+ Loop button mutes.
+- **Knobs:** drag up or down (sideways works too). Double-click resets a knob. The dot on the **Synth** / **Input FX** tab shows which page the LX25+ knobs are on, and the page turns to follow the knobs.
+- **Instrument:** use ‹ › or the list.
+- **Master:** main and input gain, master cutoff, retrigger, reverb pre-delay, the meters, and the input switches.
+- **Looper:** keep first N, auto-record and its threshold, and the learn buttons.
+- **Drum pads:** they light up when you hit the LX25+ pads. They don't play sounds from the phone.
+
+The dot in the top-right corner is green when the page is connected to Pd. If it turns red, the page reconnects by itself.
+
+## 11. Troubleshooting
 
 | Problem | Try |
 |---|---|
@@ -239,6 +260,7 @@ Songs are saved as folders under `piLooper/Sessions/`, one audio file (stem) per
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |
+| The phone can't open the remote | Check the phone is on the same Wi-Fi and use the address the script prints (the IP address works when `.local` names don't). |
 | Clicks or crackles on the Pi | Start with a bigger buffer: `AUDIO_BUF=40 scripts/run-pi.sh`. |
 | The LX25+ does nothing on the Pi | Run `scripts/run-pi.sh --list` to check the keyboard is listed, then restart the script. |
 | A layer won't record | All 8 layers are used ("layers used" = 8). Clear a layer with its red button, or press Stop twice and Stop again to start over. |

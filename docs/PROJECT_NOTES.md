@@ -59,6 +59,9 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
 | `piLooper/kits/` | Drum samples, licenses and pad map. |
 | `tools/pdgen.py` | Tiny patch-writing helper used by all generators. |
 | `tools/gen_gui.py` | Regenerates the front panel **around** `[pd internals]`, leaving that block untouched. |
+| `piLooper/remote.pd`, `remoteOut.pd`, `remote/names.json` from `tools/gen_remote.py` | **Generated:** the Pd end of the web remote, and its allow-list. |
+| `remote/server.py` | Web remote bridge: serves `remote/web/` and relays WebSocket ⇄ Pd (stdlib only). |
+| `remote/web/` | The web remote page (`index.html`, `style.css`, `app.js`, manifest, icon). No build step. |
 | `scripts/` | Mac and Pi launchers and setup. |
 | `docs/` | User manual, screenshots, these notes. |
 
@@ -107,6 +110,7 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 | `tempo-bpm`, `tempo-set`, `tempo-click`, `tempo-countin`, `tap-note`/`tap-ch` (values) | tempo | tempo state |
 | `reverb-predelay`, `pitchmod` (signal), `pitchbend-ratio` | effects / wheels | |
 | `looper-cnv`, `looper-hint`, `lyr-N-cnv`, `pad-N-cnv`, `instr-cnv`, `knobtitle-*`, `knob-learn-cnv`, `tap-led` | → screen | display updates |
+| `remote-out`, `remote-dump` | web remote | `[remoteOut <name>]` reports a name to the bridge; `remote-dump` makes them all repeat their last label / color / value |
 
 ### Conventions and Pd gotchas we hit
 
@@ -118,6 +122,29 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 - **`[bendin]` range:** it outputs 0–16383 (centre 8192).
 - **Sample rate:** samples are played at Pd's rate without resampling, so keep Pd at **48 kHz**.
 - **Per-user files are git-ignored:** `piLooper/knobmap.txt` (learned Preset knobs), `piLooper/tappad.txt` (learned tap pad), user drum samples.
+
+### Web remote
+
+```
+browser ── WebSocket /ws (JSON) ──► remote/server.py ── TCP 127.0.0.1:9311 (FUDI) ──► [remote] in the patch
+```
+
+- **Pd side (`remote.pd`):**
+  - `[netreceive]` listens on localhost only.
+  - Incoming `<name> <value>` messages go through a `[route]` of allowed names to `[s <name>]`.
+  - `[netreceive]`'s `send` message talks back to the bridge.
+  - Every watched name has a `[remoteOut <name>]`, which keeps the last label, color and value for `remote-dump`.
+- **The bridge (`server.py`):**
+  - It retries the Pd connection every second and asks for a dump each time it connects.
+  - It caches the state for new browsers and only forwards allowed names with a bang or a number.
+  - It sends loop position and meters at most every 40 ms.
+- **Driving controls:** the page drives each control through its front-panel **receive** name (`lp-vol-N-r`, `knob-N-r`, `tempo-click-r` …). The Pd window follows, and the control passes the value on as usual. The toggles and number boxes that had no receive name got one (`*-r`) for this.
+- **Adding a control:**
+  1. Add its names to `IN` / `OUT` in `tools/gen_remote.py`.
+  2. Run the generator.
+  3. Add the widget in `remote/web/app.js`.
+- **Bank counter:** `[pd instrument-select]` now also follows `bankSelect`, so the LX25+ patch − / + carry on from a bank picked elsewhere.
+- **Level ranges:** the front-panel level sliders were 0–127 but receive 0–1 gains (the inputs start at 2). Their ranges now match.
 
 ### Testing approach
 
@@ -147,6 +174,12 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
   - It listens to the first layer (onsets and accents from the loop audio, or the MIDI notes played) and generates a matching pattern on the drum kits: complementary kick/snare, hats that follow your subdivision, and fills every 4 or 8 bars.
   - Controls: a knob for *density*, one for *swing/humanize*, a pad to regenerate.
   - Could start rule-based (probabilities from onset analysis) and grow into a small model, e.g. a Magenta-style drum RNN running off-line on the Pi or the Mac and sending MIDI back into Pd.
+- [ ] **Web remote, next steps:**
+  - A systemd service, so `--headless` runs without a desktop login.
+  - A password or pairing code if it's used on shared Wi-Fi.
+  - Song save/load from the page.
+  - Drum pads that play from the phone.
+  - Test on the real Pi: CPU with the bridge running, and latency over Wi-Fi.
 - [ ] **Tempo changes after recording:** time-stretch the layers (e.g. a phase-vocoder or granular playback) so the tempo can be tapped again mid-song.
 - [ ] **MIDI clock out/in:** sync external gear or a DAW to the loop.
 - [ ] **Undo last layer:** keep the previous table so a bad overdub can be taken back.

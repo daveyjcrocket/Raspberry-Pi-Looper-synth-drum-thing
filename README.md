@@ -76,8 +76,31 @@ Settings, as environment variables:
 | `MIDI_DEVICE` | `Impact` | Part of the ALSA MIDI client name to connect |
 | `SAMPLE_RATE` | `48000` | |
 | `AUDIO_BUF` | `20` | Audio buffer in ms. Raise it (e.g. `40`) if you hear clicks |
+| `REMOTE_PORT` | `8080` | Web remote port (with `--remote` / `--headless`) |
 
 `scripts/run-pi.sh --list` shows the audio and MIDI devices Pd and ALSA can see.
+
+## Web remote (phone, tablet or browser)
+
+A modern control surface for the looper, served by the Pi (or the Mac) to any browser on the same network. It shows the looper state, transport, tempo, the 8 layers with mute/clear/volume, the knob pages, instrument, master levels, meters and drum pads. Everything stays in sync with the LX25+ and the Pd window.
+
+| Desktop | Phone |
+|---|---|
+| ![Web remote on a desktop browser](docs/img/remote-desktop.png) | ![Web remote on a phone](docs/img/remote-phone.png) |
+
+```sh
+scripts/run-pi.sh --remote      # Pd window + web remote
+scripts/run-pi.sh --headless    # web remote only, no Pd window
+scripts/setup-pi.sh --autostart --headless   # start that way at login
+```
+
+On the Mac, start the patch as usual and run `python3 remote/server.py` in a terminal.
+
+Then open `http://<pi-name>.local:8080/` (e.g. `http://raspberrypi.local:8080/`) on your phone. The server also prints the address. **Add to Home Screen** makes it open full-screen like an app.
+
+- **No extra software:** it uses only Python's standard library, and the page is plain HTML/CSS/JS with no internet needed.
+- **How it connects:** the patch's `[remote]` object listens on `127.0.0.1:9311` (this computer only). `remote/server.py` bridges it to the browser over a WebSocket, and only lets through the controls listed in `remote/names.json`.
+- **Who can use it:** anyone on the same Wi-Fi can open the page, and there's no password. Use `--host 127.0.0.1` (or `REMOTE_HOST=127.0.0.1`) to keep it on the local machine, or `REMOTE_PORT` to change the port.
 
 ## Using it
 
