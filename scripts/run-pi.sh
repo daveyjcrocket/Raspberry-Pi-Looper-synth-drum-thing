@@ -9,6 +9,12 @@
 #   MIDI_DEVICE  part of the ALSA MIDI client name to connect   (default: Impact)
 #   SAMPLE_RATE  default 48000
 #   AUDIO_BUF    audio buffer in ms; raise it if you hear clicks (default 20)
+#   REMOTE_PORT  web remote port for --remote / --headless (default 8080)
+#
+# Options:
+#   --list      show the audio and MIDI devices, then exit
+#   --remote    also start the web remote (control it from a phone: http://<pi>.local:8080/)
+#   --headless  web remote only, no Pd window (no monitor needed, but still started from the desktop session)
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -18,11 +24,17 @@ MIDI_DEVICE="${MIDI_DEVICE:-Impact}"
 SAMPLE_RATE="${SAMPLE_RATE:-48000}"
 AUDIO_BUF="${AUDIO_BUF:-20}"
 
-if [ "${1:-}" = "--list" ]; then
-  pd -nogui -alsa -listdev -send "pd quit" 2>&1
-  echo; aconnect -i
-  exit 0
-fi
+remote=0; nogui=()
+case "${1:-}" in
+  --list)
+    pd -nogui -alsa -listdev -send "pd quit" 2>&1
+    echo; aconnect -i
+    exit 0 ;;
+  --remote) remote=1 ;;
+  --headless) remote=1; nogui=(-nogui) ;;
+  "") ;;
+  *) echo "Unknown option '$1'. Use --list, --remote or --headless." >&2; exit 1 ;;
+esac
 
 # Pd's device number for the first "$1" ("input" or "output") device matching $AUDIO_DEVICE,
 # preferring the direct "(hardware)" device over the "(plug-in)" one.
@@ -53,9 +65,14 @@ else
   fi
 fi
 
-pd "${args[@]}" -open "$PATCH" &
+pd "${nogui[@]}" "${args[@]}" -open "$PATCH" &
 pd_pid=$!
-trap 'kill "$pd_pid" 2>/dev/null || true' INT TERM
+remote_pid=""
+if [ "$remote" = 1 ]; then
+  python3 "$HERE/remote/server.py" --port "${REMOTE_PORT:-8080}" &
+  remote_pid=$!
+fi
+trap 'kill "$pd_pid" $remote_pid 2>/dev/null || true' INT TERM EXIT
 
 # ALSA client id whose name contains $1 (case-insensitive), from `aconnect $2` output.
 client_id() {
