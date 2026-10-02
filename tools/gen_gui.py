@@ -10,7 +10,7 @@ import os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PATCH = os.path.join(HERE, '..', 'piLooper', 'LiveLoopSynth.pd')
-W, H = 1010, 680
+W, H = 1010, 690
 
 
 def sp(text):          # Pd label/text: escape spaces inside one symbol
@@ -133,6 +133,11 @@ A('#X obj 938 598 bng 15 250 50 0 drummer-rebonk empty rebonk 17 7 0 10 #fcfcfc 
 for k, (name, label, val) in enumerate((('drummer-level', 'level', 0.5), ('drummer-density', 'density', 0.5),
                                         ('drummer-humanize', 'humanize', 0.3))):
     A(f'#X obj 770 {616 + k * 14} hsl 120 10 0 1 0 1 {name} {name}-r {label} 124 5 0 10 #dcdcdc #1f3a5f #000000 {round(val * 119 * 100)} 1;')
+# corrections of what it heard (tempo x1/2, x2, feel), what it heard, and automatic fills
+for k, (name, label) in enumerate((('drummer-half', '1/2x'), ('drummer-double', '2x'), ('drummer-feel', 'feel'))):
+    A(f'#X obj 956 {615 + k * 14} bng 11 250 50 0 {name} empty {label} 14 6 0 10 #fcfcfc #000000 #000000;')
+cnv(770, 659, 170, 18, 'drummer-feel-cnv', 'listens to layer 1', 6, 9, 10, '#3c3c3c', '#bdbdbd')
+A('#X obj 948 661 tgl 14 1 drummer-autofill drummer-autofill-r fills 16 7 0 10 #fcfcfc #000000 #000000 1 1;')
 
 # ---------------- hidden helpers (off-screen) ----------------
 A(f'#X obj {W + 40} 60 declare -lib zexy;')

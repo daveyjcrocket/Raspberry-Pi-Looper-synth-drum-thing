@@ -28,7 +28,8 @@ IN = (['looper-rec', 'looper-play', 'looper-stop', 'looper-tap', 'knob-learn', '
       + ['bankSelect', 'mainVol', 'l-in-vol', 'r-in-vol',
          'inputTogL-r', 'inputTogR-r', 'pad-led-echo-r',
          'drummer-mode-r', 'drummer-pause', 'drummer-fill', 'drummer-rebonk', 'drummer-level-r',
-         'drummer-density-r', 'drummer-humanize-r'])
+         'drummer-density-r', 'drummer-humanize-r', 'drummer-half', 'drummer-double', 'drummer-feel',
+         'drummer-autofill-r'])
 
 # names the web page listens to (displays, and the send names of the controls above)
 OUT = (['looper-state', 'looper-cnv', 'looper-hint', 'loop-pos', 'loop-len-s', 'looper-layers',
@@ -38,7 +39,8 @@ OUT = (['looper-state', 'looper-cnv', 'looper-hint', 'loop-pos', 'loop-len-s', '
         'knobtitle-synth', 'knobtitle-fx', 'knob-page', 'selected-loop-r',
         'bankSelect', 'mainVol', 'l-in-vol', 'r-in-vol',
         'l-in-sig', 'r-in-sig', 'l-out-db', 'inputTogL', 'inputTogR', 'pad-led-echo',
-        'drummer-cnv', 'drummer-mode', 'drummer-level', 'drummer-density', 'drummer-humanize']
+        'drummer-cnv', 'drummer-mode', 'drummer-level', 'drummer-density', 'drummer-humanize',
+        'drummer-feel-cnv', 'drummer-autofill']
        + [f'lyr-{n}-cnv' for n in N] + [f'lp-vol-{n}' for n in N] + [f'lp-vol-{n}-r' for n in N]
        + [f'knob-{n}' for n in N] + [f'knob-{n}-r' for n in N]
        + [f'fxin-{n}' for n in N] + [f'fxin-{n}-r' for n in N]

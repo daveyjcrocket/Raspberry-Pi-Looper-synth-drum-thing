@@ -1,0 +1,17 @@
+#N canvas 50 50 500 300 10;
+#X text 20 5 The AI drummer listening. See tools/gen_drummer.py (this file is generated).;
+#X text 20 25 bonk~ -> <velocity> <temperature> (brightness: kick ~3.5 \, hats ~7);
+#X obj 20 60 r~ drummer-band;
+#X obj 20 90 bonk~;
+#X obj 120 120 list split 1;
+#X obj 120 150 s drmEarsHit;
+#X obj 300 120 switch~;
+#X obj 300 60 r drmEarsOn;
+#X obj 380 60 loadbang;
+#X msg 380 90 0;
+#X connect 2 0 3 0;
+#X connect 3 1 4 0;
+#X connect 4 1 5 0;
+#X connect 7 0 6 0;
+#X connect 8 0 9 0;
+#X connect 9 0 6 0;

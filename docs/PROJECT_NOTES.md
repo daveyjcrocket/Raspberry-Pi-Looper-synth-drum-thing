@@ -67,6 +67,22 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
   - The no-brain run still matches step 1, except that pause and resume take effect one 16th earlier (the look-ahead).
 - **Generator safety net:** `tools/pdgen.py` now refuses to wire an object to itself (see the gotchas).
 
+## October 2026: AI drummer, steps 3 and 4
+
+- **Listening:** while layer 1 records, `[drummerEars]` (bonk~ on the band, behind `[switch~]`, so it costs nothing the rest of the time) and the MIDI note-ons send their onsets to the brain. It works out the bars in the loop (tempo), the swing, the push and a groove (`drummer/listen.py`).
+- **Re-sync:** the reading arrives a few ms into the first pass, so Pd recomputes its 16ths and carries on from the next one.
+- **Corrections:** **1/2x**, **2x** and **feel** (as heard / straight / swing / triplet), on the front panel and the web remote, plus a feel line that shows what it heard.
+- **Groove choice:** from the accent histogram (16ths → funk, a low hit on every beat → four on the floor, sparse → half-time, swung → ride, else rock). The chosen groove is fitted to the player: kicks under strong low accents, and decorations likelier in the gaps.
+- **Rebonk** (with the brain): listens to the whole band for one loop and picks a different groove that fits.
+- **Auto fills** every 8 bars (4 when busy), fitted to the loop's length, with a crash on the next downbeat. On by default, with an **auto fills** switch.
+- **Intensity follows the layers you can hear** (keep-N counted): busier with more, ride instead of hats with 4 or more.
+- **One brain only:** a second `brain.py` exits (it holds a lock on port 9313), because two brains would answer every request twice.
+- **Tests:**
+  - `python3 drummer/test_brain.py` (17 checks, including the ears).
+  - A real-time Pd run of `drummer.pd` fed a synthetic swung band at 150 bpm. It heard 150 bpm and swing 60 % and re-synced from 75. Every hit then landed on the swung grid. Rebonk changed rock to ride, and 1/2x, feel and 2x worked. A fill came every 4th pass, with the accent after it.
+  - A full LiveLoopSynth run with the brain (silent input): no new errors.
+- Not yet tried on real instruments, the LX25+ or the Pi.
+
 ## Architecture
 
 ### Files
@@ -74,7 +90,7 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
 | Path | What it is |
 |---|---|
 | `piLooper/LiveLoopSynth.pd` | Main patch. The top level is only the front panel (generated) plus the hidden helper objects; everything else lives in `[pd internals]`. |
-| `piLooper/*.pd` from `tools/gen_*.py` | **Generated:** `Loop.pd` (one layer), `looper.pd` (controller), `knobs.pd`, `inputFX.pd`, `padDisplay.pd`, `wheels.pd`, `tempo.pd`, `tapFilter.pd`, `drummer.pd` (AI drummer). Edit the generator, not the `.pd`. |
+| `piLooper/*.pd` from `tools/gen_*.py` | **Generated:** `Loop.pd` (one layer), `looper.pd` (controller), `knobs.pd`, `inputFX.pd`, `padDisplay.pd`, `wheels.pd`, `tempo.pd`, `tapFilter.pd`, `drummer.pd` + `drummerEars.pd` (AI drummer). Edit the generator, not the `.pd`. |
 | `piLooper/analogSynth.pd`, `analogVoice.pd`, `organSynth.pd`, `organVoice.pd`, `sessionFiles.pd`, `instrumentName.pd` | Hand-written this session. |
 | `piLooper/fmSynth` (inside the main patch), `fmVoice.pd`, `synthLeadVoice*.pd`, `samp.pd`, `notecheck.pd`, `oneshot.pd`, `load.pd`, `loopSave.pd`, `loopLoad.pd` | Legacy (2017) parts, lightly modified. |
 | `piLooper/kits/` | Drum samples, licenses and pad map. |
@@ -82,7 +98,7 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
 | `tools/gen_gui.py` | Regenerates the front panel **around** `[pd internals]`, leaving that block untouched. |
 | `piLooper/remote.pd`, `remoteOut.pd`, `remote/names.json` from `tools/gen_remote.py` | **Generated:** the Pd end of the web remote, and its allow-list. |
 | `remote/server.py` | Web remote bridge: serves `remote/web/` and relays WebSocket ⇄ Pd (stdlib only). |
-| `drummer/brain.py`, `drummer/grooves.py`, `drummer/test_brain.py` | AI drummer brain (varies the pattern every pass; TCP 127.0.0.1:9312), the shared groove library, and its tests. |
+| `drummer/brain.py`, `drummer/listen.py`, `drummer/grooves.py`, `drummer/test_brain.py` | AI drummer brain (listens, then varies the pattern every pass; TCP 127.0.0.1:9312), its ears (tempo, swing, groove choice), the shared groove library, and the tests. |
 | `remote/web/` | The web remote page (`index.html`, `style.css`, `app.js`, manifest, icon). No build step. |
 | `scripts/` | Mac and Pi launchers and setup. |
 | `docs/` | User manual, screenshots, these notes. |
@@ -105,6 +121,7 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
    click (tempo.pd) ────────────────────────────────────────────────────────► dac~ (not recorded)
    drummer.pd (8 kit voices) ─s~ drummer-out─► audio-IO, after microFade, into the main volume ► dac~
                                                                              (heard, not recorded)
+   audio-IO: loops + direct-in, before the drummer ─s~ drummer-band─► drummerEars (bonk~, only while listening)
 ```
 
 ### Timing
@@ -135,10 +152,13 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 | `reverb-predelay`, `pitchmod` (signal), `pitchbend-ratio` | effects / wheels | |
 | `looper-cnv`, `looper-hint`, `lyr-N-cnv`, `pad-N-cnv`, `instr-cnv`, `knobtitle-*`, `knob-learn-cnv`, `tap-led` | → screen | display updates |
 | `drummer-mode` (`-r`), `drummer-pause`, `drummer-fill`, `drummer-rebonk`, `drummer-level` / `drummer-density` / `drummer-humanize` (`-r`), `drummer-swing` | → drummer | on/off (pads become controls), pause/resume, fill, change groove, level / density / humanize 0–1, swing 50–75 % |
-| `drummer-cnv`, `drummer-mode-pads` | drummer → | status line; pad display relabels the pads |
+| `drummer-half`, `drummer-double`, `drummer-feel`, `drummer-autofill` (`-r`) | → drummer | corrections of what it heard (tempo ×½, ×2, feel), auto fills on/off |
+| `drummer-cnv`, `drummer-feel-cnv`, `drummer-mode-pads` | drummer → | status line; what it heard; pad display relabels the pads |
 | `drummer-hit` | drummer → its voices | `role*128 + velocity`, after swing (handy for tests) |
 | `drmbase` (fixed bar), `drmgroove` + `drmtime` (this pass), `drmnext` + `drmnexttime` (next pass): 8 values per 16th (kick, snare, hat closed, hat open, rimshot, tom high, tom low, ride), velocity / offset in ms. `drmP` (step being prepared), `drmSrc` (0 fixed, 1 this pass, 2 next), `drmReadyN`, `drmLoop`, `drmUp` … | drummer state | `[value]`s and arrays named without hyphens so `[expr]` can read them |
-| Pd → brain: `loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers>` · brain → Pd: `drmnext 0 …`, `drmnexttime 0 …`, `drmready <steps> <pass>` | TCP 127.0.0.1:9312 (FUDI) | Pd asks at every loop start (and when a slider or rebonk changes) for the NEXT pass; a `drmready` for any other pass is ignored |
+| Pd → brain: `loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills>` · brain → Pd: `drmnext 0 …`, `drmnexttime 0 …`, `drmready <steps> <pass>` | TCP 127.0.0.1:9312 (FUDI) | Pd asks at every loop start (and when a slider, the layers or the groove change) for the NEXT pass; a `drmready` for any other pass is ignored |
+| Pd → brain: `listen <src> <offset>`, `on <ms> <strength> <brightness> <midi>`, `heard <len> <tap> <src> <groove>`, `fix <len> <tap> <dir> <feel> <groove> <bars>` · brain → Pd: `drmfeel <bpm> <swing> <groove> <feel>` | TCP 127.0.0.1:9312 | listening (src 0 = layer 1, 1 = rebonk) and the corrections; `drmLsn` says what Pd is listening to |
+| `drmEarsOn`, `drmEarsHit` | drummer ↔ drummerEars | switch bonk~ on/off; `<velocity> <temperature>` per attack |
 | `remote-out`, `remote-dump` | web remote | `[remoteOut <name>]` reports a name to the bridge; `remote-dump` makes them all repeat their last label / color / value |
 
 ### Conventions and Pd gotchas we hit
@@ -154,6 +174,9 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 - **`[expr]` can read `[value]` variables and arrays by name** (`expr drmS % 16`, `drmgroove[$f1]`). The names can't contain hyphens (expr reads `-` as minus), and `$0` doesn't work there. A `; name 5` message sets a `[value]`.
 - **Generator pitfall:** `x = O(...); C(last(), x)` wires `x` to itself, because `last()` is now `x`. That makes a stack overflow in Pd, which silently stops the message chain. Keep a handle on the source object instead. `pdgen.conn` now asserts against it.
 - **`[route 0 1]` on a list like `0 rock 120`** outputs `rock 120` as a message with the *selector* `rock`, so `$1` in a message box is then 120, not "rock". Gate with `[spigot]`s instead when the rest of the list starts with a symbol.
+- **bonk~:** the right outlet is `<instrument> <velocity> <temperature>`, and the left is the 11-band spectrum. Attacks come about 10 ms late, so the brain subtracts that. A kick's ringing decay gives a weak second "attack" about 100 ms later, so the brain drops weak low onsets just after strong ones. `temperature` is about 3.5 for a kick and 7 for hats.
+- **qlist lines need a message:** `500 drummer-rebonk;` sends nothing, so write `500 drummer-rebonk bang;`.
+- **Sample rate in tests:** `pd -nosound` runs at 44.1 kHz, so a 48 kHz test file plays 9 % slow (use `-r 48000`).
 - **One listener per port:** a second Pd (or a leftover one) can't `listen` on 9312 ("Address already in use"). The drummer still plays, as "- fixed". In tests, kill leftover Pd and brain processes first.
 - **Per-user files are git-ignored:** `piLooper/knobmap.txt` (learned Preset knobs), `piLooper/tappad.txt` (learned tap pad), user drum samples.
 
@@ -206,7 +229,7 @@ browser ── WebSocket /ws (JSON) ──► remote/server.py ── TCP 127.0.
   - Browse them with the Track buttons.
   - Each groove is time-matched to the tapped tempo (resample or stretch) and shown with its name and bpm.
   - It gives an instant backing to jam over.
-- [ ] **AI drummer:** step 1 is done; steps 2–4 and the ideas list are in [AI drummer: design and plan](#ai-drummer-design-and-plan).
+- [ ] **AI drummer:** steps 1–4 are done. Try it on the Pi and with real instruments, then pick from the ideas list in [AI drummer: design and plan](#ai-drummer-design-and-plan).
 - [ ] **Web remote, next steps:**
   - A systemd service, so `--headless` runs without a desktop login.
   - A password or pairing code if it's used on shared Wi-Fi.
@@ -336,15 +359,24 @@ In drummer mode:
   - **Pd looks one 16th ahead** (`drmP`), so offsets can be negative. Hits go through `[pipe]` with one step + swing + offset.
   - **Brain late or gone:** Pd repeats the pattern it has. With no brain at all it plays the fixed grooves (`drmbase`), and the status says "- fixed".
   - **Ideas left from this step:** show the brain's state on the remote, and send `layers` to the brain (it already does) and use it for intensity (step 4).
-- [ ] **Step 3: listening.** `[bonk~]` and MIDI onsets from layer 1 → the brain → tempo and swing guess (`drummer-swing`), with the ½× / 2× and feel corrections on screen and on the remote.
-- [ ] **Step 4: groove choice from your accents,** automatic fills every 4 or 8 bars, and intensity that follows the layers.
+- [x] **Step 3: listening.** Done:
+  - **Onsets:** `[drummerEars]` (bonk~ on `s~ drummer-band`, the band before the drummer) and the MIDI note-ons from layer 1 go to the brain. It skips the tap pad, and the pads while they are controls. Pads get a brightness by sound, keys by pitch.
+  - **Analysis** (`drummer/listen.py`): whole 4/4 bar counts for 60–180 bpm, scored on a swung 8th/16th grid above chance, with a pull towards ~100 bpm and towards 1/2/4/8/16-bar loops. Then the swing, the push and the groove.
+  - **Into Pd:** the reading (`drmfeel`) sets the tempo (`drmGuess`), the swing and the groove. Pd re-syncs at once.
+  - **Corrections:** 1/2x, 2x and feel ask the brain again (`fix`).
+  - **Known ambiguities**, as the prototype found: a triplet feel can read as straight 8ths at 1.5× (the bar-count prior catches most of these), and quarter notes alone can't tell ½× from 2×. That's what the corrections are for.
+- [x] **Step 4: groove choice, fills, intensity.** Done:
+  - **Groove choice** from the accent histogram, fitted to the player (kicks under low accents, decorations in the gaps).
+  - **Rebonk** listens to the band for one loop and picks a different groove.
+  - **Auto fills** every 4 or 8 bars, fitted to the loop, with an accent after. They replace step 2's every-4th-pass pickup.
+  - **Intensity:** density goes up with the layers you can hear, and with 4 or more layers rock and half-time move to the ride.
+  - **Ideas left:** pick fills by groove (e.g. toms for rock, snare for funk), a real crash sample in the kit, and ghost-note velocity copied from the player.
 
 ### Development possibilities
 
-- **Rebonk from time to time.** Don't only listen once. Let `[bonk~]` wake up every so often, e.g. for one pass every 8 or 16 loops, or when a new layer is closed. It listens to the whole band (the loop mix plus what's being played live), and the brain changes up the groove to match how the song has grown: busier when it got denser, half-time when it thinned out, ride instead of hats when the chords got bigger.
+- **Rebonk from time to time.** Pad 3 now listens for one loop by hand (step 4). Next, don't only listen when asked. Let `[bonk~]` wake up every so often, e.g. for one pass every 8 or 16 loops, or when a new layer is closed. It listens to the whole band (the loop mix plus what's being played live), and the brain changes up the groove to match how the song has grown: busier when it got denser, half-time when it thinned out, ride instead of hats when the chords got bigger.
   - bonk~ is on only for that one pass, so the CPU cost stays near zero the rest of the time.
   - A **rebonk** setting could pick *never / every N loops / on every new layer*.
-  - Pad 3 (**rebonk**) triggers it by hand.
 - **Live listening:** bonk~ always on, following your playing as it happens (pushes, accents, stops). It costs more but is still fine on a Pi 4.
 - **Saved grooves:** keep the last few grooves and flip between them with pads 4–7, or keep one per scene.
 - **Pad velocity:** fill size, or how far rebonk changes things.

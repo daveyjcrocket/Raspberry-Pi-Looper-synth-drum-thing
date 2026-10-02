@@ -59,6 +59,17 @@ GROOVES = [
 FILL = {KICK: [(0, 100)], SNARE: [(0, 95), (1, 75)], TOM_HI: [(2, 105)], TOM_LO: [(3, 115)]}
 ACCENT = [(KICK, 115), (OPEN, 105)]
 
+# The brain's automatic fills (every 4 or 8 bars), one beat each: [(role, 16th in the beat, velocity)].
+# At high density a fill starts a beat earlier with FILL_LEAD.
+FILLS = [
+    [(SNARE, 0, 80), (SNARE, 1, 70), (SNARE, 2, 90), (SNARE, 3, 105)],
+    [(SNARE, 0, 85), (SNARE, 1, 70), (TOM_HI, 2, 100), (TOM_LO, 3, 110)],
+    [(TOM_HI, 0, 95), (TOM_HI, 1, 80), (TOM_LO, 2, 100), (TOM_LO, 3, 112)],
+    [(KICK, 0, 100), (SNARE, 1, 90), (KICK, 2, 95), (SNARE, 3, 108)],
+    [(SNARE, 0, 95), (TOM_HI, 1, 90), (TOM_LO, 2, 100), (KICK, 2, 90), (TOM_LO, 3, 110)],
+]
+FILL_LEAD = [(KICK, 0, 95), (SNARE, 2, 60), (SNARE, 3, 70)]
+
 
 def fixed_bar(groove):
     """The fixed (no-brain) version of a groove: 16 steps x 8 roles of velocities."""

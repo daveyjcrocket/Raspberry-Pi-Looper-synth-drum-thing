@@ -87,7 +87,7 @@ Next to the looper controls are **learn knobs** (section 7) and two master effec
 - **INSTRUMENT BANK:** the selected instrument is filled in. Change it with the LX25+ **Patch − / +** buttons.
 - **Meters:** IN1, IN2 and OUT.
 - **LEVELS:** display only. They show main volume, input gains and FX sends.
-- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk**, and its **level**, **density** and **humanize**. See section 11.
+- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk**, and its **level**, **density** and **humanize**. Next to and below them: the **1/2x**, **2x** and **feel** corrections, what it heard (tempo and feel), and the **fills** switch. See section 11.
 
 ## 3. LX25+ controls
 
@@ -259,15 +259,52 @@ The dot in the top-right corner is green when the page is connected to Pd. If it
 The AI drummer plays a drum part along with your loop, on the drum kit you picked last (banks 0–3; it keeps that kit while you play a synth). It is **heard but never recorded**: it doesn't end up in your layers or your saved song, so you can switch it on, off or pause it whenever you like.
 
 1. Tick **drummer** (bottom right, or the switch on the web remote). The status line says *on - waiting for a loop*.
-2. Record your first layer as usual. It works best with a tempo set (section 5). Without one, it works out the number of bars from the loop length, assuming about 100 bpm in 4/4.
-3. When the loop plays, the drummer comes in on the downbeat. The status line shows the groove and tempo, for example *rock - 100 bpm*.
+2. Record your first layer as usual. **While it records, the drummer listens**: the line under the status says *listening to layer 1...*.
+3. When the loop plays, the drummer comes in on the downbeat. Within a moment it has worked out the tempo and the feel. The status line shows the groove and tempo, for example *funk - 96 bpm*, and the line below shows what it heard, for example *heard 96 bpm - swing 62%*.
 
-**It plays a little differently on every pass**, like a real drummer: ghost notes and extra kicks come and go, the hi-hat opens at the turnaround, and every few passes there's a short pickup into the downbeat. The changes are gradual, so it still sounds like the same groove. Two sliders shape it:
+### What it listens for
+
+From your first layer it works out:
+
+- **the tempo:** how many bars are in the loop. With a tapped tempo (section 5) it uses yours.
+- **the swing:** where your off-beats fall, from straight (50%) to a full triplet shuffle (67%). It also copies whether you play a little ahead of the beat or lay back.
+- **the groove:** busy 16ths get *funk*, a low note on every beat *four on the floor*, sparse playing *half-time*, a swung feel the *ride*, and everything else *rock*. It also puts kicks under your strongest low notes and fills the gaps you leave rather than playing over your accents.
+
+It listens to everything that goes into the loop (microphone, guitar, synths) and takes the notes you play on the keys and pads straight from MIDI, which is exact.
+
+**If it got it wrong**, correct it with the buttons next to the sliders (also on the web remote):
+
+| Button | What it does |
+|---|---|
+| **1/2x** | Half the tempo (it heard your 8th notes as beats). |
+| **2x** | Double the tempo (it heard every other beat). |
+| **feel** | Steps through *as heard*, *straight*, *swing* and *triplet*. |
+
+A tapped tempo avoids most tempo mistakes. Changes take effect at once, and the drummer stays in time.
+
+### Different on every pass
+
+It plays a little differently on every pass, like a real drummer: ghost notes and extra kicks come and go, and the hi-hat opens at the turnaround. The changes are gradual, so it still sounds like the same groove.
+
+- **Fills:** with **fills** ticked (*auto fills* on the web remote), it plays a fill every 8 bars (every 4 when it's busy), always ending on the loop's end, and crashes into the next downbeat.
+- **It follows the band:** as you add layers it gets busier, and with four or more layers playing, rock and half-time move from the hi-hat to the ride. When keep-first-N (section 6) mutes layers, it calms down again.
+
+Two sliders shape it:
 
 - **density:** how busy it is. At the left it plays only the backbone (kick, snare, hats on the beat at the very bottom). The middle is the groove as written, and at the right it adds lots of ghost notes and extra kicks.
 - **humanize:** how loose it is. It moves hits a few milliseconds off the grid (the kick stays tight, the snare sits a touch behind) and lets the velocities breathe. At the left it plays exactly on the grid.
 
-The variation comes from a small helper program, the **drummer brain** (`drummer/brain.py`). `run-pi.sh` starts it for you. On the Mac, `run-mac.command` runs it in its Terminal window, so keep that window open. If the brain isn't running, the status line ends in ***- fixed***: the drummer still plays, but it repeats the same pattern every pass. Slider changes and rebonk take effect from the next pass.
+### The drummer brain
+
+The listening and the variation come from a small helper program, the **drummer brain** (`drummer/brain.py`). `run-pi.sh` starts it for you. On the Mac, `run-mac.command` runs it in its Terminal window, so keep that window open. Without the brain:
+
+- the status line ends in ***- fixed***, and the drummer repeats the same pattern every pass
+- it doesn't listen (*not listening (no brain)*): it guesses the bars from the loop length, assuming about 100 bpm in 4/4, or uses your tapped tempo
+- there are no auto fills, and rebonk simply steps to the next groove
+
+Slider changes and rebonk take effect from the next pass.
+
+### The pads as controls
 
 While the drummer is on, **the drum pads become its controls** and stop playing the kit:
 
@@ -275,14 +312,14 @@ While the drummer is on, **the drum pads become its controls** and stop playing 
 |---|---|
 | **1 pause** | Pause: it stops on the next beat. Hit again to resume: it comes back in on the next bar line, so it's always in time. |
 | **2 fill** | A fill on the last beat of the bar, then an accent on the next downbeat. |
-| **3 rebonk** | Change up the groove. For now it steps through *rock, half-time, four on the floor, funk* and *ride*. Later it will listen to the band again and pick a new groove to match. |
+| **3 rebonk** | Change up the groove: it listens to the whole band (all your layers plus what you're playing) for one loop, then switches to a different groove that fits. |
 | 4–7 | Nothing yet. |
 
 It's the same on both pad maps, and pad 8 on pad map 2 is still the tap pad. The keys play as usual, including the kit when a drum bank is selected. **pause**, **fill** and **rebonk** are also on screen and on the web remote. Untick **drummer** to hand the pads back to the kit.
 
 - **Level:** the **level** slider sets the drummer's volume. It also follows the main volume.
-- **Stop:** the drummer fades out with the loop and stops with it. It comes back in when the loop plays again.
-- **Mic and speakers:** the drummer comes out of your speakers, so a microphone can pick it up while you overdub. Use headphones, or pause the drummer while you record through the mic.
+- **Stop:** the drummer fades out with the loop and stops with it. It comes back in when the loop plays again. Clearing the song makes it forget what it heard.
+- **Mic and speakers:** the drummer comes out of your speakers, so a microphone can pick it up while you overdub. Use headphones, or pause the drummer while you record through the mic. It also hears itself that way when you rebonk.
 
 The pads are told apart from the keys by their MIDI channel, which the patch takes from the tap pad (channel 10 by default). If the pads keep playing drums with the drummer on, **learn tap pad** again (section 5).
 
@@ -296,6 +333,7 @@ The pads are told apart from the keys by their MIDI channel, which the patch tak
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Pads play the kit with the AI drummer on, or don't control it | The patch finds the pads by the tap pad's MIDI channel: click **learn tap pad** and hit pad 8 (pad map 2). |
+| The drummer plays at double or half speed, or swings when you don't | It misheard your first layer. Use **1/2x**, **2x** or **feel** (section 11), or tap the tempo before you record. |
 | The drummer's status ends in "- fixed" | The drummer brain isn't running, so the pattern doesn't change from pass to pass. Start the patch with `scripts/run-pi.sh` (or `run-mac.command` on the Mac, and keep its window open), or run `python3 drummer/brain.py` yourself. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |
 | The phone can't open the remote | Check the phone is on the same Wi-Fi and use the address the script prints (the IP address works when `.local` names don't). |
