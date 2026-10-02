@@ -8,7 +8,7 @@ LiveLoopSynth is a live looper with drum kits, synths and effects. You play it f
 
 | | Mac | Raspberry Pi |
 |---|---|---|
-| Start | Double-click `scripts/run-mac.command` | `scripts/run-pi.sh`, or automatically at login if you ran `scripts/setup-pi.sh --autostart` |
+| Start | Double-click `scripts/run-mac.command`. Keep its Terminal window open: it runs the AI drummer's brain (section 11). | `scripts/run-pi.sh`, or automatically at login if you ran `scripts/setup-pi.sh --autostart` |
 | Phone remote | Also run `python3 remote/server.py` | `scripts/run-pi.sh --remote` (or `--headless`: no Pd window). See [section 10](#10-the-web-remote-phone-or-tablet). |
 | First time only | In Pd: **Media → Audio Settings**, pick the UMC22 (it may show as *USB Audio CODEC*) for input and output at 48000 Hz. **Media → MIDI Settings**, pick *Impact LX25+*. Click **Save All Settings** in both. Allow microphone access if macOS asks. | Nothing: the script finds the UMC22 and the LX25+ itself. |
 
@@ -87,7 +87,7 @@ Next to the looper controls are **learn knobs** (section 7) and two master effec
 - **INSTRUMENT BANK:** the selected instrument is filled in. Change it with the LX25+ **Patch − / +** buttons.
 - **Meters:** IN1, IN2 and OUT.
 - **LEVELS:** display only. They show main volume, input gains and FX sends.
-- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk** and its **level**. See section 11.
+- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk**, and its **level**, **density** and **humanize**. See section 11.
 
 ## 3. LX25+ controls
 
@@ -247,7 +247,7 @@ You can control everything on the main screen from a phone, a tablet or another 
 - **Instrument:** use ‹ › or the list.
 - **Master:** main and input gain, master cutoff, retrigger, reverb pre-delay, the meters, and the input switches.
 - **Looper:** keep first N, auto-record and its threshold, and the learn buttons.
-- **AI drummer:** the on switch, its status line, **pause / resume**, **fill**, **rebonk** and its level (section 11).
+- **AI drummer:** the on switch, its status line, **pause / resume**, **fill**, **rebonk**, and its level, density and humanize (section 11).
 - **Drum pads:** they light up when you hit the LX25+ pads. They don't play sounds from the phone.
 
 The dot in the top-right corner is green when the page is connected to Pd. If it turns red, the page reconnects by itself.
@@ -262,6 +262,13 @@ The AI drummer plays a drum part along with your loop, on the drum kit you picke
 2. Record your first layer as usual. It works best with a tempo set (section 5). Without one, it works out the number of bars from the loop length, assuming about 100 bpm in 4/4.
 3. When the loop plays, the drummer comes in on the downbeat. The status line shows the groove and tempo, for example *rock - 100 bpm*.
 
+**It plays a little differently on every pass**, like a real drummer: ghost notes and extra kicks come and go, the hi-hat opens at the turnaround, and every few passes there's a short pickup into the downbeat. The changes are gradual, so it still sounds like the same groove. Two sliders shape it:
+
+- **density:** how busy it is. At the left it plays only the backbone (kick, snare, hats on the beat at the very bottom). The middle is the groove as written, and at the right it adds lots of ghost notes and extra kicks.
+- **humanize:** how loose it is. It moves hits a few milliseconds off the grid (the kick stays tight, the snare sits a touch behind) and lets the velocities breathe. At the left it plays exactly on the grid.
+
+The variation comes from a small helper program, the **drummer brain** (`drummer/brain.py`). `run-pi.sh` starts it for you. On the Mac, `run-mac.command` runs it in its Terminal window, so keep that window open. If the brain isn't running, the status line ends in ***- fixed***: the drummer still plays, but it repeats the same pattern every pass. Slider changes and rebonk take effect from the next pass.
+
 While the drummer is on, **the drum pads become its controls** and stop playing the kit:
 
 | Pad | What it does |
@@ -275,7 +282,6 @@ It's the same on both pad maps, and pad 8 on pad map 2 is still the tap pad. The
 
 - **Level:** the **level** slider sets the drummer's volume. It also follows the main volume.
 - **Stop:** the drummer fades out with the loop and stops with it. It comes back in when the loop plays again.
-- **Every pass through the loop** it opens the hi-hat on the last off-beat, so the loop "breathes" at the turnaround. More variation from one pass to the next is the next step.
 - **Mic and speakers:** the drummer comes out of your speakers, so a microphone can pick it up while you overdub. Use headphones, or pause the drummer while you record through the mic.
 
 The pads are told apart from the keys by their MIDI channel, which the patch takes from the tap pad (channel 10 by default). If the pads keep playing drums with the drummer on, **learn tap pad** again (section 5).
@@ -290,6 +296,7 @@ The pads are told apart from the keys by their MIDI channel, which the patch tak
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Pads play the kit with the AI drummer on, or don't control it | The patch finds the pads by the tap pad's MIDI channel: click **learn tap pad** and hit pad 8 (pad map 2). |
+| The drummer's status ends in "- fixed" | The drummer brain isn't running, so the pattern doesn't change from pass to pass. Start the patch with `scripts/run-pi.sh` (or `run-mac.command` on the Mac, and keep its window open), or run `python3 drummer/brain.py` yourself. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |
 | The phone can't open the remote | Check the phone is on the same Wi-Fi and use the address the script prints (the IP address works when `.local` names don't). |
 | Clicks or crackles on the Pi | Start with a bigger buffer: `AUDIO_BUF=40 scripts/run-pi.sh`. |

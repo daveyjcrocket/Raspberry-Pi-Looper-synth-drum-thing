@@ -288,7 +288,9 @@ knob(mk, { sendTo: 'fx-cutoff-r', listen: ['fx-cutoff', 'fx-cutoff-r'], label: '
 knob(mk, { sendTo: 'fx-retrig-r', listen: ['fx-retrig', 'fx-retrig-r'], label: 'retrigger', small: true, color: 'var(--c2)', fmt: pct });
 knob(mk, { sendTo: 'reverb-predelay-r', listen: ['reverb-predelay'], label: 'pre-delay', small: true, color: 'var(--c4)', min: 0, max: 250, def: 20, fmt: (v) => Math.round(v) + ' ms' });
 // AI drummer: on/off is the data-tgl switch, pause / fill / rebonk are data-bang buttons
-knob($('#drummer-knob'), { sendTo: 'drummer-level-r', listen: ['drummer-level'], label: 'level', small: true, max: 1, def: 0.5, fmt: (v) => Math.round(v * 100) });
+for (const [name, label, def] of [['level', 'level', 0.5], ['density', 'density', 0.5], ['humanize', 'humanize', 0.3]]) {
+  knob($('#drummer-knobs'), { sendTo: `drummer-${name}-r`, listen: [`drummer-${name}`], label, small: true, max: 1, def, fmt: (v) => Math.round(v * 100) });
+}
 const drum = $('#drummer');
 on('drummer-cnv', 'label', (t) => { drum.textContent = t; });
 on('drummer-cnv', 'color', (c) => {

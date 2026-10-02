@@ -40,6 +40,9 @@ class Patch:
         return len(self.lines) - 1
 
     def conn(self, a, b, outlet=0, inlet=0):
+        # an object wired to itself is always a slip (e.g. x = obj(...); conn(last(), x))
+        # and makes a stack overflow in Pd that silently stops the message chain
+        assert a != b, f'object {a} connected to itself: {self.lines[a]}'
         self.conns.append(f'#X connect {a} {outlet} {b} {inlet};')
 
     def save(self, path):

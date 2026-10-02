@@ -1,4 +1,4 @@
-#N canvas 40 40 1010 660 10;
+#N canvas 40 40 1010 680 10;
 #X declare -lib zexy;
 #X obj 10 10 cnv 15 250 74 empty looper-cnv READY 14 37 0 26 #505050 #ffffff 0;
 #X obj 275 18 hsl 470 24 0 1 0 0 empty loop-pos loop\ position 0 -9 0 10 #dcdcdc #2e7d32 #000000 0 1;
@@ -126,7 +126,9 @@
 #X obj 840 598 bng 15 250 50 0 drummer-pause empty pause 17 7 0 10 #fcfcfc #000000 #000000;
 #X obj 895 598 bng 15 250 50 0 drummer-fill empty fill 17 7 0 10 #fcfcfc #000000 #000000;
 #X obj 938 598 bng 15 250 50 0 drummer-rebonk empty rebonk 17 7 0 10 #fcfcfc #000000 #000000;
-#X obj 770 622 hsl 120 12 0 1 0 1 drummer-level drummer-level-r level 124 6 0 10 #dcdcdc #1f3a5f #000000 5950 1;
+#X obj 770 616 hsl 120 10 0 1 0 1 drummer-level drummer-level-r level 124 5 0 10 #dcdcdc #1f3a5f #000000 5950 1;
+#X obj 770 630 hsl 120 10 0 1 0 1 drummer-density drummer-density-r density 124 5 0 10 #dcdcdc #1f3a5f #000000 5950 1;
+#X obj 770 644 hsl 120 10 0 1 0 1 drummer-humanize drummer-humanize-r humanize 124 5 0 10 #dcdcdc #1f3a5f #000000 3570 1;
 #X obj 1050 60 declare -lib zexy;
 #X obj 1050 90 instrumentName;
 #X obj 1050 120 looper;

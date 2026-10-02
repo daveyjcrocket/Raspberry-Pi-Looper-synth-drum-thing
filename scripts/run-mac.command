@@ -14,3 +14,9 @@ if [ -z "$PD_APP" ] || [ ! -d "$PD_APP" ]; then
 fi
 
 open -a "$PD_APP" "$PATCH"
+
+# The AI drummer's brain varies the drum pattern on every pass through the loop. It runs in
+# this Terminal window: keep the window open while you play (closing it only stops the
+# variation; the drummer then repeats its last pattern). Ctrl-C stops it.
+echo "AI drummer brain running - keep this window open while you play (Ctrl-C to stop)."
+exec python3 "$HERE/drummer/brain.py"
