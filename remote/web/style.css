@@ -244,6 +244,9 @@ main {
 /* ---------------- looper options ---------------- */
 .opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .opt:last-of-type { border-bottom: 0; }
+.drummer-status { margin: 0 0 12px; transition: background .2s, color .2s; }
+.drum-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.drum-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .stepper { display: inline-flex; align-items: center; gap: 8px; }
 .stepper b { min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; font-size: 16px; }
 .stepper span { font-size: 12px; color: var(--muted); width: 18px; }

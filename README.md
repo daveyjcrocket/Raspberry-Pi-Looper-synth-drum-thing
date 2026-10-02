@@ -28,6 +28,8 @@ Two kits come with the project, in `piLooper/kits/`:
 
 Each kit has eight sounds on the LX25+ pads, with the same layout on both pad maps: kick, snare, closed hi-hat, open hi-hat, rimshot, high tom, low tom, ride. See [`piLooper/kits/README.md`](piLooper/kits/README.md) for the pad-to-note map, credits and licenses.
 
+**AI drummer:** with **drummer** ticked, it plays the selected kit along with your loop. You hear it, but it's never recorded. While it's on, the pads pause it, ask for a fill, or change the groove. See the [user manual, section 11](docs/USER_MANUAL.md#11-the-ai-drummer).
+
 Drum banks 2 and 3 still use their own samples, which aren't included. To use them, add `.wav` files to `piLooper/` named `kick_13.wav`–`kick_24.wav`, `snare_13.wav`–`snare_24.wav`, `hh_07.wav`–`hh_12.wav` and `crash_03.wav`–`crash_04.wav`.
 
 Pd plays samples at its own sample rate, so keep Pd at 48 kHz (both modes below use it). Otherwise the drums play off-pitch.

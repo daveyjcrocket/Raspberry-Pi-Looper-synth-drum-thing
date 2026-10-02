@@ -124,6 +124,14 @@ for k, (recv, label, top) in enumerate((('mainVol', 'main', 1), ('l-in-vol', 'in
                                         ('post-bits', 'bits', 1))):     # the ranges Pd uses (gains; inputs start at 2)
     A(f'#X obj 900 {438 + k * 20} hsl 60 12 0 {top} 0 0 empty {recv} {sp(label)} 64 6 0 10 #dcdcdc #1f3a5f #000000 0 1;')
 
+# ---------------- AI drummer (right column, bottom) ----------------
+cnv(770, 572, 230, 20, 'drummer-cnv', 'AI drummer off - pads play the kit', 6, 10, 10, '#3c3c3c', '#bdbdbd')
+A('#X obj 770 598 tgl 15 0 drummer-mode drummer-mode-r drummer 17 7 0 10 #fcfcfc #000000 #000000 0 1;')
+A('#X obj 840 598 bng 15 250 50 0 drummer-pause empty pause 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 895 598 bng 15 250 50 0 drummer-fill empty fill 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 938 598 bng 15 250 50 0 drummer-rebonk empty rebonk 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 770 622 hsl 120 12 0 1 0 1 drummer-level drummer-level-r level 124 6 0 10 #dcdcdc #1f3a5f #000000 5950 1;')
+
 # ---------------- hidden helpers (off-screen) ----------------
 A(f'#X obj {W + 40} 60 declare -lib zexy;')
 A(f'#X obj {W + 40} 90 instrumentName;')
@@ -133,5 +141,6 @@ A(f'#X obj {W + 40} 180 padDisplay;')
 A(f'#X obj {W + 40} 210 wheels;')
 A(f'#X obj {W + 40} 240 tempo;')
 A(f'#X obj {W + 40} 270 remote;')      # web remote (remote/server.py)
+A(f'#X obj {W + 40} 300 drummer;')     # AI drummer (tools/gen_drummer.py)
 
 open(PATCH, 'w').write('\n'.join(L) + '\n' + internals)
