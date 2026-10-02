@@ -78,7 +78,7 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 
 Next to the looper controls are **learn knobs** (section 7) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
 
-**DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth.
+**DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth. With the **AI drummer** on, they turn dark and show its controls instead: **pause**, **fill** and **rebonk** (section 11).
 
 ![Drum pads with the GMRock kit, two pads being hit](img/pads.png)
 
@@ -87,12 +87,13 @@ Next to the looper controls are **learn knobs** (section 7) and two master effec
 - **INSTRUMENT BANK:** the selected instrument is filled in. Change it with the LX25+ **Patch − / +** buttons.
 - **Meters:** IN1, IN2 and OUT.
 - **LEVELS:** display only. They show main volume, input gains and FX sends.
+- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk** and its **level**. See section 11.
 
 ## 3. LX25+ controls
 
 | LX25+ control | What it does |
 |---|---|
-| **Keys / pads** | Play the selected instrument (drum kits respond to the pads and to keys C3-D#4). The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). |
+| **Keys / pads** | Play the selected instrument (drum kits respond to the pads and to keys C3-D#4). The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). With the AI drummer on, pads 1–3 control it instead (section 11). |
 | **Record** | Start recording. Press again to set the loop length and start the next layer. Each later press starts a new layer. |
 | **Play** | Play-through: stop recording and keep the loop going, so you can play along without adding to it. It also restarts after a Stop. |
 | **Stop** | Fade out over one loop, then stop. **Press again** to stop immediately. **Press while stopped** to clear everything. |
@@ -246,11 +247,40 @@ You can control everything on the main screen from a phone, a tablet or another 
 - **Instrument:** use ‹ › or the list.
 - **Master:** main and input gain, master cutoff, retrigger, reverb pre-delay, the meters, and the input switches.
 - **Looper:** keep first N, auto-record and its threshold, and the learn buttons.
+- **AI drummer:** the on switch, its status line, **pause / resume**, **fill**, **rebonk** and its level (section 11).
 - **Drum pads:** they light up when you hit the LX25+ pads. They don't play sounds from the phone.
 
 The dot in the top-right corner is green when the page is connected to Pd. If it turns red, the page reconnects by itself.
 
-## 11. Troubleshooting
+## 11. The AI drummer
+
+![The AI drummer playing along (bottom right), with the pads showing its controls](img/main-drummer.png)
+
+The AI drummer plays a drum part along with your loop, on the drum kit you picked last (banks 0–3; it keeps that kit while you play a synth). It is **heard but never recorded**: it doesn't end up in your layers or your saved song, so you can switch it on, off or pause it whenever you like.
+
+1. Tick **drummer** (bottom right, or the switch on the web remote). The status line says *on - waiting for a loop*.
+2. Record your first layer as usual. It works best with a tempo set (section 5). Without one, it works out the number of bars from the loop length, assuming about 100 bpm in 4/4.
+3. When the loop plays, the drummer comes in on the downbeat. The status line shows the groove and tempo, for example *rock - 100 bpm*.
+
+While the drummer is on, **the drum pads become its controls** and stop playing the kit:
+
+| Pad | What it does |
+|---|---|
+| **1 pause** | Pause: it stops on the next beat. Hit again to resume: it comes back in on the next bar line, so it's always in time. |
+| **2 fill** | A fill on the last beat of the bar, then an accent on the next downbeat. |
+| **3 rebonk** | Change up the groove. For now it steps through *rock, half-time, four on the floor, funk* and *ride*. Later it will listen to the band again and pick a new groove to match. |
+| 4–7 | Nothing yet. |
+
+It's the same on both pad maps, and pad 8 on pad map 2 is still the tap pad. The keys play as usual, including the kit when a drum bank is selected. **pause**, **fill** and **rebonk** are also on screen and on the web remote. Untick **drummer** to hand the pads back to the kit.
+
+- **Level:** the **level** slider sets the drummer's volume. It also follows the main volume.
+- **Stop:** the drummer fades out with the loop and stops with it. It comes back in when the loop plays again.
+- **Every pass through the loop** it opens the hi-hat on the last off-beat, so the loop "breathes" at the turnaround. More variation from one pass to the next is the next step.
+- **Mic and speakers:** the drummer comes out of your speakers, so a microphone can pick it up while you overdub. Use headphones, or pause the drummer while you record through the mic.
+
+The pads are told apart from the keys by their MIDI channel, which the patch takes from the tap pad (channel 10 by default). If the pads keep playing drums with the drummer on, **learn tap pad** again (section 5).
+
+## 12. Troubleshooting
 
 | Problem | Try |
 |---|---|
@@ -259,6 +289,7 @@ The dot in the top-right corner is green when the page is connected to Pd. If it
 | G3 key is silent | Your pads and keys share a MIDI channel; see *The tap pad* in section 5. |
 | Auto-record starts on its own | Raise the **threshold**, or untick **auto-record** and use the Record button. |
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
+| Pads play the kit with the AI drummer on, or don't control it | The patch finds the pads by the tap pad's MIDI channel: click **learn tap pad** and hit pad 8 (pad map 2). |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |
 | The phone can't open the remote | Check the phone is on the same Wi-Fi and use the address the script prints (the IP address works when `.local` names don't). |
 | Clicks or crackles on the Pi | Start with a bigger buffer: `AUDIO_BUF=40 scripts/run-pi.sh`. |

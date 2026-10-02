@@ -26,7 +26,8 @@ IN = (['looper-rec', 'looper-play', 'looper-stop', 'looper-tap', 'knob-learn', '
          'fx-cutoff-r', 'fx-retrig-r', 'reverb-predelay-r']
       + [f'knob-{n}-r' for n in N] + [f'fxin-{n}-r' for n in N]
       + ['bankSelect', 'mainVol', 'l-in-vol', 'r-in-vol',
-         'inputTogL-r', 'inputTogR-r', 'pad-led-echo-r'])
+         'inputTogL-r', 'inputTogR-r', 'pad-led-echo-r',
+         'drummer-mode-r', 'drummer-pause', 'drummer-fill', 'drummer-rebonk', 'drummer-level-r'])
 
 # names the web page listens to (displays, and the send names of the controls above)
 OUT = (['looper-state', 'looper-cnv', 'looper-hint', 'loop-pos', 'loop-len-s', 'looper-layers',
@@ -35,7 +36,8 @@ OUT = (['looper-state', 'looper-cnv', 'looper-hint', 'loop-pos', 'loop-len-s', '
         'fx-cutoff', 'fx-cutoff-r', 'fx-retrig', 'fx-retrig-r', 'reverb-predelay',
         'knobtitle-synth', 'knobtitle-fx', 'knob-page', 'selected-loop-r',
         'bankSelect', 'mainVol', 'l-in-vol', 'r-in-vol',
-        'l-in-sig', 'r-in-sig', 'l-out-db', 'inputTogL', 'inputTogR', 'pad-led-echo']
+        'l-in-sig', 'r-in-sig', 'l-out-db', 'inputTogL', 'inputTogR', 'pad-led-echo',
+        'drummer-cnv', 'drummer-mode', 'drummer-level']
        + [f'lyr-{n}-cnv' for n in N] + [f'lp-vol-{n}' for n in N] + [f'lp-vol-{n}-r' for n in N]
        + [f'knob-{n}' for n in N] + [f'knob-{n}-r' for n in N]
        + [f'fxin-{n}' for n in N] + [f'fxin-{n}-r' for n in N]

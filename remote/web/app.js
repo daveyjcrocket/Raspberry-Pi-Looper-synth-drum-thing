@@ -287,12 +287,21 @@ knob(mk, { sendTo: 'r-in-vol', listen: ['r-in-vol'], label: 'in 2', small: true,
 knob(mk, { sendTo: 'fx-cutoff-r', listen: ['fx-cutoff', 'fx-cutoff-r'], label: 'cutoff', small: true, color: 'var(--c1)', fmt: pct });
 knob(mk, { sendTo: 'fx-retrig-r', listen: ['fx-retrig', 'fx-retrig-r'], label: 'retrigger', small: true, color: 'var(--c2)', fmt: pct });
 knob(mk, { sendTo: 'reverb-predelay-r', listen: ['reverb-predelay'], label: 'pre-delay', small: true, color: 'var(--c4)', min: 0, max: 250, def: 20, fmt: (v) => Math.round(v) + ' ms' });
+// AI drummer: on/off is the data-tgl switch, pause / fill / rebonk are data-bang buttons
+knob($('#drummer-knob'), { sendTo: 'drummer-level-r', listen: ['drummer-level'], label: 'level', small: true, max: 1, def: 0.5, fmt: (v) => Math.round(v * 100) });
+const drum = $('#drummer');
+on('drummer-cnv', 'label', (t) => { drum.textContent = t; });
+on('drummer-cnv', 'color', (c) => {
+  if (typeof c[0] === 'string') drum.style.background = c[0];
+  if (typeof c[1] === 'string') drum.style.color = c[1];
+});
+
 const meter = (id) => { const el = $(id); return (db) => { el.style.height = (clamp((db + 60) / 66, 0, 1) * 100) + '%'; }; };
 on('l-in-sig', 'value', meter('#m-in1'));
 on('r-in-sig', 'value', meter('#m-in2'));
 on('l-out-db', 'value', meter('#m-out'));
 
-// drum pads (display only: they light up when the LX25+ pads are hit)
+// drum pads (display only: they light up when the LX25+ pads are hit; in AI drummer mode they show its controls)
 const pads = $('#pads');
 for (let n = 1; n <= 8; n++) {
   const p = h('div', 'pad', '-');

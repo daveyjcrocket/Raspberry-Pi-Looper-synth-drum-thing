@@ -63,7 +63,12 @@
   "r-in-vol",
   "inputTogL-r",
   "inputTogR-r",
-  "pad-led-echo-r"
+  "pad-led-echo-r",
+  "drummer-mode-r",
+  "drummer-pause",
+  "drummer-fill",
+  "drummer-rebonk",
+  "drummer-level-r"
  ],
  "out": [
   "looper-state",
@@ -102,6 +107,9 @@
   "inputTogL",
   "inputTogR",
   "pad-led-echo",
+  "drummer-cnv",
+  "drummer-mode",
+  "drummer-level",
   "lyr-1-cnv",
   "lyr-2-cnv",
   "lyr-3-cnv",
