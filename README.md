@@ -28,7 +28,7 @@ Two kits come with the project, in `piLooper/kits/`:
 
 Each kit has eight sounds on the LX25+ pads, with the same layout on both pad maps: kick, snare, closed hi-hat, open hi-hat, rimshot, high tom, low tom, ride. See [`piLooper/kits/README.md`](piLooper/kits/README.md) for the pad-to-note map, credits and licenses.
 
-**AI drummer:** with **drummer** ticked, it plays the selected kit along with your loop, a little differently on every pass. **density** and **humanize** sliders shape it. You hear it, but it's never recorded. While it's on, the pads pause it, ask for a fill, or change the groove. The variation comes from a small helper, `drummer/brain.py`, which the start scripts run for you. See the [user manual, section 11](docs/USER_MANUAL.md#11-the-ai-drummer).
+**AI drummer:** with **drummer** ticked, it listens to your first layer for the tempo, the swing and the kind of groove, then plays the selected kit along with your loop, a little differently on every pass, with a fill every few bars. **density** and **humanize** sliders shape it, and **1/2x**, **2x** and **feel** correct what it heard. You hear it, but it's never recorded. While it's on, the pads pause it, ask for a fill, or rebonk (it listens to the band again and changes the groove). The variation comes from a small helper, `drummer/brain.py`, which the start scripts run for you. See the [user manual, section 11](docs/USER_MANUAL.md#11-the-ai-drummer).
 
 Drum banks 2 and 3 still use their own samples, which aren't included. To use them, add `.wav` files to `piLooper/` named `kick_13.wav`–`kick_24.wav`, `snare_13.wav`–`snare_24.wav`, `hh_07.wav`–`hh_12.wav` and `crash_03.wav`–`crash_04.wav`.
 
@@ -80,7 +80,7 @@ Settings, as environment variables:
 | `SAMPLE_RATE` | `48000` | |
 | `AUDIO_BUF` | `20` | Audio buffer in ms. Raise it (e.g. `40`) if you hear clicks |
 | `REMOTE_PORT` | `8080` | Web remote port (with `--remote` / `--headless`) |
-| `DRUMMER_BRAIN` | `1` | `0` = don't start the AI drummer's brain (the drummer then repeats a fixed pattern) |
+| `DRUMMER_BRAIN` | `1` | `0` = don't start the AI drummer's brain (the drummer then doesn't listen and repeats a fixed pattern) |
 
 `scripts/run-pi.sh --list` shows the audio and MIDI devices Pd and ALSA can see.
 

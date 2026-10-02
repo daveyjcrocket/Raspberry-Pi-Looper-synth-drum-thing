@@ -4,8 +4,8 @@ The drummer plays the selected drum kit (instrument banks 0-3; it keeps the last
 synth is selected) in time with the loop. Its output goes to s~ drummer-out, which audio-IO
 adds after the loopers, so it is heard but never recorded.
 
-Timing: on every loop start [r f] it works out the bars in the loop (from the tapped tempo, or
-by assuming roughly 100 bpm 4/4 when the loop is free-length) and steps through it in 16ths.
+Timing: on every loop start [r f] it works out the bars in the loop (from the tempo the brain
+heard in the first layer, else the tapped tempo, else roughly 100 bpm 4/4) and steps through it in 16ths.
 Each step is prepared one 16th AHEAD (drmP = the step being prepared) and its hits are sent
 through [pipe] with delay = one step + swing + the hit's own timing offset, so a hit can land
 a little early or late (humanize). The very first step after the loop starts plays at once.
@@ -19,11 +19,21 @@ for the next pass ("loop <steps> <step-ms> <groove> <density> <humanize> <pass> 
 it answers "drmnext 0 ...", "drmnexttime 0 ...", "drmready <steps> <pass>". When it is late or gone,
 Pd repeats the pattern it has. drmSrc says where the step comes from: 0 fixed, 1 this pass, 2 next.
 
+Listening (only while the brain is connected): while the first layer records, [drummerEars]
+(bonk~ on the band, switched on only while listening) and the MIDI note-ons send their onsets
+to the brain ("listen", "on <ms> <strength> <brightness> <midi>", "heard ..."). It answers
+"drmfeel <bpm> <swing> <groove> <feel>": Pd takes the tempo (bars in the loop), the swing and
+the groove, and re-syncs its 16ths if the loop is already playing. A rebonk listens to the
+whole band for one loop and changes up the groove (without the brain it steps through the library).
+
 Messages:
   drummer-mode 0/1    on = the drummer plays and the drum pads become its controls
   drummer-pause       pause (at the next beat) / resume (at the next bar line)
   drummer-fill        a fill on the last beat of the bar, and an accent on the next downbeat
-  drummer-rebonk      change up the groove (for now: the next groove in the library)
+  drummer-rebonk      change up the groove: listen to the band for one loop and pick a new one
+  drummer-half, drummer-double   the heard tempo was wrong: x1/2 or x2
+  drummer-feel        cycle the feel: as heard, straight, swing, triplet
+  drummer-autofill 0/1  automatic fills every 4 or 8 bars (the brain's)
   drummer-level 0-1, drummer-density 0-1, drummer-humanize 0-1,
   drummer-swing 50-75 (% position of the off-beat 8th; 50 = straight)
   drummer-test-pad N  same as hitting pad N in drummer mode (tests)
@@ -40,6 +50,9 @@ from pdgen import Patch
 from grooves import GROOVES, FILL, ACCENT, fixed_bar
 
 BRAIN_PORT = 9312
+# the "brightness" (0-10, like bonk~'s temperature) of each pad's sound, for listening:
+# kick, snare, hat closed, hat open, rimshot, tom high, tom low, ride
+PAD_BRIGHT = [1, 6, 9, 9, 7, 5, 3, 8]
 p = Patch(1500, 1100)
 O, M, C = p.obj, p.msg, p.conn
 last = lambda: len(p.lines) - 1
@@ -91,12 +104,14 @@ for i, (k, r, f) in enumerate(files):
     w = O('file which', x, y + 22); C(m, w)                 # silent when the file is missing
     C(w, O('list split 1', x, y + 44)); C(last(), M(f'read -resize $1 drk-{k}-{r}', x + 80, y + 44))
     C(last(), sf)
-for i, (name, size) in enumerate([('drmbase', 128), ('drmfillpat', 32), ('drmgroove', 2048),
+for i, (name, size) in enumerate([('drmbase', 128), ('drmfillpat', 32), ('drmpadb', 8), ('drmgroove', 2048),
                                   ('drmtime', 2048), ('drmnext', 2048), ('drmnexttime', 2048)]):
     O(f'table {name} {size}', 1200, 30 + i * 22)
 C(lt, M(f'; drmfillpat 0 {fill_table()}; drmSw 50; drmKit 0; drummer-level 0.5; drmDens 0.5; drmHum 0.3; '
         'drmMode 0; drmPaused 0; drmWant 0; drmAct 0; drmRun 0; drmFillP 0; drmFill 0; drmFm 0; drmAcc 0; '
-        'drmBrain 0; drmGlen 0; drmReadyN 0; drmUp 0; drmLoop 0; drmN 0', 20, 440), 3)
+        'drmBrain 0; drmGlen 0; drmReadyN 0; drmUp 0; drmLoop 0; drmN 0; drmBpm 0; drmTap 0; drmGuess 0; '
+        'drmFeel 0; drmLsn 0; drmAF 1; drmKeep 0; drmKeepN 8; drmL 0; drmLayers 0; '
+        f'drmpadb 0 {" ".join(map(str, PAD_BRIGHT))}', 20, 440), 3)
 C(lt, M('0', 400, 440), 2); C(last(), O('s $0-groove', 400, 465))
 C(lt, M(f'listen {BRAIN_PORT} 127.0.0.1', 460, 465), 1); brainListen = last()
 C(lt, O('s $0-status', 460, 440), 0)
@@ -104,7 +119,7 @@ C(lt, O('s $0-status', 460, 440), 0)
 VALUES = ['drmSw', 'drmKit', 'drmMode', 'drmPaused', 'drmWant', 'drmAct', 'drmRun', 'drmFillP', 'drmFill',
           'drmFm', 'drmAcc', 'drmS', 'drmN', 'drmBeat', 'drmStep', 'drmLen', 'drmBpm', 'drmG', 'drmP', 'drmSrc',
           'drmBase', 'drmSwD', 'drmBrain', 'drmGlen', 'drmReadyN', 'drmUp', 'drmLoop', 'drmLayers', 'drmDens',
-          'drmHum', 'drmLS']
+          'drmHum', 'drmLS', 'drmTap', 'drmGuess', 'drmFeel', 'drmLsn', 'drmAF', 'drmKeep', 'drmKeepN', 'drmL']
 for i, n in enumerate(VALUES):
     O(f'v {n}', 1200 + (i // 16) * 90, 170 + (i % 16) * 22)
 
@@ -130,7 +145,10 @@ C(last(), M('1', 520, 595)); C(last(), O('v drmFillP', 520, 620))
 
 # groove: rebonk steps through the library; the fixed bar goes to drmbase, the brain is asked again
 reb = O('r drummer-rebonk', 700, 520)
-C(reb, O(f'expr (drmG+1) % {len(GROOVES)}', 700, 545)); C(last(), O('s $0-groove', 700, 570))
+rbx = O('expr if(drmUp && drmRun && drmLen >= 100, if(drmLsn, -1, 1), 0)', 620, 532); C(reb, rbx)
+rbs = O('sel 0 1', 620, 545); C(rbx, rbs)
+C(rbs, O('s $0-rebonk-listen', 760, 570), 1)
+C(rbs, O(f'expr (drmG+1) % {len(GROOVES)}', 700, 545), 0); C(last(), O('s $0-groove', 700, 570))
 grv = O('r $0-groove', 700, 600)
 gt = O('t b b f f', 700, 625); C(grv, gt)
 C(gt, O('v drmG', 860, 650), 3)
@@ -149,7 +167,13 @@ lvlLine = O('vline~', 1000, 570); C(lvl, M('$1 30', 1000, 545)); C(last(), lvlLi
 setter('drummer-swing', 'drmSw', 50, 75, False, 1100, 520)
 setter('drummer-density', 'drmDens', 0, 1, True, 1100, 620)
 setter('drummer-humanize', 'drmHum', 0, 1, True, 1100, 720)
-C(O('r looper-layers', 1000, 620), O('v drmLayers', 1000, 645))
+setter('drummer-autofill', 'drmAF', 0, 1, True, 1100, 820)
+for k, (recv, name) in enumerate((('looper-layers', 'drmL'), ('keepActive', 'drmKeep'), ('keepN', 'drmKeepN'))):
+    t = O('t b f', 1000 + k * 70, 645); C(O(f'r {recv}', 1000 + k * 70, 620), t)
+    C(t, O(f'v {name}', 1030 + k * 70, 670), 1); C(t, O('s $0-layers', 1000 + k * 70, 695), 0)
+C(O('r $0-layers', 1000, 720), O('expr if(drmKeep, min(drmL, drmKeepN), drmL)', 1000, 745))
+C(last(), O('change', 1000, 770)); C(last(), O('t b f', 1000, 795)); lyt = last()
+C(lyt, O('v drmLayers', 1060, 820), 1); C(lyt, O('s $0-ask', 1000, 820), 0)
 
 # ---------------- pads: controls in drummer mode ----------------
 ni = O('notein', 20, 900)
@@ -168,7 +192,8 @@ for i, name in enumerate(['drummer-pause', 'drummer-fill', 'drummer-rebonk']):
 
 # ---------------- the brain (drummer/brain.py) on TCP 127.0.0.1:9312 ----------------
 net = O('netreceive', 1700, 545); C(brainListen, net)
-nr = O('route drmnext drmnexttime drmready', 1700, 570); C(net, nr)
+nr = O('route drmnext drmnexttime drmready drmfeel', 1700, 570); C(net, nr)
+C(nr, O('s $0-feel', 2000, 595), 3)
 C(nr, O('s drmnext', 1700, 595), 0); C(nr, O('s drmnexttime', 1780, 595), 1)
 # "drmready <steps> <pass>": only the pass Pd is waiting for (a reply to a request made just
 # before a loop boundary would otherwise be played one pass late)
@@ -179,18 +204,18 @@ C(nc, O('v drmUp', 1800, 645), 2)
 C(nc, O('expr if(drmUp, drmReadyN, 0)', 1750, 670), 1); C(last(), O('v drmReadyN', 1750, 695))
 C(nc, O('t b b', 1700, 720), 0); ct = last()
 C(ct, O('s $0-ask', 1760, 745), 1); C(ct, O('s $0-status', 1700, 745), 0)
-# ask for the next pass: loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers>
+# ask for the next pass: loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills>
 ask = O('r $0-ask', 1700, 790)
 C(ask, O('expr drmUp && drmN > 0', 1700, 815)); asel = O('sel 1', 1700, 840); C(last() - 1, asel)
-ax = O('expr drmN; drmStep; drmG; drmDens; drmHum; drmLoop+1; drmLayers', 1700, 865); C(asel, ax)
-apk = O('pack f f f f f f f', 1700, 890)
-for i in range(7):
+ax = O('expr drmN; drmStep; drmG; drmDens; drmHum; drmLoop+1; drmLayers; drmAF', 1700, 865); C(asel, ax)
+apk = O('pack f f f f f f f f', 1700, 890)
+for i in range(8):
     C(ax, apk, i, i)
 C(apk, O('list prepend send loop', 1700, 915)); C(last(), O('list trim', 1700, 940)); C(last(), net)
 
 # ---------------- loop clock -> 16th steps ----------------
 C(O('r ms', 1250, 520), O('v drmLen', 1250, 545))
-C(O('r tempo-bpm', 1350, 520), O('v drmBpm', 1350, 545))
+C(O('r tempo-bpm', 1350, 520), O('v drmTap', 1350, 545))
 met = O('metro 100', 1250, 800)
 cnt = O('f', 1250, 830); C(met, cnt); C(cnt, O('+ 1', 1300, 830)); C(last(), cnt, 0, 1)
 # Only while the loop plays (OVERDUB, PLAYING, FADING) - not while the first layer records.
@@ -201,8 +226,11 @@ rd = O('delay 0', 1250, 590); C(rf, rd)
 rok = O('expr drmLS>=2 && drmLS<=4 && drmLen>=100', 1150, 600); C(rd, rok)
 rsel = O('sel 1 0', 1150, 612); C(rok, rsel)
 ft = O('t b b b b b b', 1250, 625); C(rsel, ft, 0)
-# 5: bars in the loop: from the tempo, else ~100 bpm in 4/4; more than 16 bars plays half-time
-bars = O('expr if(drmBpm>0, max(1, rint(drmLen*drmBpm/240000)), max(1, rint(drmLen/2400)))', 1250, 650)
+posT = O('timer', 1050, 640); C(rsel, posT, 0, 0)          # ms since this loop started
+# 5: bars in the loop: from the heard tempo, else the tapped one, else ~100 bpm in 4/4;
+# more than 16 bars plays half-time
+bars = O('expr if(drmGuess>0 || drmTap>0, max(1, rint(drmLen*if(drmGuess>0, drmGuess, drmTap)/240000)), '
+         'max(1, rint(drmLen/2400)))', 1250, 650)
 C(ft, bars, 5)
 bx = O('expr if($f1>16, rint($f1/2), $f1)*16', 1250, 675); C(bars, bx)
 nt = O('t f f', 1250, 700); C(bx, nt)
@@ -354,4 +382,159 @@ pt2 = O('t l l', 620, 1595); C(ppk, pt2); C(pt2, fixed, 1, 0); C(pt2, live, 0, 0
 C(fixed, M('color #2e7d32 #ffffff, label $1\\ -\\ $2\\ bpm\\ -\\ fixed', 620, 1645)); C(last(), cnv)
 C(live, M('color #2e7d32 #ffffff, label $1\\ -\\ $2\\ bpm', 820, 1645)); C(last(), cnv)
 
+# ---------------- listening (with the brain): the first layer, or the band after a rebonk ----------------
+# drmLsn: 0 = not listening, 1 = the first layer (while it records), 2 = the band for one loop (rebonk)
+ears = O('drummerEars', 20, 1700)
+lsT = O('timer', 300, 1900)                                   # ms since listening started
+earsOn = O('s drmEarsOn', 420, 1800)
+lst = O('r looper-state', 20, 1750)
+lsx = O('expr if($f1==1, if(drmUp, 1, 4), if(drmLsn==1, if($f1==2 || $f1==3, 2, 3), 0))', 20, 1775); C(lst, lsx)
+lss = O('sel 1 2 3 4', 20, 1800); C(lsx, lss)
+# the first layer starts recording: listen
+l1 = O('t b b b b', 20, 1825); C(lss, l1, 0)
+C(l1, M('; drmLsn 1', 200, 1850), 3); C(l1, lsT, 2)
+C(l1, M('send listen 0 0', 140, 1850), 1); C(last(), net)
+C(l1, M('1', 20, 1850), 0); C(last(), earsOn)
+C(l1, M('color #1f3a5f #ffffff, label listening\\ to\\ layer\\ 1...', 60, 1875), 0); feelCnv = O('s drummer-feel-cnv', 60, 1900)
+C(last() - 1, feelCnv)
+C(lss, M('color #3c3c3c #bdbdbd, label not\\ listening\\ (no\\ brain)', 400, 1850), 3); C(last(), feelCnv)
+# it closed: what was heard?  (closed into OVERDUB or PLAYING; cleared = forget it)
+l2 = O('t b b b', 120, 1925); C(lss, l2, 1)
+C(l2, M('; drmLsn 0', 260, 1950), 2)
+C(l2, M('0', 220, 1950), 1); C(last(), earsOn)
+C(l2, O('expr drmLen; drmTap; drmG', 120, 1950), 0); hx = last()
+hpk = O('pack f f f', 120, 1975); C(hx, hpk, 0, 0); C(hx, hpk, 1, 1); C(hx, hpk, 2, 2)
+C(hpk, M('send heard $1 $2 0 $3', 120, 2000)); C(last(), net)
+l3 = O('t b b', 330, 1925); C(lss, l3, 2)
+C(l3, M('; drmLsn 0', 380, 1950), 1); C(l3, M('0', 330, 1950), 0); C(last(), earsOn)
+
+# rebonk: listen to the band for one loop, starting now (the brain folds it into the loop)
+rbl = O('r $0-rebonk-listen', 600, 1750)
+rb = O('t b b b b b', 600, 1775); C(rbl, rb)
+rbD = O('delay', 600, 1900)
+C(rb, M('; drmLsn 2', 780, 1800), 4)
+C(rb, posT, 3, 1); C(posT, M('send listen 1 $1', 720, 1825)); C(last(), net)
+C(rb, lsT, 2)
+C(rb, M('1', 660, 1825), 1); C(last(), earsOn)
+C(rb, M('color #1f3a5f #ffffff, label listening\\ to\\ the\\ band...', 660, 1850), 1); C(last(), feelCnv)
+C(rb, O('v drmLen', 600, 1825), 0); C(last(), rbD)
+rbe = O('t b b b', 600, 1925); C(rbD, rbe)
+C(rbe, M('; drmLsn 0', 760, 1950), 2)
+C(rbe, M('0', 700, 1950), 1); C(last(), earsOn)
+C(rbe, O('expr drmLen; drmTap; drmG', 600, 1950), 0); hx = last()
+hpk = O('pack f f f', 600, 1975); C(hx, hpk, 0, 0); C(hx, hpk, 1, 1); C(hx, hpk, 2, 2)
+C(hpk, M('send heard $1 $2 1 $3', 600, 2000)); C(last(), net)
+# stop: forget a rebonk in progress. clearAll: forget everything heard.
+rbc = O('t b b', 900, 1775)
+C(O('r stop', 900, 1750), rbc); C(O('r clearAll', 970, 1750), rbc)
+C(rbc, M('stop', 960, 1800), 1); C(last(), rbD)
+C(rbc, O('expr drmLsn==2', 900, 1800), 0); C(last(), O('sel 1', 900, 1825)); C(last(), l3)
+clr = O('t b b', 1050, 1775); C(O('r clearAll', 1050, 1750), clr)
+C(clr, M('; drmGuess 0; drmFeel 0', 1110, 1800), 1)
+C(clr, M('color #3c3c3c #bdbdbd, label listens\\ to\\ layer\\ 1', 1050, 1825), 0); C(last(), feelCnv)
+
+# onsets -> the brain: "on <ms> <strength> <brightness 0-10> <midi 0/1>"
+onq = O('t b l', 300, 2050)
+opk = O('pack f f f f', 300, 2100)
+C(onq, O('unpack f f f', 360, 2075), 1); oun = last()
+C(oun, opk, 2, 3); C(oun, opk, 1, 2); C(oun, opk, 0, 1)
+C(onq, lsT, 0, 1); C(lsT, opk, 0, 0)
+C(opk, M('send on $1 $2 $3 $4', 300, 2125)); C(last(), net)
+# bonk~: "<velocity> <temperature>" (audio)
+C(O('r drmEarsHit', 300, 1975), O('list append 0', 300, 2000)); C(last(), onq)
+# MIDI note-ons, but not the tap pad, nor the pads while they are the drummer's controls.
+# Pads (on the tap pad's channel) are bright by sound; keys by pitch.
+mni = O('notein', 500, 1975)
+mpk = O('pack f f f', 500, 2000); C(mni, mpk, 2, 2); C(mni, mpk, 1, 1); C(mni, mpk, 0, 0)
+mt = O('t l b b', 500, 2025); C(mpk, mt)
+mex = O('expr if(!drmLsn || $f2<=0 || ($f1==$f4 && ($f5==0 || $f3==$f5)), -1, '
+        'if($f5>0 && $f3==$f5 && $f1>=48 && $f1<=63, if(drmMode, -1, drmpadb[($f1-48)%8]), '
+        'min(10, max(0, ($f1-24)/8)))); $f2', 500, 2075)
+C(mt, O('v tap-ch', 640, 2050), 2); C(last(), mex, 0, 4)
+C(mt, O('v tap-note', 580, 2050), 1); C(last(), mex, 0, 3)
+C(mt, mex, 0, 0)
+mpk2 = O('pack f f', 500, 2125); C(mex, mpk2, 1, 1)
+C(mex, O('moses 0', 500, 2100), 0); C(last(), mpk2, 1, 0)
+C(mpk2, M('$2 $1 1', 500, 2150)); C(last(), onq)
+
+# ---------------- the brain's reading: "drmfeel <bpm> <swing> <groove> <feel>" ----------------
+fr = O('r $0-feel', 1000, 1950)
+frt = O('t b l', 1000, 1975); C(fr, frt)
+fu = O('unpack f f f f', 1060, 2000); C(frt, fu, 1)
+newg = O('f', 1120, 2050)
+C(fu, O('v drmFeel', 1240, 2025), 3); C(fu, newg, 2, 1)
+C(fu, O('v drmSw', 1180, 2025), 1); C(fu, O('v drmGuess', 1060, 2025), 0)
+fa = O('t b b b', 1000, 2075); C(frt, fa, 0)
+C(fa, O('s $0-resync', 1100, 2100), 2)                  # 1. the new tempo: re-sync the 16ths
+C(fa, newg, 1); C(newg, O('s $0-groove', 1120, 2100))   # 2. the groove (asks the brain again)
+# 3. show it: "heard 96 bpm - swing 62%" etc.
+C(fa, O('expr drmFeel*2 + (drmSw > 50); rint(drmGuess); drmSw', 1000, 2125), 0); flx = last()
+fpk = O('pack f f f', 1000, 2150); C(flx, fpk, 2, 2); C(flx, fpk, 1, 1); C(flx, fpk, 0, 0)
+frr = O('route 0 1 2 3 4 5 6 7', 1000, 2175); C(fpk, frr)
+for i, lab in enumerate(['heard $1 bpm - straight', 'heard $1 bpm - swing $2%', '$1 bpm - straight',
+                         '$1 bpm - straight', '$1 bpm - swing $2%', '$1 bpm - swing $2%',
+                         '$1 bpm - triplet', '$1 bpm - triplet']):
+    C(frr, M(f'color #263238 #ffffff, label {esc(lab)}', 1000 + i * 60, 2200 + (i % 2) * 25), i)
+    C(last(), feelCnv)
+
+# re-sync: the tempo changed while the loop plays. Work out the new 16ths and carry on from
+# the next one (the pattern for the new length comes from the next loop on).
+rsy = O('r $0-resync', 1500, 1750)
+C(rsy, O('v drmRun', 1500, 1775)); C(last(), O('sel 1', 1500, 1800)); rsel1 = last()
+rs = O('t b b b b b', 1500, 1825); C(rsel1, rs)
+C(rs, bars, 4)
+C(rs, O('expr drmBrain && drmGlen == drmN', 1700, 1850), 3); C(last(), O('v drmBrain', 1700, 1875))
+rsD = O('delay', 1500, 2000)
+C(rs, M('stop', 1640, 1850), 2); C(last(), met)
+C(rs, M('clear', 1600, 1850), 2); C(last(), pipe)
+C(rs, M('stop', 1560, 1850), 2); C(last(), rsD)
+rsT = O('timer', 1400, 1875); C(rsel, rsT, 0, 0)             # ms since this loop started (for the re-sync)
+C(rs, rsT, 1, 1)
+rk = O('expr if(floor($f1/drmStep)+1 < drmN, floor($f1/drmStep)+1, -1); (floor($f1/drmStep)+1)*drmStep - $f1',
+       1500, 1900)
+C(rsT, rk)
+rdl = O('f', 1500, 1975)
+C(rk, O('t f f', 1700, 1925), 1); rdt = last()
+C(rdt, O('v drmBase', 1760, 1950), 1); C(rdt, rdl, 0, 1)
+C(rk, O('moses 0', 1500, 1925), 0); rkt = O('t b f f', 1500, 1950); C(last() - 1, rkt, 1)
+C(rkt, O('v drmP', 1620, 1975), 2)
+C(rkt, cnt, 1, 1)
+rpb = O('t b b b', 1440, 1975); C(rkt, rpb, 0)
+C(rpb, O('v drmBrain', 1380, 2000), 2); C(last(), O('v drmSrc', 1380, 2025))
+C(rpb, O('s $0-prep', 1440, 2025), 1)
+C(rpb, rdl, 0); C(rdl, rsD); C(rsD, met)
+C(rs, O('s $0-status', 1450, 1850), 0)
+# a pending re-sync never outlives the loop clock
+C(stop, M('stop', 1560, 1050), 2); C(last(), rsD)
+
+# corrections: tempo x1/2, x2, and the feel (as heard, straight, swing, triplet)
+C(O('r drummer-half', 1800, 1750), M('-1', 1800, 1775)); C(last(), O('s $0-fix', 1800, 1800))
+C(O('r drummer-double', 1900, 1750), M('1', 1900, 1775)); C(last(), O('s $0-fix', 1900, 1800))
+C(O('r drummer-feel', 2000, 1750), O('t b b', 2000, 1765)); fft = last()
+C(fft, O('expr (drmFeel+1) % 4', 2000, 1780), 1); C(last(), O('v drmFeel', 2000, 1795))
+C(fft, M('0', 2060, 1780), 0); C(last(), O('s $0-fix', 2060, 1800))
+fx = O('r $0-fix', 1800, 1850)
+C(fx, O('expr if(drmUp && drmLen >= 100, $f1, -9)', 1800, 1875)); C(last(), O('moses -5', 1800, 1900))
+fxt = O('t b f', 1800, 1925); C(last() - 1, fxt, 1)
+fpk6 = O('pack f f f f f f', 1800, 1975)
+C(fxt, fpk6, 1, 2)
+C(fxt, O('expr drmLen; drmTap; drmFeel; drmG; drmN/16', 1800, 1950), 0); fxe = last()
+for o, i in ((4, 5), (3, 4), (2, 3), (1, 1), (0, 0)):
+    C(fxe, fpk6, o, i)
+C(fpk6, O('list prepend send fix', 1800, 2000)); C(last(), O('list trim', 1800, 2025)); C(last(), net)
+
 p.save(os.path.join(HERE, '..', 'piLooper', 'drummer.pd'))
+
+# ---------------- drummerEars.pd: bonk~ on the band, switched on only while listening ----------------
+e = Patch(500, 300)
+e.text('The AI drummer listening. See tools/gen_drummer.py (this file is generated).', 20, 5)
+e.text('bonk~ -> <velocity> <temperature> (brightness: kick ~3.5, hats ~7)', 20, 25)
+band = e.obj('r~ drummer-band', 20, 60)
+bonk = e.obj('bonk~', 20, 90); e.conn(band, bonk)
+split = e.obj('list split 1', 120, 120); e.conn(bonk, split, 1)
+e.conn(split, e.obj('s drmEarsHit', 120, 150), 1)
+sw = e.obj('switch~', 300, 120)
+e.conn(e.obj('r drmEarsOn', 300, 60), sw)
+e.conn(e.obj('loadbang', 380, 60), e.msg('0', 380, 90)); e.conn(len(e.lines) - 1, sw)
+e.save(os.path.join(HERE, '..', 'piLooper', 'drummerEars.pd'))
+
