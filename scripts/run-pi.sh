@@ -10,6 +10,8 @@
 #   SAMPLE_RATE  default 48000
 #   AUDIO_BUF    audio buffer in ms; raise it if you hear clicks (default 20)
 #   REMOTE_PORT  web remote port for --remote / --headless (default 8080)
+#   DRUMMER_BRAIN 0 = don't start the AI drummer's brain (drummer/brain.py); the drummer then
+#                plays its fixed grooves without variation (default 1)
 #
 # Options:
 #   --list      show the audio and MIDI devices, then exit
@@ -72,7 +74,12 @@ if [ "$remote" = 1 ]; then
   python3 "$HERE/remote/server.py" --port "${REMOTE_PORT:-8080}" &
   remote_pid=$!
 fi
-trap 'kill "$pd_pid" $remote_pid 2>/dev/null || true' INT TERM EXIT
+brain_pid=""
+if [ "${DRUMMER_BRAIN:-1}" != 0 ]; then
+  python3 "$HERE/drummer/brain.py" &      # varies the AI drummer every pass; idle until the drummer plays
+  brain_pid=$!
+fi
+trap 'kill "$pd_pid" $remote_pid $brain_pid 2>/dev/null || true' INT TERM EXIT
 
 # ALSA client id whose name contains $1 (case-insensitive), from `aconnect $2` output.
 client_id() {

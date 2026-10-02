@@ -68,7 +68,9 @@
   "drummer-pause",
   "drummer-fill",
   "drummer-rebonk",
-  "drummer-level-r"
+  "drummer-level-r",
+  "drummer-density-r",
+  "drummer-humanize-r"
  ],
  "out": [
   "looper-state",
@@ -110,6 +112,8 @@
   "drummer-cnv",
   "drummer-mode",
   "drummer-level",
+  "drummer-density",
+  "drummer-humanize",
   "lyr-1-cnv",
   "lyr-2-cnv",
   "lyr-3-cnv",

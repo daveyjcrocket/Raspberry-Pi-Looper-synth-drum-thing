@@ -53,6 +53,20 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
 - In drummer mode the drum pads are its controls (pause, fill, rebonk) instead of playing the kit.
 - Tested headless with Pd 0.54: hit timing per 16th step, swing, pause/resume, fill, rebonk, fade on Stop, nothing on `s~ input`, and the pad filtering. Not yet tried on the LX25+ or the Pi.
 
+## October 2026: AI drummer, step 2
+
+- **The drummer brain** (`drummer/brain.py`, stdlib Python) writes a new pattern for every pass through the loop. It keeps a memory so the groove drifts like one player rather than re-rolling at random. Every 4th pass may get a pickup into the downbeat.
+- **Two new sliders:** **density** (how busy) and **humanize** (timing drift and velocity), on the front panel and the web remote.
+- **The Pd player looks one 16th ahead**, so the brain's timing offsets can put a hit early as well as late.
+- **Double buffer:** the brain writes `drmnext` and Pd copies it in at the loop start. If the brain is late or gone, Pd repeats what it has. Without the brain, Pd plays the fixed grooves, and the status line ends in "- fixed".
+- **Shared library:** the grooves live in `drummer/grooves.py`, used by both the brain and the generator.
+- **Start scripts:** `run-pi.sh` starts the brain (`DRUMMER_BRAIN=0` turns it off). `run-mac.command` runs it in its Terminal window.
+- **Tests:**
+  - `python3 drummer/test_brain.py`
+  - Real-time Pd runs with the brain: every pass different, knob changes from the next pass, brain killed mid-run → the last pattern repeats.
+  - The no-brain run still matches step 1, except that pause and resume take effect one 16th earlier (the look-ahead).
+- **Generator safety net:** `tools/pdgen.py` now refuses to wire an object to itself (see the gotchas).
+
 ## Architecture
 
 ### Files
@@ -68,6 +82,7 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
 | `tools/gen_gui.py` | Regenerates the front panel **around** `[pd internals]`, leaving that block untouched. |
 | `piLooper/remote.pd`, `remoteOut.pd`, `remote/names.json` from `tools/gen_remote.py` | **Generated:** the Pd end of the web remote, and its allow-list. |
 | `remote/server.py` | Web remote bridge: serves `remote/web/` and relays WebSocket ⇄ Pd (stdlib only). |
+| `drummer/brain.py`, `drummer/grooves.py`, `drummer/test_brain.py` | AI drummer brain (varies the pattern every pass; TCP 127.0.0.1:9312), the shared groove library, and its tests. |
 | `remote/web/` | The web remote page (`index.html`, `style.css`, `app.js`, manifest, icon). No build step. |
 | `scripts/` | Mac and Pi launchers and setup. |
 | `docs/` | User manual, screenshots, these notes. |
@@ -119,10 +134,11 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 | `tempo-bpm`, `tempo-set`, `tempo-click`, `tempo-countin`, `tap-note`/`tap-ch` (values) | tempo | tempo state |
 | `reverb-predelay`, `pitchmod` (signal), `pitchbend-ratio` | effects / wheels | |
 | `looper-cnv`, `looper-hint`, `lyr-N-cnv`, `pad-N-cnv`, `instr-cnv`, `knobtitle-*`, `knob-learn-cnv`, `tap-led` | → screen | display updates |
-| `drummer-mode` (`-r`), `drummer-pause`, `drummer-fill`, `drummer-rebonk`, `drummer-level` (`-r`), `drummer-swing` | → drummer | on/off (pads become controls), pause/resume, fill, change groove, level 0–1, swing 50–75 % |
+| `drummer-mode` (`-r`), `drummer-pause`, `drummer-fill`, `drummer-rebonk`, `drummer-level` / `drummer-density` / `drummer-humanize` (`-r`), `drummer-swing` | → drummer | on/off (pads become controls), pause/resume, fill, change groove, level / density / humanize 0–1, swing 50–75 % |
 | `drummer-cnv`, `drummer-mode-pads` | drummer → | status line; pad display relabels the pads |
 | `drummer-hit` | drummer → its voices | `role*128 + velocity`, after swing (handy for tests) |
-| `drmgroove` (array, 8 values per 16th: kick, snare, hat closed, hat open, rimshot, tom high, tom low, ride), `drmGlen`, `drmSw`, `drmKit` … | drummer state | `[value]`s and arrays named without hyphens so `[expr]` can read them |
+| `drmbase` (fixed bar), `drmgroove` + `drmtime` (this pass), `drmnext` + `drmnexttime` (next pass): 8 values per 16th (kick, snare, hat closed, hat open, rimshot, tom high, tom low, ride), velocity / offset in ms. `drmP` (step being prepared), `drmSrc` (0 fixed, 1 this pass, 2 next), `drmReadyN`, `drmLoop`, `drmUp` … | drummer state | `[value]`s and arrays named without hyphens so `[expr]` can read them |
+| Pd → brain: `loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers>` · brain → Pd: `drmnext 0 …`, `drmnexttime 0 …`, `drmready <steps> <pass>` | TCP 127.0.0.1:9312 (FUDI) | Pd asks at every loop start (and when a slider or rebonk changes) for the NEXT pass; a `drmready` for any other pass is ignored |
 | `remote-out`, `remote-dump` | web remote | `[remoteOut <name>]` reports a name to the bridge; `remote-dump` makes them all repeat their last label / color / value |
 
 ### Conventions and Pd gotchas we hit
@@ -136,7 +152,9 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 - **Sample rate:** samples are played at Pd's rate without resampling, so keep Pd at **48 kHz**.
 - **`[v name]` stores a float without sending it on.** Only a bang makes it output. Put a `[t b f]` in front when the chain has to carry on.
 - **`[expr]` can read `[value]` variables and arrays by name** (`expr drmS % 16`, `drmgroove[$f1]`). The names can't contain hyphens (expr reads `-` as minus), and `$0` doesn't work there. A `; name 5` message sets a `[value]`.
-- **Generator pitfall:** `x = O(...); C(last(), x)` wires `x` to itself, because `last()` is now `x`. That makes a stack overflow in Pd, which silently stops the message chain. Keep a handle on the source object instead. Scan for it with `awk '/^#X connect/{split($0,a," "); if(a[3]==a[5]) print}' piLooper/*.pd`.
+- **Generator pitfall:** `x = O(...); C(last(), x)` wires `x` to itself, because `last()` is now `x`. That makes a stack overflow in Pd, which silently stops the message chain. Keep a handle on the source object instead. `pdgen.conn` now asserts against it.
+- **`[route 0 1]` on a list like `0 rock 120`** outputs `rock 120` as a message with the *selector* `rock`, so `$1` in a message box is then 120, not "rock". Gate with `[spigot]`s instead when the rest of the list starts with a symbol.
+- **One listener per port:** a second Pd (or a leftover one) can't `listen` on 9312 ("Address already in use"). The drummer still plays, as "- fixed". In tests, kill leftover Pd and brain processes first.
 - **Per-user files are git-ignored:** `piLooper/knobmap.txt` (learned Preset knobs), `piLooper/tappad.txt` (learned tap pad), user drum samples.
 
 ### Web remote
@@ -167,6 +185,7 @@ browser ── WebSocket /ws (JSON) ──► remote/server.py ── TCP 127.0.
 - **Offline audio:** `pd -batch -nosound` with a small harness patch, a `[qlist]` script of timed messages and `[writesf~]` to a WAV, analysed with Python for RMS, pitch (Goertzel) and timing.
 - **No MIDI in batch mode.** The controls have test inputs instead (`knobs-inject`, `pads-test-note`, `wheels-test-bend`/`-mod`, `drummer-test-pad <1-8>`), and buttons are simulated with `midi-btn-ctl-in <cc>`.
 - **Drummer timing:** log `[r drummer-hit]` with a `[timer]` to get every hit with its exact logical time. That's more reliable than finding onsets in the rendered audio, because the tom samples have several peaks.
+- **Drummer + brain:** run Pd in real time (`pd -nosound -nogui`, not `-batch`), because in batch mode logical time races ahead of the brain's replies. Start the brain with `python3 drummer/brain.py --seed 1 --verbose &` and kill it by its own PID (`$!` of a `cd … && python3 …` list is the subshell, and `pkill -f` matches your own shell command).
 - **Screenshots:** `Xvfb` plus Pd's normal GUI, captured with `import`.
 
 ## Known issues and loose ends
@@ -307,11 +326,16 @@ In drummer mode:
   - **Controls:** a fill on the last beat of the bar plus a downbeat accent, a hi-hat lift on the last off-beat of the loop, and swing (`drummer-swing`, 50–75 %).
   - **Pause and output:** pause and resume on the beat and bar grid, a level control, and output that is heard but not recorded.
   - **Front panel and web remote:** status line, on switch, pause / fill / rebonk, level. The pad display relabels the pads in drummer mode.
-- [ ] **Step 2: variation every pass.**
-  - The brain (Python, a separate process on its own FUDI port, e.g. 9312) writes a whole-loop pattern into `drmgroove` (up to 256 steps × 8 sounds) and sets `drmGlen`.
-  - Double-buffer it (write `drmnext`, copy on `[r f]`) so a pattern never changes mid-loop.
-  - Knobs for **density** and **humanize**.
-  - Pd keeps playing the last pattern if the brain stops.
+- [x] **Step 2: variation every pass.** Done:
+  - **The brain** (`drummer/brain.py`, TCP 127.0.0.1:9312) writes the next pass's whole-loop pattern (up to 256 steps × 8 sounds, with timing offsets) into `drmnext`. Pd copies it into `drmgroove` at the loop start.
+  - **How it varies:**
+    - The backbone always plays.
+    - Decorations keep last pass's choice 70 % of the time, otherwise they are rolled again at the density-scaled chance (livelier on the loop's last beat).
+    - The hat opens at the turnaround, and every 4th pass may have a pickup.
+    - Humanize gives per-sound timing drift (AR(1); kick tight, snare a touch behind) and velocity spread.
+  - **Pd looks one 16th ahead** (`drmP`), so offsets can be negative. Hits go through `[pipe]` with one step + swing + offset.
+  - **Brain late or gone:** Pd repeats the pattern it has. With no brain at all it plays the fixed grooves (`drmbase`), and the status says "- fixed".
+  - **Ideas left from this step:** show the brain's state on the remote, and send `layers` to the brain (it already does) and use it for intensity (step 4).
 - [ ] **Step 3: listening.** `[bonk~]` and MIDI onsets from layer 1 → the brain → tempo and swing guess (`drummer-swing`), with the ½× / 2× and feel corrections on screen and on the remote.
 - [ ] **Step 4: groove choice from your accents,** automatic fills every 4 or 8 bars, and intensity that follows the layers.
 
