@@ -10,12 +10,15 @@ Pd sends the onsets it hears, then asks for a reading:
     listen <src 0 = first layer, 1 = rebonk> <ms into the loop when listening started>;
     on <ms> <strength> <brightness 0-10> <midi 0/1>;      (one per onset)
     heard <loop-ms> <tapped-bpm or 0> <src> <groove>;
-    fix <loop-ms> <tapped-bpm> <-1 = half, 1 = double, 0> <feel 0-3> <groove> <bars>;
-      -> drmfeel <bpm> <swing %> <groove> <feel>;
+    fix <loop-ms> <tapped-bpm> <-1 = half, 1 = double, 0> <feel 0-3> <groove> <bars> <1 = next meter>;
+      -> drmfeel <bpm> <swing %> <groove> <feel> <scope: 0 = song, 1 = this part>;
 
 Playing. At the start of every loop Pd asks for the pattern of the NEXT loop:
 
-    loop <steps> <step-ms> <groove> <density 0-1> <humanize 0-1> <loop-number> <layers> <auto-fills>;
+    loop <steps> <step-ms> <groove> <density 0-1> <humanize 0-1> <loop-number> <layers> <auto-fills> <part>;
+
+(part 0 = verse, 1 = chorus: busier, ride instead of hats, a crash on every pass). The groove sets
+the meter: 4/4 bars are 16 steps, 3/4 and 6/8 bars 12.
 
 and the brain answers with the whole loop, 8 values per 16th step (one per kit sound):
 
@@ -33,7 +36,7 @@ import argparse, math, os, random, socket, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from grooves import GROOVES, FILLS, FILL_LEAD, ACCENT, KICK, SNARE, HAT, OPEN, RIM, TOM_HI, TOM_LO, RIDE
+from grooves import GROOVES, FILLS, FILLS6, FILL_LEAD, ACCENT, meter_of, KICK, SNARE, HAT, OPEN, RIM, TOM_HI, TOM_LO, RIDE
 from listen import Ears, FEELS
 
 PERSIST = 0.7          # chance a decoration keeps last pass's choice (the rest are rolled again)
@@ -47,11 +50,15 @@ def density_scale(chance, density):
     return min(0.95, chance * (2 * density) ** 1.3)
 
 
-def intensity(density, layers):
-    """Density as the band grows: busier with more layers playing, calmer with fewer."""
-    if layers <= 0:
-        return density
-    return max(0.0, min(1.0, density + 0.1 * (min(layers, 6) - 2)))
+CHORUS_LIFT = 0.25     # the chorus plays this much busier than the verse
+
+
+def intensity(density, layers, part=0):
+    """Density as the band grows: busier with more layers playing, calmer with fewer,
+    and busier in the chorus."""
+    if layers > 0:
+        density += 0.1 * (min(layers, 6) - 2)
+    return max(0.0, min(1.0, density + CHORUS_LIFT * (part == 1)))
 
 
 def phrase_bars(bars, density):
@@ -75,10 +82,13 @@ class Drummer:
         self.cache = {}            # loop number -> the state before it, so a repeat request
                                    # (a knob moved) recomputes that loop instead of evolving twice
 
-    def pattern(self, steps, step_ms, groove, density, humanize, loop_no, layers=0, autofill=1):
-        steps = max(16, min(256, int(steps)))
+    def pattern(self, steps, step_ms, groove, density, humanize, loop_no, layers=0, autofill=1, part=0):
+        """The pattern of one pass: (groove name, velocities, offsets), 8 per 16th step.
+        The groove sets the meter: bars of 16 steps (4/4) or 12 (3/4, 6/8)."""
+        steps = max(12, min(256, int(steps)))
         groove = int(groove) % len(GROOVES)
-        key = (steps, groove)
+        _, S, Q, _ = meter_of(groove)               # steps per bar, per beat
+        key = (steps, groove, part)
         if key != self.key:
             self.key, self.on, self.drift, self.cache = key, {}, [0.0] * 8, {}
         if loop_no in self.cache:
@@ -89,8 +99,8 @@ class Drummer:
         rng = self.rng
         name = GROOVES[groove][0]
         hits = self.ears.groove_for(groove)
-        density = intensity(density, layers)
-        bars = steps // 16
+        density = intensity(density, layers, part)
+        bars = max(1, steps // S)
         vel = [0] * (steps * 8)
         off = [0.0] * (steps * 8)
 
@@ -101,7 +111,7 @@ class Drummer:
                 for step, v, chance in lst:
                     p = density_scale(chance, density)
                     if chance < 1:
-                        if last_bar and step >= 12:
+                        if last_bar and step >= S - Q:
                             p = min(0.95, p * TURNAROUND)
                         k = (bar, role, step)
                         if k in self.on and rng.random() < PERSIST:
@@ -111,17 +121,18 @@ class Drummer:
                         self.on[k] = play
                         if not play:
                             continue
-                    i = (bar * 16 + step) * 8 + role
-                    vel[i] = max(vel[i], v)
-        # low density thins the backbone hats to quarter notes
+                    i = (bar * S + step) * 8 + role
+                    if i < len(vel):
+                        vel[i] = max(vel[i], v)
+        # low density thins the backbone hats to the beat
         if density < 0.2:
             for s in range(steps):
-                if s % 4:
+                if s % Q:
                     for role in (HAT, RIDE):
                         if vel[s * 8 + role] and vel[s * 8 + KICK] == 0 and vel[s * 8 + SNARE] == 0:
                             vel[s * 8 + role] = 0
-        # a big band (4+ layers) and busy: hats move to the ride
-        if layers >= 4 and density >= 0.6 and name in ('rock', 'half-time'):
+        # a big band (4+ layers) and busy, or the chorus: hats move to the ride
+        if (layers >= 4 and density >= 0.6 or part == 1) and name in ('rock', 'half-time', '3/4 rock'):
             for s in range(steps):
                 h = vel[s * 8 + HAT]
                 if h:
@@ -135,10 +146,12 @@ class Drummer:
             for bar in range(bars):
                 n = loop_no * bars + bar
                 if n and n % phrase == 0:
-                    self.accent(vel, bar * 16)
+                    self.accent(vel, bar * S)
                 if (n + 1) % phrase == 0:
-                    self.fill(vel, bar * 16, density)
+                    self.fill(vel, bar * S, S, Q, density)
                     filled_end = filled_end or bar == bars - 1
+        if part == 1:                                # the chorus crashes in on every pass
+            self.accent(vel, 0)
         s = steps - 2
         if not filled_end and vel[s * 8 + HAT] and rng.random() < 0.5 + 0.3 * density:
             vel[s * 8 + OPEN], vel[s * 8 + HAT] = vel[s * 8 + HAT], 0
@@ -164,20 +177,22 @@ class Drummer:
                 vel[i] = int(max(1, min(127, round(v))))
         return name, vel, off
 
-    def fill(self, vel, bar0, density):
-        """A fill at the end of the bar starting at step bar0: the last beat, or the last two
-        when busy. The kit stops for it (except a kick to lead in)."""
-        shape = self.rng.choice(FILLS)
-        two = density >= 0.75 and self.rng.random() < 0.6
-        start = bar0 + (8 if two else 12)
-        for s in range(start, bar0 + 16):
+    def fill(self, vel, bar0, S, Q, density):
+        """A fill on the last beat of the bar starting at step bar0 (S steps a bar, Q a beat),
+        or the last two beats of 4/4 and 3/4 when busy. The kit stops for it (except a kick
+        to lead in)."""
+        shape = self.rng.choice(FILLS6 if Q == 6 else FILLS)
+        two = Q == 4 and density >= 0.75 and self.rng.random() < 0.6
+        last = bar0 + S - Q
+        start = last - Q if two else last
+        for s in range(start, bar0 + S):
             for r in range(8):
                 vel[s * 8 + r] = 0
         if two:
             for role, k, v in FILL_LEAD:
-                vel[(bar0 + 8 + k) * 8 + role] = v
+                vel[(start + k) * 8 + role] = v
         for role, k, v in shape:
-            i = (bar0 + 12 + k) * 8 + role
+            i = (last + k) * 8 + role
             vel[i] = max(vel[i], v)
 
     def accent(self, vel, s):
@@ -200,9 +215,11 @@ def messages(name_vel_off, steps, loop_no):
             + f'drmready {steps} {loop_no};\n')
 
 
-def feel_message(reading, feel):
+def feel_message(reading, feel, scope):
+    """drmfeel <bpm> <swing> <groove> <feel> <scope>: scope 0 = the whole song (both parts),
+    1 = only the part playing (a rebonk)."""
     bpm, swing, groove = reading
-    return f'drmfeel {bpm:.3f} {int(swing)} {int(groove)} {int(feel)};\n'
+    return f'drmfeel {bpm:.3f} {int(swing)} {int(groove)} {int(feel)} {int(scope)};\n'
 
 
 def handle(drummer, a, log=None):
@@ -214,13 +231,14 @@ def handle(drummer, a, log=None):
         return ''
     if cmd == 'loop' and len(x) >= 6:
         steps, step_ms, groove, density, humanize, loop_no = x[:6]
-        layers, autofill = (x[6:8] + [0, 1])[:2] if len(x) < 8 else x[6:8]
+        layers, autofill, part = (x[6:] + [0, 1, 0][len(x) - 6:])[:3]
         t0 = time.perf_counter()
         pat = drummer.pattern(int(steps), step_ms, int(groove), density, humanize, int(loop_no),
-                              int(layers), int(autofill))
+                              int(layers), int(autofill), int(part))
         if log:
-            log(f'loop {int(loop_no)}: {pat[0]}, {int(steps)} steps, density {density:.2f}, humanize '
-                f'{humanize:.2f}, layers {int(layers)}, {(time.perf_counter() - t0) * 1000:.1f} ms')
+            log(f'loop {int(loop_no)}: {pat[0]}{" (chorus)" if part else ""}, {int(steps)} steps, density '
+                f'{density:.2f}, humanize {humanize:.2f}, layers {int(layers)}, '
+                f'{(time.perf_counter() - t0) * 1000:.1f} ms')
         return messages(pat, int(steps), int(loop_no))
     if cmd == 'listen' and len(x) >= 2:
         ears.listen(x[0], x[1])
@@ -232,16 +250,18 @@ def handle(drummer, a, log=None):
             log('onsets (ms strength brightness midi): ' + '  '.join(
                 f'{t:.0f} {w:.0f} {b:.1f} {int(m)}' for t, w, b, m in ears.onsets))
         t0 = time.perf_counter()
-        r = ears.analyse(x[0], x[1], int(x[2]), int(x[3]))
+        src = int(x[2])
+        r = ears.analyse(x[0], x[1], src, int(x[3]))
         if log:
-            log(f'heard {n} onsets in {x[0]:.0f} ms: {r[0]:.1f} bpm, swing {r[1]} %, push {ears.push:+.1f} ms, '
-                f'{GROOVES[r[2]][0]}, {(time.perf_counter() - t0) * 1000:.1f} ms')
-        return feel_message(r, ears.feel)
+            log(f'heard {n} onsets in {x[0]:.0f} ms: {ears.meter}, {r[0]:.1f} bpm, swing {r[1]} %, push '
+                f'{ears.push:+.1f} ms, {GROOVES[r[2]][0]}, {(time.perf_counter() - t0) * 1000:.1f} ms')
+        return feel_message(r, ears.feel, 1 if src == 1 else 0)
     elif cmd == 'fix' and len(x) >= 6 and x[0] > 0:
-        r = ears.fix(x[0], x[1], int(x[2]), int(x[3]), int(x[4]), x[5])
+        meter_step = int(x[6]) if len(x) >= 7 else 0
+        r = ears.fix(x[0], x[1], int(x[2]), int(x[3]), int(x[4]), x[5], meter_step)
         if log:
-            log(f'fix: {r[0]:.1f} bpm, {FEELS[ears.feel]} {r[1]} %')
-        return feel_message(r, ears.feel)
+            log(f'fix: {ears.meter}, {r[0]:.1f} bpm, {FEELS[ears.feel]} {r[1]} %, {GROOVES[r[2]][0]}')
+        return feel_message(r, ears.feel, 0 if meter_step else 1)
     return ''
 
 

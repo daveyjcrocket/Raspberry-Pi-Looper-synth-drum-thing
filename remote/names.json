@@ -74,7 +74,10 @@
   "drummer-half",
   "drummer-double",
   "drummer-feel",
-  "drummer-autofill-r"
+  "drummer-autofill-r",
+  "drummer-verse",
+  "drummer-chorus",
+  "drummer-meter"
  ],
  "out": [
   "looper-state",

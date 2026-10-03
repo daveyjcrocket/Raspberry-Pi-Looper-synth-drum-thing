@@ -3,20 +3,22 @@
 Pd collects the onsets (bonk~ on the band, plus the exact MIDI note-ons) while the first layer
 records, or for one pass after a rebonk, and the brain analyses them here. It is cheap:
 the downbeat and the exact loop length are already known, so "find the tempo" is only
-"how many whole 4/4 bars are in this loop", a dozen or so candidates.
+"how many whole bars of 4/4, 3/4 or 6/8 are in this loop", a few dozen candidates.
 
 Onsets: (time ms from the loop start, strength 0-1, brightness 0-10, midi 0/1).
 Brightness says low (kick, bass: below LOW) or high (snare, hats, chords).
 """
 import math
-from grooves import GROOVES, KICK, SNARE, HAT, OPEN, RIM, RIDE
+from grooves import GROOVES, METERS, METER_ORDER, GROOVE_METER, grooves_in, KICK, SNARE, HAT, OPEN, RIM, RIDE
 
 LOW = 4.5                 # brightness below this is a low hit (bonk~'s temperature: kick ~3.5, hats ~7)
 AUDIO_LATENCY = 10.0      # bonk~ reports an attack about this late, ms
 SIGMA = 10.0              # timing slop of a played note, ms
 MIDI_ECHO = (-15.0, 30.0) # an audio onset this close to a MIDI note is that note again
 RING_MS = 150.0           # a weak low onset this soon after a strong low one is its ring
-BPM_LO, BPM_HI = 60, 180
+BPM_RANGE = {'4/4': (60, 180), '3/4': (60, 180), '6/8': (40, 140)}   # beats per minute
+BPM_HOME = {'4/4': 100, '3/4': 100, '6/8': 70}     # the tempo a loop most likely has
+METER_PRIOR = {'4/4': 0.05, '3/4': 0.0, '6/8': 0.0}
 MAX_BARS = 16             # Pd plays loops longer than this half-time
 FEELS = ['heard', 'straight', 'swing', 'triplet']
 
@@ -56,52 +58,103 @@ def grid(beat, swing):
     return [0.0, (0.25 + d / 2) * beat, swing / 100 * beat, (0.75 + d / 2) * beat]
 
 
+def grid68(beat):
+    """Positions in one 6/8 beat (a dotted quarter): 6 16ths, the 8ths at the even ones."""
+    return [k * beat / 6 for k in range(6)]
+
+
+def positions(meter, beat, swing):
+    return grid68(beat) if meter == '6/8' else grid(beat, swing)
+
+
 def nearest(x, beat, pos):
-    """(index 0-3 in the beat, signed error ms) of the grid point nearest x (0 <= x < beat)."""
+    """(index in the beat, signed error ms) of the grid point nearest x (0 <= x < beat)."""
     best = (0, x)
+    n = len(pos)
     for k, p in enumerate(pos + [beat]):
         e = x - p
         if abs(e) < abs(best[1]):
-            best = (k % 4, e)
+            best = (k % n, e)
     return best
 
 
-def score(ons, length, bars, swing):
-    """How well the onsets sit on this tempo's grid, above what random onsets would score."""
-    beat = length / (4 * bars)
-    pos = grid(beat, swing)
-    sig = min(SIGMA, beat / 12)
+def beat_ms(length, meter, bars):
+    return length / (bars * METERS[meter][2])
+
+
+def bpm_of(length, meter, bars):
+    return 60000 / beat_ms(length, meter, bars)
+
+
+def score(ons, length, bars, swing, meter='4/4'):
+    """How well the onsets sit on this tempo's grid, above what random onsets would score:
+    the 8ths count fully, the 16ths half."""
+    beat = beat_ms(length, meter, bars)
+    pos = positions(meter, beat, swing)
+    eighths = pos[0::2] if meter == '6/8' else [pos[0], pos[2]]
+    sig = min(SIGMA, beat / (3 * len(pos)))
     chance = sig * math.sqrt(2 * math.pi) / beat
     tot = s8 = s16 = 0.0
     for t, w, _ in ons:
         x = t % beat
-        e8 = min(abs(x), abs(x - beat), abs(x - pos[2]))
-        e16 = min(e8, abs(x - pos[1]), abs(x - pos[3]))
+        e8 = min([abs(x - beat)] + [abs(x - p) for p in eighths])
+        e16 = min([e8] + [abs(x - p) for p in pos])
         s8 += w * math.exp(-0.5 * (e8 / sig) ** 2)
         s16 += w * math.exp(-0.5 * (e16 / sig) ** 2)
         tot += w
     if not tot:
         return 0.0
-    return (s8 / tot - 2 * chance) + 0.5 * (s16 / tot - 4 * chance)
+    return (s8 / tot - len(eighths) * chance) + 0.5 * (s16 / tot - len(pos) * chance)
 
 
-def bar_options(length):
-    """Whole-bar counts to try: 60-180 bpm, or the nearest when none fit."""
-    opts = [b for b in range(1, MAX_BARS + 1) if BPM_LO <= 240000 * b / length <= BPM_HI]
-    if not opts:
-        opts = [max(1, min(MAX_BARS, round(length * 100 / 240000)))]
-    return opts
+def accents(ons, length, meter, bars, swing=50):
+    """How the accents fit the meter, two numbers in -1..1:
+    beats: the meter's beats against the 8ths between them (3+3 for 6/8, 2+2+2 for 3/4);
+    downbeat: the bar's first beat against its other beats. Low hits count more."""
+    S, Q, bpb = METERS[meter]
+    beat = beat_ms(length, meter, bars)
+    pos = positions(meter, beat, swing)
+    n = bars * bpb
+    slot = {}
+    for t, w, b in ons:
+        j = int(t // beat)
+        k, e = nearest(t - j * beat, beat, pos)
+        if k == 0 and t - j * beat > beat / 2:
+            j += 1
+        if k % 2 == 0 and abs(e) < beat / (2 * len(pos)):
+            key = (j % n, k)
+            slot[key] = slot.get(key, 0.0) + w * (1.5 if b < LOW else 1.0)
+    on = [slot.get((j, 0), 0.0) for j in range(n)]
+    off = [slot.get((j, k), 0.0) for j in range(n) for k in range(2, len(pos), 2)]
+
+    def contrast(a, b):
+        ma, mb = sum(a) / max(1, len(a)), sum(b) / max(1, len(b))
+        return (ma - mb) / (ma + mb + 1e-9)
+    down = contrast(on[0::bpb], [v for j, v in enumerate(on) if j % bpb]) if bpb > 1 else 0.0
+    return contrast(on, off), down
 
 
-def bars_for(length, bpm):
+def candidates(length, meters=METER_ORDER):
+    """(meter, bars) to try: whole bars at a sensible tempo, or the nearest when none fit."""
+    out = []
+    for m in meters:
+        lo, hi = BPM_RANGE[m]
+        out += [(m, b) for b in range(1, MAX_BARS + 1) if lo <= bpm_of(length, m, b) <= hi]
+    return out or [('4/4', max(1, min(MAX_BARS, round(length * 100 / 240000))))]
+
+
+def bars_for(length, bpm, meter='4/4'):
     """The bar count Pd plays for a tempo (same rounding as drummer.pd)."""
-    return max(1, round(length * bpm / 240000))
+    return max(1, round(length * bpm / (60000 * METERS[meter][2])))
 
 
-def best_swing(ons, length, bars):
-    """Swing 50-75 % that fits best, refined from where the off-beat 8ths really are."""
-    best = max(range(50, 76), key=lambda s: (score(ons, length, bars, s), -s))
-    beat = length / (4 * bars)
+def best_swing(ons, length, bars, meter='4/4'):
+    """Swing 50-75 % that fits best, refined from where the off-beat 8ths really are
+    (6/8 has no swing: its 8ths are triplets already)."""
+    if meter == '6/8':
+        return 50
+    best = max(range(50, 76), key=lambda s: (score(ons, length, bars, s, meter), -s))
+    beat = beat_ms(length, meter, bars)
     pos = grid(beat, best)
     num = den = 0.0
     for t, w, _ in ons:
@@ -114,26 +167,63 @@ def best_swing(ons, length, bars):
     return 50 if s < 54 else int(round(s))
 
 
-def analyse_tempo(ons, length, tap=0):
-    """Bars in the loop: from the tapped tempo, else the best fit with a pull towards ~100 bpm."""
-    if tap > 0:
-        return min(MAX_BARS, bars_for(length, tap))
+EIGHTHS = {'4/4': 8, '3/4': 6, '6/8': 6}     # 8th notes in a bar
+
+
+def pulse_score(ons, length, meter, bars, tapped=False):
+    """Stage 1, the pulse: how well the grid fits, with a pull towards a likely tempo and
+    1/2/4/8-bar loops. A shuffle fits 4/4's swung grid best, a full triplet stream 6/8's."""
+    bpm = bpm_of(length, meter, bars)
+    t = METER_PRIOR[meter]
+    if not tapped:
+        t += -0.15 * (math.log2(bpm / BPM_HOME[meter]) / 0.6) ** 2
+        if bars in (1, 2, 4, 8, 16):        # loops are mostly 1, 2, 4 or 8 bars
+            t += 0.12
+    swings = (50,) if meter == '6/8' else (50, 58, 62, 67)
+    return t + max(score(ons, length, bars, s, meter) for s in swings)
+
+
+def meter_score(ons, length, meter, bars):
+    """Stage 2, the grouping of a pulse: the accents, and the grid once more."""
+    beats, down = accents(ons, length, meter, bars)
+    if meter == '6/8':          # the downbeat against the bar's other quarters, as for 3/4
+        down = accents(ons, length, '3/4', bars)[1]
+    swings = (50,) if meter == '6/8' else (50, 58, 62)
+    return (METER_PRIOR[meter] + 0.5 * beats + 0.5 * down
+            + 0.5 * max(score(ons, length, bars, s, meter) for s in swings))
+
+
+def regroup(ons, length, eighths):
+    """The meters a loop of <eighths> 8th notes can be, in whole bars: [(meter, bars)]."""
+    out = []
+    for m in METER_ORDER:
+        bars = eighths / EIGHTHS[m]
+        if abs(bars - round(bars)) < 0.01 and 1 <= round(bars) <= MAX_BARS:
+            out.append((m, round(bars)))
+    return out
+
+
+def analyse_tempo(ons, length, tap=0, meters=METER_ORDER):
+    """(meter, bars). First the pulse (tapped, or the best fit), then the meter that groups
+    it best: 4/4, 3/4 or 6/8 with the same 8th notes."""
     if len(ons) < 3:
-        return min(MAX_BARS, bars_for(length, 100))
+        m = meters[0]
+        bpm = tap if tap > 0 else BPM_HOME[m]
+        return m, min(MAX_BARS, bars_for(length, bpm, m))
+    if tap > 0:
+        firsts = [(m, min(MAX_BARS, bars_for(length, tap, m))) for m in meters]
+        first = max(firsts, key=lambda c: pulse_score(ons, length, c[0], c[1], True))
+    else:
+        first = max(candidates(length, meters), key=lambda c: pulse_score(ons, length, c[0], c[1]))
+    eighths = first[1] * EIGHTHS[first[0]]
+    opts = [c for c in regroup(ons, length, eighths) if c[0] in meters] or [first]
+    return max(opts, key=lambda c: meter_score(ons, length, c[0], c[1]))
 
-    def total(b):
-        bpm = 240000 * b / length
-        prior = -0.15 * (math.log2(bpm / 100) / 0.6) ** 2
-        if b in (1, 2, 4, 8, 16):        # loops are mostly 1, 2, 4 or 8 bars
-            prior += 0.12
-        return max(score(ons, length, b, s) for s in (50, 58, 62, 67)) + prior
-    return max(bar_options(length), key=total)
 
-
-def push_of(ons, length, bars, swing):
+def push_of(ons, length, bars, swing, meter='4/4'):
     """Average ms the beats are played ahead (-) or behind (+) the grid."""
-    beat = length / (4 * bars)
-    pos = grid(beat, swing)
+    beat = beat_ms(length, meter, bars)
+    pos = positions(meter, beat, swing)
     num = den = 0.0
     for t, w, _ in ons:
         k, e = nearest(t % beat, beat, pos)
@@ -143,48 +233,56 @@ def push_of(ons, length, bars, swing):
     return max(-15.0, min(15.0, num / den)) if den >= 0.5 else 0.0
 
 
-def histogram(ons, length, bars, swing):
-    """The onsets folded into one bar of 16ths: (low[16], high[16]), strength per bar."""
-    beat = length / (4 * bars)
-    pos = grid(beat, swing)
-    low, high = [0.0] * 16, [0.0] * 16
+def histogram(ons, length, bars, swing, meter='4/4'):
+    """The onsets folded into one bar of 16ths: (low[S], high[S]), strength per bar."""
+    S, Q, _ = METERS[meter]
+    beat = beat_ms(length, meter, bars)
+    pos = positions(meter, beat, swing)
+    low, high = [0.0] * S, [0.0] * S
     for t, w, b in ons:
         i = int(t // beat)
         x = t - i * beat
         k, _ = nearest(x, beat, pos)
         if k == 0 and x > beat / 2:          # nearest is the next beat
             i += 1
-        step = (i * 4 + k) % 16
+        step = (i * Q + k) % S
         (low if b < LOW else high)[step] += w / bars
     return low, high
 
 
-def features(low, high, bars, length):
+def features(low, high, bars, length, meter='4/4'):
+    S, Q, bpb = METERS[meter]
     both = [a + b for a, b in zip(low, high)]
     tot = sum(both) or 1e-9
-    beats = 4
     lmax = max(low) or 1e-9
     return {
-        'activity': sum(1 for v in both if v > 0.15) / beats,     # busy 16th slots per beat
-        'odd16': sum(both[i] for i in range(1, 16, 2)) / tot,
-        'off8': sum(both[i] for i in range(2, 16, 4)) / tot,
-        'four': min(low[i] for i in (0, 4, 8, 12)) / lmax if max(low) > 0.2 else 0.0,
-        'bpm': 240000 * bars / length,
+        'activity': sum(1 for v in both if v > 0.15) / bpb,       # busy 16th slots per beat
+        'odd16': sum(both[i] for i in range(1, S, 2)) / tot,
+        'four': min(low[i] for i in range(0, S, Q)) / lmax if max(low) > 0.2 else 0.0,
+        'bpm': 60000 * bars * bpb / length,
     }
 
 
-def choose_groove(f, swing, exclude=None):
-    """Score the groove library against what was heard: 16ths -> funk, a kick on every beat ->
-    four on the floor, sparse -> half-time, swung -> ride, else rock."""
-    names = [n for n, _ in GROOVES]
+def choose_groove(f, swing, exclude=None, meter='4/4'):
+    """Score the meter's grooves against what was heard.
+    4/4: 16ths -> funk, a kick on every beat -> four on the floor, sparse -> half-time,
+    swung -> ride, else rock.  3/4: sparse -> waltz, swung -> jazz waltz, else 3/4 rock.
+    6/8: busy -> 6/8 rock, else the ballad (6/8 blues for a change)."""
+    a = f['activity']
     sc = {
         'rock': 1.0,
-        'funk': 0.5 + 2.2 * f['odd16'] + (0.2 if f['activity'] >= 2.5 else 0),
+        'funk': 0.5 + 2.2 * f['odd16'] + (0.2 if a >= 2.5 else 0),
         'four on the floor': 0.4 + 1.1 * f['four'],
-        'half-time': 0.5 + 0.8 * max(0.0, 1.5 - f['activity']) + (0.3 if f['bpm'] > 135 else 0),
+        'half-time': 0.5 + 0.8 * max(0.0, 1.5 - a) + (0.3 if f['bpm'] > 135 else 0),
         'ride': 0.4 + 0.06 * (swing - 50),
+        '3/4 rock': 1.0,
+        'waltz': 0.6 + 0.8 * max(0.0, 1.6 - a),
+        'jazz waltz': 0.4 + 0.07 * (swing - 50),
+        '6/8 ballad': 1.0,
+        '6/8 rock': 0.4 + 0.3 * a,
+        '6/8 blues': 0.9,
     }
-    order = sorted(range(len(names)), key=lambda i: -sc.get(names[i], 0))
+    order = sorted(grooves_in(meter), key=lambda i: -sc.get(GROOVES[i][0], 0))
     for i in order:
         if i != exclude:
             return i
@@ -202,7 +300,8 @@ def fit_groove(groove, low, high):
     kicks = {s for s, _, _ in g.get(KICK, [])}
     lmax = max(low)
     if lmax > 0.3 * mx:
-        strong = sorted((s for s in range(16) if low[s] >= 0.5 * lmax and s not in kicks), key=lambda s: -low[s])
+        strong = sorted((s for s in range(len(low)) if low[s] >= 0.5 * lmax and s not in kicks),
+                        key=lambda s: -low[s])
         g[KICK] = g.get(KICK, []) + [(s, 95, 0.7) for s in strong[:3]]
     for role in (SNARE, HAT, OPEN, RIM, RIDE):
         if role not in g:
@@ -218,11 +317,11 @@ def fit_groove(groove, low, high):
 
 
 class Ears:
-    """What the drummer heard, and the current reading of it (bars, swing, feel, groove)."""
+    """What the drummer heard, and the current reading of it (meter, bars, swing, feel, groove)."""
 
     def __init__(self):
         self.onsets, self.offset, self.src = [], 0.0, 0
-        self.length, self.bars, self.measured, self.feel = 0.0, 0, 50, 0
+        self.length, self.meter, self.bars, self.measured, self.feel = 0.0, '4/4', 0, 50, 0
         self.push, self.groove, self.fitted = 0.0, None, {}
         self.heard = []           # the prepared onsets of the last analysis
 
@@ -237,51 +336,71 @@ class Ears:
         self.onsets.append((t + self.offset, w, bright, midi))
 
     def swing(self):
+        if self.meter == '6/8':
+            return 50
         return [self.measured, 50, self.measured if 55 <= self.measured <= 64 else 60, 67][self.feel]
 
+    def refit(self, exclude=None, choose=True):
+        """Swing, push and (if choose) the groove for the current meter and bars, from what was heard."""
+        L, m, b = self.length, self.meter, self.bars
+        self.measured = best_swing(self.heard, L, b, m)
+        self.push = push_of(self.heard, L, b, self.measured, m)
+        low, high = histogram(self.heard, L, b, self.measured, m)
+        if choose:
+            self.groove = choose_groove(features(low, high, b, L, m), self.measured, exclude, m)
+        self.fitted = {self.groove: fit_groove(GROOVES[self.groove][1], low, high)}
+
     def analyse(self, length, tap, src, groove):
-        """After listening: returns (bpm, swing, groove)."""
+        """After listening: returns (bpm, swing, groove). A rebonk (src 1) keeps the meter and
+        tempo and picks a different groove."""
+        groove = int(groove) % len(GROOVES)
         ons = prepare(self.onsets, length)
         self.onsets = []
         if src == 0 or not self.bars or abs(length - self.length) > 1:
-            self.bars = analyse_tempo(ons, length, tap)
+            self.meter, self.bars = analyse_tempo(ons, length, tap)
+        else:
+            self.meter = GROOVE_METER[groove]
         self.length = length
         if ons:
             self.heard = ons
-            self.measured = best_swing(ons, length, self.bars)
-            self.push = push_of(ons, length, self.bars, self.measured)
-            low, high = histogram(ons, length, self.bars, self.measured)
-            f = features(low, high, self.bars, length)
-            g = choose_groove(f, self.measured, exclude=int(groove) if src == 1 else None)
-            self.fitted = {g: fit_groove(GROOVES[g][1], low, high)}
-            self.groove = g
+            self.refit(exclude=groove if src == 1 else None)
         elif src == 1:            # rebonk heard nothing: just change up the groove
-            self.groove = (int(groove) + 1) % len(GROOVES)
+            same = grooves_in(self.meter)
+            self.groove = same[(same.index(groove) + 1) % len(same)] if groove in same else same[0]
         else:
-            self.groove = int(groove)
+            self.groove = groove if GROOVE_METER[groove] == self.meter else grooves_in(self.meter)[0]
         return self.reading()
 
-    def fix(self, length, tap, direction, feel, groove, bars):
-        """The player's corrections: tempo x1/2 (-1) or x2 (+1), and the feel 0-3."""
+    def fix(self, length, tap, direction, feel, groove, bars, meter_step=0):
+        """The player's corrections: tempo x1/2 (-1) or x2 (+1), the feel 0-3, and the next
+        meter (4/4 -> 3/4 -> 6/8)."""
+        groove = int(groove) % len(GROOVES)
         if abs(length - self.length) > 1 or not self.bars:
-            self.length, self.bars = length, max(1, int(bars) or bars_for(length, tap or 100))
+            self.length, self.meter = length, GROOVE_METER[groove]
+            self.bars = max(1, int(bars) or bars_for(length, tap or BPM_HOME[self.meter], self.meter))
+        if self.groove is None or GROOVE_METER[self.groove] != self.meter:
+            self.groove = groove
         if direction < 0 and self.bars > 1:
             self.bars = max(1, round(self.bars / 2))
         elif direction > 0 and self.bars * 2 <= MAX_BARS:
             self.bars *= 2
         self.feel = int(feel) % len(FEELS)
-        if direction and self.heard:
-            self.measured = best_swing(self.heard, length, self.bars)
-            self.push = push_of(self.heard, length, self.bars, self.measured)
-            low, high = histogram(self.heard, length, self.bars, self.measured)
-            g = self.groove if self.groove is not None else int(groove)
-            self.fitted = {g: fit_groove(GROOVES[g][1], low, high)}
-        if self.groove is None:
-            self.groove = int(groove)
+        if meter_step:
+            old, beats = self.meter, self.bars * METERS[self.meter][2]
+            self.meter = METER_ORDER[(METER_ORDER.index(old) + 1) % len(METER_ORDER)]
+            if {old, self.meter} == {'3/4', '6/8'}:       # same bar of 6 eighths
+                pass
+            else:                                           # keep the beat
+                self.bars = max(1, min(MAX_BARS, round(beats / METERS[self.meter][2])))
+        if direction or meter_step:
+            if self.heard:
+                self.refit(choose=bool(meter_step))
+            elif meter_step:
+                self.groove, self.fitted = grooves_in(self.meter)[0], {}
         return self.reading()
 
     def reading(self):
-        return 240000 * self.bars / self.length, self.swing(), self.groove
+        return bpm_of(self.length, self.meter, self.bars), self.swing(), self.groove
 
     def groove_for(self, g):
         """The groove to vary: the fitted one when it is the groove playing, else the library's."""

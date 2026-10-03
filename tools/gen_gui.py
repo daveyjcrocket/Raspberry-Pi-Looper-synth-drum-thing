@@ -139,6 +139,13 @@ for k, (name, label) in enumerate((('drummer-half', '1/2x'), ('drummer-double', 
 cnv(770, 659, 170, 18, 'drummer-feel-cnv', 'listens to layer 1', 6, 9, 10, '#3c3c3c', '#bdbdbd')
 A('#X obj 948 661 tgl 14 1 drummer-autofill drummer-autofill-r fills 16 7 0 10 #fcfcfc #000000 #000000 1 1;')
 
+# AI drummer, second row (under the drum pads): song parts, meter, footswitches
+A('#X obj 10 645 bng 15 250 50 0 drummer-verse empty verse 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 70 645 bng 15 250 50 0 drummer-chorus empty chorus 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 140 645 bng 15 250 50 0 drummer-meter empty meter\\ (4/4\\ 3/4\\ 6/8) 17 7 0 10 #fcfcfc #000000 #000000;')
+A('#X obj 300 645 bng 15 250 50 0 drummer-fs-learn empty learn\\ footswitches 17 7 0 10 #fcfcfc #000000 #000000;')
+cnv(440, 644, 300, 18, 'drummer-fs-cnv', 'footswitch: sustain pedal = fill', 6, 9, 10, '#2a2a2a', '#dddddd')
+
 # ---------------- hidden helpers (off-screen) ----------------
 A(f'#X obj {W + 40} 60 declare -lib zexy;')
 A(f'#X obj {W + 40} 90 instrumentName;')

@@ -78,7 +78,7 @@ Set their gain with the knobs on the UMC22. The **IN1/IN2** meters in the bottom
 
 Next to the looper controls are **learn knobs** (section 7) and two master effects. **Master cutoff** is a low-pass filter over everything you play: lower it for a darker, muffled sound. **Retrigger** is a stutter effect that repeats short slices in time with the loop.
 
-**DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth. With the **AI drummer** on, they turn dark and show its controls instead: **pause**, **fill** and **rebonk** (section 11).
+**DRUM PADS.** A row of eight pads that flash when you hit them. They're colored by drum kit: GMRock orange, Virtuosity teal, your own kits 2 and 3 purple and blue. They turn grey when a synth is selected, because the pads then play that synth. With the **AI drummer** on, they turn dark and show its controls instead: **pause**, **fill**, **rebonk** and **verse/chor** (section 11).
 
 ![Drum pads with the GMRock kit, two pads being hit](img/pads.png)
 
@@ -87,13 +87,13 @@ Next to the looper controls are **learn knobs** (section 7) and two master effec
 - **INSTRUMENT BANK:** the selected instrument is filled in. Change it with the LX25+ **Patch − / +** buttons.
 - **Meters:** IN1, IN2 and OUT.
 - **LEVELS:** display only. They show main volume, input gains and FX sends.
-- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk**, and its **level**, **density** and **humanize**. Next to and below them: the **1/2x**, **2x** and **feel** corrections, what it heard (tempo and feel), and the **fills** switch. See section 11.
+- **AI drummer** (bottom): its status line, the **drummer** switch, **pause**, **fill**, **rebonk**, and its **level**, **density** and **humanize**. Next to and below them: the **1/2x**, **2x** and **feel** corrections, what it heard (tempo and feel), and the **fills** switch. Under the drum pads: **verse**, **chorus**, **meter** and **learn footswitches**. See section 11.
 
 ## 3. LX25+ controls
 
 | LX25+ control | What it does |
 |---|---|
-| **Keys / pads** | Play the selected instrument (drum kits respond to the pads and to keys C3-D#4). The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). With the AI drummer on, pads 1–3 control it instead (section 11). |
+| **Keys / pads** | Play the selected instrument (drum kits respond to the pads and to keys C3-D#4). The pads play the drum kits (see [kits/README](../piLooper/kits/README.md) for the pad layout). With the AI drummer on, pads 1–4 control it instead (section 11). A sustain pedal plays a drummer fill (section 11). |
 | **Record** | Start recording. Press again to set the loop length and start the next layer. Each later press starts a new layer. |
 | **Play** | Play-through: stop recording and keep the loop going, so you can play along without adding to it. It also restarts after a Stop. |
 | **Stop** | Fade out over one loop, then stop. **Press again** to stop immediately. **Press while stopped** to clear everything. |
@@ -266,9 +266,10 @@ The AI drummer plays a drum part along with your loop, on the drum kit you picke
 
 From your first layer it works out:
 
-- **the tempo:** how many bars are in the loop. With a tapped tempo (section 5) it uses yours.
+- **the meter:** **4/4**, **3/4** (a waltz) or **6/8** (two groups of three 8ths, like a slow blues or a ballad in 12/8). It goes by where your strong notes fall: every 4 beats, every 3, or in threes of 8th notes.
+- **the tempo:** how many bars are in the loop. With a tapped tempo (section 5) it uses yours. In 6/8 the tempo counts the dotted quarters (two beats per bar).
 - **the swing:** where your off-beats fall, from straight (50%) to a full triplet shuffle (67%). It also copies whether you play a little ahead of the beat or lay back.
-- **the groove:** busy 16ths get *funk*, a low note on every beat *four on the floor*, sparse playing *half-time*, a swung feel the *ride*, and everything else *rock*. It also puts kicks under your strongest low notes and fills the gaps you leave rather than playing over your accents.
+- **the groove:** in 4/4, busy 16ths get *funk*, a low note on every beat *four on the floor*, sparse playing *half-time*, a swung feel the *ride*, and everything else *rock*. In 3/4: *waltz* (sparse), *jazz waltz* (swung) or *3/4 rock*. In 6/8: *6/8 ballad*, *6/8 rock* (busy) or *6/8 blues*. It also puts kicks under your strongest low notes and fills the gaps you leave rather than playing over your accents.
 
 It listens to everything that goes into the loop (microphone, guitar, synths) and takes the notes you play on the keys and pads straight from MIDI, which is exact.
 
@@ -278,9 +279,19 @@ It listens to everything that goes into the loop (microphone, guitar, synths) an
 |---|---|
 | **1/2x** | Half the tempo (it heard your 8th notes as beats). |
 | **2x** | Double the tempo (it heard every other beat). |
-| **feel** | Steps through *as heard*, *straight*, *swing* and *triplet*. |
+| **feel** | Steps through *as heard*, *straight*, *swing* and *triplet* (4/4 and 3/4). |
+| **meter** | The next meter: 4/4 → 3/4 → 6/8 (under the drum pads; also on the web remote). Going between 4/4 and 3/4 or 6/8 keeps the beat; between 3/4 and 6/8 it keeps the bar. |
 
-A tapped tempo avoids most tempo mistakes. Changes take effect at once, and the drummer stays in time.
+A tapped tempo avoids most tempo mistakes. Changes take effect at once, and the drummer stays in time. A shuffle can come out as 6/8 and a sparse waltz as 6/8 at half speed. That's what **meter** and **1/2x** / **2x** are for.
+
+### Verse and chorus
+
+The drummer knows two song parts, each with its own groove:
+
+- **verse:** the groove it heard, as above.
+- **chorus:** the same groove, bigger: busier, on the ride instead of the hi-hat (rock and half-time), with a crash at the start of every pass. **rebonk** while the chorus plays gives the chorus a groove of its own.
+
+Click **verse** or **chorus** (under the drum pads, or on the web remote), or hit pad 4 or a footswitch to go to the other part. While it plays, the drummer finishes the bar with a fill and starts the new part on the next bar line, so you can call the change a beat or two early. The status line ends in *- chorus* while the chorus plays. Your loop doesn't change; it's the drums that lift the song. Clearing the song goes back to the verse.
 
 ### Different on every pass
 
@@ -300,7 +311,7 @@ The listening and the variation come from a small helper program, the **drummer 
 
 - the status line ends in ***- fixed***, and the drummer repeats the same pattern every pass
 - it doesn't listen (*not listening (no brain)*): it guesses the bars from the loop length, assuming about 100 bpm in 4/4, or uses your tapped tempo
-- there are no auto fills, and rebonk simply steps to the next groove
+- it stays in 4/4 (the meter comes from the brain), there are no auto fills, the chorus is just the same fixed groove, and rebonk simply steps to the next groove
 
 Slider changes and rebonk take effect from the next pass.
 
@@ -312,16 +323,26 @@ While the drummer is on, **the drum pads become its controls** and stop playing 
 |---|---|
 | **1 pause** | Pause: it stops on the next beat. Hit again to resume: it comes back in on the next bar line, so it's always in time. |
 | **2 fill** | A fill on the last beat of the bar, then an accent on the next downbeat. |
-| **3 rebonk** | Change up the groove: it listens to the whole band (all your layers plus what you're playing) for one loop, then switches to a different groove that fits. |
-| 4–7 | Nothing yet. |
+| **3 rebonk** | Change up the groove: it listens to the whole band (all your layers plus what you're playing) for one loop, then switches to a different groove that fits, in the same meter. |
+| **4 verse/chor** | Go to the other song part (verse ↔ chorus), with a fill into it. |
+| 5–7 | Nothing yet. |
 
-It's the same on both pad maps, and pad 8 on pad map 2 is still the tap pad. The keys play as usual, including the kit when a drum bank is selected. **pause**, **fill** and **rebonk** are also on screen and on the web remote. Untick **drummer** to hand the pads back to the kit.
+It's the same on both pad maps, and pad 8 on pad map 2 is still the tap pad. The keys play as usual, including the kit when a drum bank is selected. **pause**, **fill**, **rebonk**, **verse** and **chorus** are also on screen and on the web remote. Untick **drummer** to hand the pads back to the kit.
 
 - **Level:** the **level** slider sets the drummer's volume. It also follows the main volume.
 - **Stop:** the drummer fades out with the loop and stops with it. It comes back in when the loop plays again. Clearing the song makes it forget what it heard.
 - **Mic and speakers:** the drummer comes out of your speakers, so a microphone can pick it up while you overdub. Use headphones, or pause the drummer while you record through the mic. It also hears itself that way when you rebonk.
 
 The pads are told apart from the keys by their MIDI channel, which the patch takes from the tap pad (channel 10 by default). If the pads keep playing drums with the drummer on, **learn tap pad** again (section 5).
+
+### Footswitches
+
+Control the drummer with your feet: any MIDI footswitch that sends a control change (CC) or a program change works, for example a sustain pedal plugged into the LX25+, or a MIDI foot controller.
+
+- **Out of the box:** a sustain pedal in the LX25+ (CC 64) plays a **fill**.
+- **Learn your own:** click **learn footswitches** (under the drum pads). The line next to it asks for each action in turn: press the footswitch for **pause**, then **fill**, **rebonk** and **verse/chorus**. Click **learn footswitches** again to stop early; the actions you skipped keep what they had. The switches are saved in `piLooper/footswitch.txt` and loaded every time.
+
+A switch counts when it sends a value of 64 or more (a press), so set momentary switches to send 127 when pressed and 0 when released. Program changes count every time. The switch matches on its channel too. Footswitches work whether or not the drummer is playing: pause needs the drummer on, a fill needs it playing, and verse/chorus can be set up before the loop starts.
 
 ## 12. Troubleshooting
 
@@ -334,6 +355,8 @@ The pads are told apart from the keys by their MIDI channel, which the patch tak
 | Auto-record doesn't start | Lower the threshold, or press **Record**. |
 | Pads play the kit with the AI drummer on, or don't control it | The patch finds the pads by the tap pad's MIDI channel: click **learn tap pad** and hit pad 8 (pad map 2). |
 | The drummer plays at double or half speed, or swings when you don't | It misheard your first layer. Use **1/2x**, **2x** or **feel** (section 11), or tap the tempo before you record. |
+| The drummer plays in 3 when the song is in 4 (or the other way) | Click **meter** until it's right (4/4 → 3/4 → 6/8). |
+| A footswitch does nothing, or triggers on release | Learn it again (**learn footswitches**), and set it to momentary, sending 127 when pressed. |
 | The drummer's status ends in "- fixed" | The drummer brain isn't running, so the pattern doesn't change from pass to pass. Start the patch with `scripts/run-pi.sh` (or `run-mac.command` on the Mac, and keep its window open), or run `python3 drummer/brain.py` yourself. |
 | Drums sound out of tune | Pd must run at 48 kHz (Media → Audio Settings on a Mac; the Pi script sets it). |
 | The phone can't open the remote | Check the phone is on the same Wi-Fi and use the address the script prints (the IP address works when `.local` names don't). |

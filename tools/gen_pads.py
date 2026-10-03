@@ -2,7 +2,7 @@
 
 Pads 1-8 = notes 56-63 (pad map 1) and 48-55 (pad map 2), as used by the drum kits.
 Each drum kit has its own color; the pads go grey when a non-drum instrument is selected.
-In AI drummer mode the pads show the drummer's controls (pause / resume, fill, rebonk).
+In AI drummer mode the pads show the drummer's controls (pause / resume, fill, rebonk, verse / chorus).
 Optional (toggle pad-led-echo, off by default): echo pad notes back to the keyboard, with a
 different velocity per kit, for controllers that light their pads from incoming MIDI.
 """
@@ -21,7 +21,7 @@ LOOK = [('#6d3a0f', '#ff9800', '#ffe0b2', 127), ('#0b4a45', '#1de9b6', '#b2dfdb'
         ('#3c3c3c', '#9e9e9e', '#8c8c8c', 0), ('#263238', '#ffeb3b', '#ffffff', 127)]
 DRUMS = ['kick', 'snare', 'hat closed', 'hat open', 'rimshot', 'tom high', 'tom low', 'ride']
 NAMES = [DRUMS, DRUMS, [f'pad {i}' for i in range(1, 9)], [f'pad {i}' for i in range(1, 9)], ['-'] * 8,
-         ['pause', 'fill', 'rebonk'] + ['-'] * 5]
+         ['pause', 'fill', 'rebonk', 'verse/chor'] + ['-'] * 4]
 esc = lambda t: t.replace(' ', '\\ ')
 
 # ---- current kit (0-3, 4 = none, 5 = AI drummer mode) -> resting look + labels for all pads ----

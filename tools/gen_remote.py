@@ -29,7 +29,7 @@ IN = (['looper-rec', 'looper-play', 'looper-stop', 'looper-tap', 'knob-learn', '
          'inputTogL-r', 'inputTogR-r', 'pad-led-echo-r',
          'drummer-mode-r', 'drummer-pause', 'drummer-fill', 'drummer-rebonk', 'drummer-level-r',
          'drummer-density-r', 'drummer-humanize-r', 'drummer-half', 'drummer-double', 'drummer-feel',
-         'drummer-autofill-r'])
+         'drummer-autofill-r', 'drummer-verse', 'drummer-chorus', 'drummer-meter'])
 
 # names the web page listens to (displays, and the send names of the controls above)
 OUT = (['looper-state', 'looper-cnv', 'looper-hint', 'loop-pos', 'loop-len-s', 'looper-layers',
