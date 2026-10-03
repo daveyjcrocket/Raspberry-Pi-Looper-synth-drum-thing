@@ -83,6 +83,35 @@ Everything was tested headless with Pure Data 0.54: offline renders, simulated M
   - A full LiveLoopSynth run with the brain (silent input): no new errors.
 - Not yet tried on real instruments, the LX25+ or the Pi.
 
+## October 2026: meters, verse / chorus, footswitches
+
+- **Meters:** six new grooves, *waltz*, *3/4 rock*, *jazz waltz* (3/4, 12 steps a bar) and *6/8 ballad*, *6/8 rock*, *6/8 blues* (6/8, 12 steps, two dotted-quarter beats of 6).
+  - **The groove carries the meter** (`GROOVE_METER` in `drummer/grooves.py`). Pd sets `drmBarS` / `drmBeatS` / `drmBpb` / `drmBarMs` with the groove's fixed bar.
+  - **The Pd player is meter-aware:** geometry, pause on the beat, resume on the bar, fills on the bar's last beat (a 6-step fill table in 6/8), swing only with beats of 4.
+- **Hearing the meter** (`drummer/listen.py`) is two stages:
+  - **The pulse:** grid fit plus tempo and bar-count priors over every (meter, bars) candidate.
+  - **The grouping:** among the meters that fit that 8th note in whole bars, pick by the accents. That means the downbeat against the other beats, and the beats against the 8ths between them (3+3 is 6/8, 2+2+2 is 3/4).
+  - **Results** on synthetic loops: 4/4, 3/4 and 6/8 are read right. Misses are the inherent ones: a quarter-note waltz at 150 reads as 6/8 at half speed, and triplet streams read as 6/8.
+  - **The `meter` correction** cycles 4/4 → 3/4 → 6/8.
+- **Verse / chorus:**
+  - Two parts, each with its own groove (`drmGA`, `drmGB`).
+  - **verse**, **chorus**, pad 4 or a footswitch asks for the other part. While playing, it waits for a fill and switches on the next bar line, playing the part's fixed groove for the rest of that pass; the brain takes over from the next pass.
+  - The chorus is busier, on the ride, and crashes on every pass. A rebonk changes only the current part's groove (`drmfeel … <scope>`).
+- **Footswitches:**
+  - A CC (value ≥ 64) or program change, matched with its channel.
+  - **learn footswitches** steps through pause, fill, rebonk and verse/chorus, and saves to `piLooper/footswitch.txt` (git-ignored).
+  - Default: CC 64 (the LX25+ sustain pedal) = fill.
+  - `drummer-test-cc <value> <cc> <ch>` simulates one in tests.
+- **Tests:**
+  - `python3 drummer/test_brain.py` (20 checks, now including meters, 3/4 and 6/8 fills, the chorus and the protocol).
+  - Real-time `drummer.pd` run with the brain and a synthetic 3/4 waltz: heard as 3/4 at 120 bpm, every hit on the grid. In the same run:
+    - The sustain pedal played a fill on the bar's last beat.
+    - The chorus came in on the bar line after its fill.
+    - **meter** moved to 6/8 at 80 dotted-quarter bpm.
+    - Learning saved CC 80 and 81, and the learned pause switch paused and resumed the drummer.
+    - Pad 4 went back to the verse with a 6/8 fill.
+  - A full LiveLoopSynth run: no new errors.
+
 ## Architecture
 
 ### Files
@@ -152,12 +181,14 @@ UMC22 in 1/2 ──adc~──► gain ► IN1/IN2 gates ────────
 | `reverb-predelay`, `pitchmod` (signal), `pitchbend-ratio` | effects / wheels | |
 | `looper-cnv`, `looper-hint`, `lyr-N-cnv`, `pad-N-cnv`, `instr-cnv`, `knobtitle-*`, `knob-learn-cnv`, `tap-led` | → screen | display updates |
 | `drummer-mode` (`-r`), `drummer-pause`, `drummer-fill`, `drummer-rebonk`, `drummer-level` / `drummer-density` / `drummer-humanize` (`-r`), `drummer-swing` | → drummer | on/off (pads become controls), pause/resume, fill, change groove, level / density / humanize 0–1, swing 50–75 % |
-| `drummer-half`, `drummer-double`, `drummer-feel`, `drummer-autofill` (`-r`) | → drummer | corrections of what it heard (tempo ×½, ×2, feel), auto fills on/off |
+| `drummer-half`, `drummer-double`, `drummer-feel`, `drummer-meter`, `drummer-autofill` (`-r`) | → drummer | corrections of what it heard (tempo ×½, ×2, feel, meter), auto fills on/off |
+| `drummer-verse`, `drummer-chorus`, `drummer-part` (the other one), `drummer-fs-learn`, `drummer-test-cc` | → drummer | song parts; learn footswitches; a fake CC for tests |
+| `drummer-fs-cnv` | drummer → | footswitch learning prompts |
 | `drummer-cnv`, `drummer-feel-cnv`, `drummer-mode-pads` | drummer → | status line; what it heard; pad display relabels the pads |
 | `drummer-hit` | drummer → its voices | `role*128 + velocity`, after swing (handy for tests) |
 | `drmbase` (fixed bar), `drmgroove` + `drmtime` (this pass), `drmnext` + `drmnexttime` (next pass): 8 values per 16th (kick, snare, hat closed, hat open, rimshot, tom high, tom low, ride), velocity / offset in ms. `drmP` (step being prepared), `drmSrc` (0 fixed, 1 this pass, 2 next), `drmReadyN`, `drmLoop`, `drmUp` … | drummer state | `[value]`s and arrays named without hyphens so `[expr]` can read them |
-| Pd → brain: `loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills>` · brain → Pd: `drmnext 0 …`, `drmnexttime 0 …`, `drmready <steps> <pass>` | TCP 127.0.0.1:9312 (FUDI) | Pd asks at every loop start (and when a slider, the layers or the groove change) for the NEXT pass; a `drmready` for any other pass is ignored |
-| Pd → brain: `listen <src> <offset>`, `on <ms> <strength> <brightness> <midi>`, `heard <len> <tap> <src> <groove>`, `fix <len> <tap> <dir> <feel> <groove> <bars>` · brain → Pd: `drmfeel <bpm> <swing> <groove> <feel>` | TCP 127.0.0.1:9312 | listening (src 0 = layer 1, 1 = rebonk) and the corrections; `drmLsn` says what Pd is listening to |
+| Pd → brain: `loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills> <part>` · brain → Pd: `drmnext 0 …`, `drmnexttime 0 …`, `drmready <steps> <pass>` | TCP 127.0.0.1:9312 (FUDI) | Pd asks at every loop start (and when a slider, the layers or the groove change) for the NEXT pass; a `drmready` for any other pass is ignored |
+| Pd → brain: `listen <src> <offset>`, `on <ms> <strength> <brightness> <midi>`, `heard <len> <tap> <src> <groove>`, `fix <len> <tap> <dir> <feel> <groove> <bars> <next-meter>` · brain → Pd: `drmfeel <bpm> <swing> <groove> <feel> <scope>` | TCP 127.0.0.1:9312 | listening (src 0 = layer 1, 1 = rebonk) and the corrections; `drmLsn` says what Pd is listening to |
 | `drmEarsOn`, `drmEarsHit` | drummer ↔ drummerEars | switch bonk~ on/off; `<velocity> <temperature>` per attack |
 | `remote-out`, `remote-dump` | web remote | `[remoteOut <name>]` reports a name to the bridge; `remote-dump` makes them all repeat their last label / color / value |
 
@@ -378,7 +409,10 @@ In drummer mode:
   - bonk~ is on only for that one pass, so the CPU cost stays near zero the rest of the time.
   - A **rebonk** setting could pick *never / every N loops / on every new layer*.
 - **Live listening:** bonk~ always on, following your playing as it happens (pushes, accents, stops). It costs more but is still fine on a Pi 4.
-- **Saved grooves:** keep the last few grooves and flip between them with pads 4–7, or keep one per scene.
+- **Saved grooves:** keep the last few grooves and flip between them with pads 5–7, or keep one per scene.
+- **More song parts:** a bridge or an intro/outro after verse and chorus, and saving each part's groove with the song.
+- **More meters:** 5/4 and 7/8, and a true 12/8 (4 dotted-quarter beats) next to 6/8.
+- **Footswitch hold:** a long press for a second action (e.g. tap = fill, hold = verse/chorus) on a single sustain pedal.
 - **Pad velocity:** fill size, or how far rebonk changes things.
 - **Count-in drums:** with a tapped tempo, the drummer could play during the count-in and while layer 1 records, instead of the click.
 - **Record it on purpose:** a "print drums" button that records one pass of the drummer into a layer, for when you want to keep it.

@@ -7,7 +7,7 @@
 #X obj 300 65 route bang;
 #X obj 300 90 list prepend send;
 #X obj 300 115 list trim;
-#X obj 20 150 route looper-rec looper-play looper-stop looper-tap knob-learn tap-learn lp-trig-1-r lp-trig-2-r lp-trig-3-r lp-trig-4-r lp-trig-5-r lp-trig-6-r lp-trig-7-r lp-trig-8-r clear-1-r clear-2-r clear-3-r clear-4-r clear-5-r clear-6-r clear-7-r clear-8-r lp-vol-1-r lp-vol-2-r lp-vol-3-r lp-vol-4-r lp-vol-5-r lp-vol-6-r lp-vol-7-r lp-vol-8-r keepActive-gui keepN-gui looper-auto-r looper-thr-r tempo-bpm-gui tempo-click-r tempo-countin-r fx-cutoff-r fx-retrig-r reverb-predelay-r knob-1-r knob-2-r knob-3-r knob-4-r knob-5-r knob-6-r knob-7-r knob-8-r fxin-1-r fxin-2-r fxin-3-r fxin-4-r fxin-5-r fxin-6-r fxin-7-r fxin-8-r bankSelect mainVol l-in-vol r-in-vol inputTogL-r inputTogR-r pad-led-echo-r drummer-mode-r drummer-pause drummer-fill drummer-rebonk drummer-level-r drummer-density-r drummer-humanize-r drummer-half drummer-double drummer-feel drummer-autofill-r remote-dump;
+#X obj 20 150 route looper-rec looper-play looper-stop looper-tap knob-learn tap-learn lp-trig-1-r lp-trig-2-r lp-trig-3-r lp-trig-4-r lp-trig-5-r lp-trig-6-r lp-trig-7-r lp-trig-8-r clear-1-r clear-2-r clear-3-r clear-4-r clear-5-r clear-6-r clear-7-r clear-8-r lp-vol-1-r lp-vol-2-r lp-vol-3-r lp-vol-4-r lp-vol-5-r lp-vol-6-r lp-vol-7-r lp-vol-8-r keepActive-gui keepN-gui looper-auto-r looper-thr-r tempo-bpm-gui tempo-click-r tempo-countin-r fx-cutoff-r fx-retrig-r reverb-predelay-r knob-1-r knob-2-r knob-3-r knob-4-r knob-5-r knob-6-r knob-7-r knob-8-r fxin-1-r fxin-2-r fxin-3-r fxin-4-r fxin-5-r fxin-6-r fxin-7-r fxin-8-r bankSelect mainVol l-in-vol r-in-vol inputTogL-r inputTogR-r pad-led-echo-r drummer-mode-r drummer-pause drummer-fill drummer-rebonk drummer-level-r drummer-density-r drummer-humanize-r drummer-half drummer-double drummer-feel drummer-autofill-r drummer-verse drummer-chorus drummer-meter remote-dump;
 #X obj 20 180 s looper-rec;
 #X obj 130 180 s looper-play;
 #X obj 240 180 s looper-stop;
@@ -82,7 +82,10 @@
 #X obj 790 356 s drummer-double;
 #X obj 20 378 s drummer-feel;
 #X obj 130 378 s drummer-autofill-r;
-#X obj 240 378 s remote-dump;
+#X obj 240 378 s drummer-verse;
+#X obj 350 378 s drummer-chorus;
+#X obj 460 378 s drummer-meter;
+#X obj 570 378 s remote-dump;
 #X obj 20 422 remoteOut looper-state;
 #X obj 165 422 remoteOut looper-cnv;
 #X obj 310 422 remoteOut looper-hint;
@@ -272,3 +275,6 @@
 #X connect 8 72 81 0;
 #X connect 8 73 82 0;
 #X connect 8 74 83 0;
+#X connect 8 75 84 0;
+#X connect 8 76 85 0;
+#X connect 8 77 86 0;

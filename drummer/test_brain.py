@@ -4,8 +4,8 @@ import os, random, sys, unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from brain import Drummer, messages, handle, phrase_bars
-from grooves import GROOVES, KICK, SNARE, HAT, OPEN, RIDE, TOM_HI, TOM_LO
-from listen import Ears, grid
+from grooves import GROOVES, KICK, SNARE, HAT, OPEN, RIDE, TOM_HI, TOM_LO, METERS, meter_of, grooves_in
+from listen import Ears, grid, grid68
 
 
 def hits(vel):
@@ -15,14 +15,15 @@ def hits(vel):
 class BrainTest(unittest.TestCase):
     def test_backbone_always_plays(self):
         for g, (name, groove) in enumerate(GROOVES):
+            S = meter_of(g)[1]
             d = Drummer(random.Random(g))
             for k in range(8):
-                _, vel, _ = d.pattern(32, 125, g, 0.0, 0.0, k, autofill=0)
+                _, vel, _ = d.pattern(2 * S, 125, g, 0.0, 0.0, k, autofill=0)
                 for role, lst in groove.items():
                     for step, v, chance in lst:
                         if chance >= 1 and role in (KICK, SNARE):
                             for bar in range(2):
-                                self.assertTrue(vel[(bar * 16 + step) * 8 + role], f'{name} {role} {step}')
+                                self.assertTrue(vel[(bar * S + step) * 8 + role], f'{name} {role} {step}')
 
     def test_density_adds_hits(self):
         counts = []
@@ -87,6 +88,23 @@ class BrainTest(unittest.TestCase):
             vel = off.pattern(32, 125, 0, 0.5, 0.0, k, autofill=0)[1]
             self.assertFalse(any(vel[s * 8 + TOM_LO] for s in range(32)))
 
+    def test_fills_in_three_and_six_eight(self):
+        for name, S, last_beat in (('waltz', 12, range(8, 12)), ('6/8 ballad', 12, range(6, 12))):
+            g = [n for n, _ in GROOVES].index(name)
+            d = Drummer(random.Random(4))
+            vel = [d.pattern(2 * S, 125, g, 0.5, 0.0, k)[1] for k in range(4)][3]   # 2 bars: fill at pass 4
+            fill = {s for s in range(2 * S) if vel[s * 8 + TOM_HI] or vel[s * 8 + TOM_LO] or vel[s * 8 + SNARE] >= 80}
+            self.assertTrue(fill & {S + s for s in last_beat}, (name, sorted(fill)))
+            self.assertFalse(any(vel[(S + s) * 8 + HAT] for s in last_beat), name)   # the kit stops for it
+
+    def test_chorus_is_bigger(self):
+        def count(part):
+            return sum(hits(Drummer(random.Random(s)).pattern(32, 125, 0, 0.4, 0.0, 1, 2, 0, part)[1]) for s in range(30))
+        self.assertLess(count(0), count(1))
+        vel = Drummer(random.Random(0)).pattern(32, 125, 0, 0.4, 0.0, 1, 2, 0, 1)[1]
+        self.assertTrue(any(vel[s * 8 + RIDE] for s in range(32)))                   # rock's chorus: ride
+        self.assertGreaterEqual(vel[0 * 8 + OPEN], 100)                                # and a crash in
+
     def test_layers_raise_the_intensity(self):
         def count(layers):
             return sum(hits(Drummer(random.Random(s)).pattern(32, 125, 0, 0.5, 0.0, 0, layers, 0)[1]) for s in range(30))
@@ -105,9 +123,31 @@ class BrainTest(unittest.TestCase):
         for t, w, b, m in synth(120, 2, 50, rng=random.Random(0)):
             handle(d, ['on', str(t), str(w), str(b), str(m)])
         reply = handle(d, 'heard 4000 0 0 4'.split())
-        self.assertTrue(reply.startswith('drmfeel 120.000 50 '), reply)
-        self.assertEqual(handle(d, 'fix 4000 0 -1 0 0 2'.split()), 'drmfeel 60.000 50 %s 0;\n' % reply.split()[3])
+        self.assertTrue(reply.startswith('drmfeel 120.000 50 ') and reply.endswith(' 0 0;\n'), reply)
+        g = reply.split()[3]
+        self.assertEqual(handle(d, 'fix 4000 0 -1 0 0 2'.split()), 'drmfeel 60.000 50 %s 0 1;\n' % g)
         self.assertTrue(handle(d, 'fix 4000 0 1 3 0 1'.split()).startswith('drmfeel 120.000 67 '))
+        self.assertTrue(handle(d, 'loop 24 125 5 0.5 0.3 2 2 1 1'.split()).endswith('drmready 24 2;\n'))
+        meter = handle(d, 'fix 4000 0 0 0 0 2 1'.split()).split()                 # next meter: 3/4
+        self.assertEqual(meter[-1], '0;')
+        self.assertIn(int(meter[3]), grooves_in('3/4'))
+        self.assertEqual(d.ears.meter, '3/4')
+
+
+def synth3(meter, bpm, bars, rng, kind='eighths'):
+    """Onsets of a 3/4 or 6/8 loop: 8ths with the meter's accents (3/4: every quarter,
+    6/8: every dotted quarter), or quarters only (a 'waltz')."""
+    S, Q, bpb = METERS[meter]
+    beat = 60000 / bpm
+    pos = grid68(beat) if meter == '6/8' else grid(beat, 50)
+    out = []
+    for b in range(bars * bpb):
+        for k in range(0, Q, 2):
+            if kind == 'waltz' and k:
+                continue
+            w = (100 if k == 0 else 55) * rng.uniform(0.85, 1.1)
+            out.append((b * beat + pos[k] + rng.gauss(0, 4), w, 2 if k == 0 and b % bpb == 0 else 7, 1))
+    return out
 
 
 def synth(bpm, bars, swing, kind='8ths', rng=None, slop=8.0, low_on=(0, 8)):
@@ -148,6 +188,20 @@ class EarsTest(unittest.TestCase):
                     _, b, s, _ = self.read(synth(bpm, bars, swing, rng=rng), bars * 240000 / bpm)
                     self.assertAlmostEqual(b, bpm, delta=0.5, msg=(bpm, swing, bars))
                     self.assertLessEqual(abs(s - swing), 3, (bpm, swing, bars, s))
+
+    def test_meters(self):
+        rng = random.Random(9)
+        for meter, kind, bpms in (('3/4', 'eighths', (90, 120, 150)), ('3/4', 'waltz', (90, 120)),
+                                  ('6/8', 'eighths', (50, 65, 80))):
+            bpb = METERS[meter][2]
+            for bpm in bpms:
+                for bars in (1, 2, 4):
+                    e, b, _, name = self.read(synth3(meter, bpm, bars, rng, kind), bars * bpb * 60000 / bpm)
+                    self.assertEqual(e.meter, meter, (meter, kind, bpm, bars))
+                    self.assertAlmostEqual(b, bpm, delta=0.5, msg=(meter, kind, bpm, bars))
+                    self.assertIn([n for n, _ in GROOVES].index(name), grooves_in(meter))
+        e, _, _, _ = self.read(synth(100, 2, 50, '8ths', rng), 4800)
+        self.assertEqual(e.meter, '4/4')
 
     def test_tap_sets_the_bars(self):
         ons = [(t, w, b, m) for t, w, b, m in synth(70, 4, 50, 'quarters')]     # quarters: 70 or 140?
@@ -192,6 +246,7 @@ class EarsTest(unittest.TestCase):
             g = e.analyse(4800, 0, src, 0)[2]
             self.assertEqual(GROOVES[g][0], 'rock' if src == 0 else GROOVES[g][0])
         self.assertNotEqual(g, 0)                                        # rebonk while rock plays: not rock
+        self.assertIn(g, grooves_in('4/4'))                              # ... but still 4/4
 
     def test_kick_follows_low_accents(self):
         e, _, _, name = self.read(synth(100, 2, 50, '8ths', random.Random(7), low_on=(0, 6, 8, 14)), 4800)

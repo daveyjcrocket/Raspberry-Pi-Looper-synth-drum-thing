@@ -5,7 +5,9 @@ synth is selected) in time with the loop. Its output goes to s~ drummer-out, whi
 adds after the loopers, so it is heard but never recorded.
 
 Timing: on every loop start [r f] it works out the bars in the loop (from the tempo the brain
-heard in the first layer, else the tapped tempo, else roughly 100 bpm 4/4) and steps through it in 16ths.
+heard in the first layer, else the tapped tempo, else a likely tempo) and steps through it in 16ths.
+The groove playing sets the meter: 4/4 (16 steps a bar, beats of 4), 3/4 (12, beats of 4) or 6/8
+(12, two dotted-quarter beats of 6); drmBarS, drmBeatS and drmBpb (beats a bar) follow it.
 Each step is prepared one 16th AHEAD (drmP = the step being prepared) and its hits are sent
 through [pipe] with delay = one step + swing + the hit's own timing offset, so a hit can land
 a little early or late (humanize). The very first step after the loop starts plays at once.
@@ -15,15 +17,15 @@ Patterns, 8 values per step (one per kit sound, 0 = silent, else the velocity):
   drmgroove    the brain's pattern for this pass (whole loop), with drmtime = offsets in ms
   drmnext      the brain's pattern for the next pass (drmnexttime); copied in at the loop start
 The brain (drummer/brain.py) connects to TCP 127.0.0.1:9312. At every loop start Pd asks it
-for the next pass ("loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers>");
+for the next pass ("loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <fills> <part>");
 it answers "drmnext 0 ...", "drmnexttime 0 ...", "drmready <steps> <pass>". When it is late or gone,
 Pd repeats the pattern it has. drmSrc says where the step comes from: 0 fixed, 1 this pass, 2 next.
 
 Listening (only while the brain is connected): while the first layer records, [drummerEars]
 (bonk~ on the band, switched on only while listening) and the MIDI note-ons send their onsets
 to the brain ("listen", "on <ms> <strength> <brightness> <midi>", "heard ..."). It answers
-"drmfeel <bpm> <swing> <groove> <feel>": Pd takes the tempo (bars in the loop), the swing and
-the groove, and re-syncs its 16ths if the loop is already playing. A rebonk listens to the
+"drmfeel <bpm> <swing> <groove> <feel> <scope>": Pd takes the tempo (bars in the loop), the swing and
+the groove (and with it the meter), and re-syncs its 16ths if the loop is already playing. A rebonk listens to the
 whole band for one loop and changes up the groove (without the brain it steps through the library).
 
 Messages:
@@ -33,13 +35,24 @@ Messages:
   drummer-rebonk      change up the groove: listen to the band for one loop and pick a new one
   drummer-half, drummer-double   the heard tempo was wrong: x1/2 or x2
   drummer-feel        cycle the feel: as heard, straight, swing, triplet
+  drummer-meter       the heard meter was wrong: next one (4/4 -> 3/4 -> 6/8)
+  drummer-verse, drummer-chorus, drummer-part (= the other one)
+                      song parts, each with its own groove: the change comes at the next bar
+                      line after a fill (at once while the drummer isn't playing). The chorus
+                      plays busier, on the ride, with a crash on every pass.
+  drummer-fs-learn    learn the footswitches: press the one for pause, then fill, rebonk and
+                      verse/chorus (clicking again stops). Footswitches send a CC (127 = press)
+                      or a program change; saved in footswitch.txt. Default: CC 64 (the LX25+
+                      sustain pedal) = fill.
   drummer-autofill 0/1  automatic fills every 4 or 8 bars (the brain's)
   drummer-level 0-1, drummer-density 0-1, drummer-humanize 0-1,
   drummer-swing 50-75 (% position of the off-beat 8th; 50 = straight)
   drummer-test-pad N  same as hitting pad N in drummer mode (tests)
+  drummer-test-cc V N CH  same as a MIDI CC N with value V on channel CH (tests)
 Pads in drummer mode (both pad maps, on the pads' MIDI channel = the tap pad's channel, so
 only when that is a real channel, not 0 = any):
-  pad 1 pause / resume, pad 2 fill, pad 3 rebonk. tapFilter keeps them out of the instruments.
+  pad 1 pause / resume, pad 2 fill, pad 3 rebonk, pad 4 verse / chorus.
+  tapFilter keeps them out of the instruments.
 Kit sounds (roles): 0 kick, 1 snare, 2 hat closed, 3 hat open, 4 rimshot, 5 tom high, 6 tom low, 7 ride.
 """
 import os, sys
@@ -47,7 +60,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, '..', 'drummer'))
 from pdgen import Patch
-from grooves import GROOVES, FILL, ACCENT, fixed_bar
+from grooves import GROOVES, FILL, FILL6, ACCENT, fixed_bar, meter_of, next_in_meter
 
 BRAIN_PORT = 9312
 # the "brightness" (0-10, like bonk~'s temperature) of each pad's sound, for listening:
@@ -70,9 +83,14 @@ KITS = [[f'kits/gmrock/{f}.wav' for f in ('kick', 'snare', 'hihat_closed', 'hiha
         ['kick_19.wav', 'snare_19.wav', 'hh_10.wav', 'hh_11.wav', 'snare_20.wav', 'snare_21.wav',
          'kick_20.wav', 'crash_04.wav']]
 
-def fill_table():
-    v = [0] * 32
-    for role, hits in FILL.items():
+# default bar length (ms) when there is no tempo at all: ~100 bpm, or 70 dotted quarters in 6/8
+BAR_MS = {'4/4': 2400, '3/4': 1800, '6/8': 1714}
+FS_ACTIONS = ['pause', 'fill', 'rebonk', 'verse/chorus']
+FS_DEFAULT = [0, 100064, 0, 0]          # kind*100000 + channel*1000 + number; CC 64 any channel = fill
+
+def fill_table(fill=FILL):
+    v = [0] * 48
+    for role, hits in fill.items():
         for step, vel in hits:
             v[step * 8 + role] = vel
     return ' '.join(map(str, v))
@@ -104,14 +122,18 @@ for i, (k, r, f) in enumerate(files):
     w = O('file which', x, y + 22); C(m, w)                 # silent when the file is missing
     C(w, O('list split 1', x, y + 44)); C(last(), M(f'read -resize $1 drk-{k}-{r}', x + 80, y + 44))
     C(last(), sf)
-for i, (name, size) in enumerate([('drmbase', 128), ('drmfillpat', 32), ('drmpadb', 8), ('drmgroove', 2048),
+for i, (name, size) in enumerate([('drmbase', 128), ('drmfillpat', 48), ('drmpadb', 8), ('drmnextg', len(GROOVES)), ('drmfs', 4), ('drmgroove', 2048),
                                   ('drmtime', 2048), ('drmnext', 2048), ('drmnexttime', 2048)]):
     O(f'table {name} {size}', 1200, 30 + i * 22)
 C(lt, M(f'; drmfillpat 0 {fill_table()}; drmSw 50; drmKit 0; drummer-level 0.5; drmDens 0.5; drmHum 0.3; '
         'drmMode 0; drmPaused 0; drmWant 0; drmAct 0; drmRun 0; drmFillP 0; drmFill 0; drmFm 0; drmAcc 0; '
         'drmBrain 0; drmGlen 0; drmReadyN 0; drmUp 0; drmLoop 0; drmN 0; drmBpm 0; drmTap 0; drmGuess 0; '
         'drmFeel 0; drmLsn 0; drmAF 1; drmKeep 0; drmKeepN 8; drmL 0; drmLayers 0; '
-        f'drmpadb 0 {" ".join(map(str, PAD_BRIGHT))}', 20, 440), 3)
+        'drmBarS 16; drmBeatS 4; drmBpb 4; drmBarMs 2400; drmPart 0; drmPartP 0; drmGA 0; drmGB 0; '
+        'drmScope 0; drmNewG 0; drmFsL 0; '
+        f'drmpadb 0 {" ".join(map(str, PAD_BRIGHT))}; '
+        f'drmnextg 0 {" ".join(str(next_in_meter(i)) for i in range(len(GROOVES)))}; '
+        f'drmfs 0 {" ".join(map(str, FS_DEFAULT))}', 20, 440), 3)
 C(lt, M('0', 400, 440), 2); C(last(), O('s $0-groove', 400, 465))
 C(lt, M(f'listen {BRAIN_PORT} 127.0.0.1', 460, 465), 1); brainListen = last()
 C(lt, O('s $0-status', 460, 440), 0)
@@ -119,7 +141,9 @@ C(lt, O('s $0-status', 460, 440), 0)
 VALUES = ['drmSw', 'drmKit', 'drmMode', 'drmPaused', 'drmWant', 'drmAct', 'drmRun', 'drmFillP', 'drmFill',
           'drmFm', 'drmAcc', 'drmS', 'drmN', 'drmBeat', 'drmStep', 'drmLen', 'drmBpm', 'drmG', 'drmP', 'drmSrc',
           'drmBase', 'drmSwD', 'drmBrain', 'drmGlen', 'drmReadyN', 'drmUp', 'drmLoop', 'drmLayers', 'drmDens',
-          'drmHum', 'drmLS', 'drmTap', 'drmGuess', 'drmFeel', 'drmLsn', 'drmAF', 'drmKeep', 'drmKeepN', 'drmL']
+          'drmHum', 'drmLS', 'drmTap', 'drmGuess', 'drmFeel', 'drmLsn', 'drmAF', 'drmKeep', 'drmKeepN', 'drmL',
+          'drmBarS', 'drmBeatS', 'drmBpb', 'drmBarMs', 'drmPart', 'drmPartP', 'drmGA', 'drmGB', 'drmScope',
+          'drmNewG', 'drmFsL']
 for i, n in enumerate(VALUES):
     O(f'v {n}', 1200 + (i // 16) * 90, 170 + (i % 16) * 22)
 
@@ -148,14 +172,18 @@ reb = O('r drummer-rebonk', 700, 520)
 rbx = O('expr if(drmUp && drmRun && drmLen >= 100, if(drmLsn, -1, 1), 0)', 620, 532); C(reb, rbx)
 rbs = O('sel 0 1', 620, 545); C(rbx, rbs)
 C(rbs, O('s $0-rebonk-listen', 760, 570), 1)
-C(rbs, O(f'expr (drmG+1) % {len(GROOVES)}', 700, 545), 0); C(last(), O('s $0-groove', 700, 570))
+C(rbs, O('expr drmnextg[drmG]', 700, 545), 0); C(last(), O('s $0-groove', 700, 570))
 grv = O('r $0-groove', 700, 600)
-gt = O('t b b f f', 700, 625); C(grv, gt)
-C(gt, O('v drmG', 860, 650), 3)
+gt = O('t b b f f f', 700, 625); C(grv, gt)
+C(gt, O('v drmG', 860, 650), 4)
+C(gt, O('expr if(drmPart, drmGA, $f1); if(drmPart, $f1, drmGB)', 960, 650), 3); gpx = last()
+C(gpx, O('v drmGA', 960, 675), 0); C(gpx, O('v drmGB', 1040, 675), 1)
 gs = O('sel ' + ' '.join(str(i) for i in range(len(GROOVES))), 700, 650); C(gt, gs, 2)
 gname = O('symbol', 700, 800)
 for i, (name, groove) in enumerate(GROOVES):
-    gm = M(f'; drmbase 0 {" ".join(map(str, fixed_bar(groove)))}', 700 + i * 120, 680)
+    meter, S, Q, bpb = meter_of(i)
+    gm = M(f'; drmbase 0 {" ".join(map(str, fixed_bar(groove)))}; drmBarS {S}; drmBeatS {Q}; drmBpb {bpb}; '
+           f'drmBarMs {BAR_MS[meter]}; drmfillpat 0 {fill_table(FILL6 if Q == 6 else FILL)}', 700 + i * 120, 680)
     nm = M(f'symbol {esc(name)}', 700 + i * 120, 760)
     t = O('t b b', 700 + i * 120, 665); C(gs, t, i); C(t, gm, 1); C(t, nm, 0)
     C(nm, gname, 0, 1)
@@ -185,9 +213,9 @@ C(pt, O('v tap-note', 90, 975), 1); C(last(), pe, 0, 3)
 C(pt, pe, 0, 0)
 pspig = O('spigot', 20, 1025); C(pe, pspig)
 C(O('r drummer-mode', 90, 1000), pspig, 0, 1)
-psel = O('sel 1 2 3', 20, 1050); C(pspig, psel)
+psel = O('sel 1 2 3 4', 20, 1050); C(pspig, psel)
 C(O('r drummer-test-pad', 120, 1025), psel)
-for i, name in enumerate(['drummer-pause', 'drummer-fill', 'drummer-rebonk']):
+for i, name in enumerate(['drummer-pause', 'drummer-fill', 'drummer-rebonk', 'drummer-part']):
     C(psel, O(f's {name}', 20 + i * 110, 1075), i)
 
 # ---------------- the brain (drummer/brain.py) on TCP 127.0.0.1:9312 ----------------
@@ -204,12 +232,12 @@ C(nc, O('v drmUp', 1800, 645), 2)
 C(nc, O('expr if(drmUp, drmReadyN, 0)', 1750, 670), 1); C(last(), O('v drmReadyN', 1750, 695))
 C(nc, O('t b b', 1700, 720), 0); ct = last()
 C(ct, O('s $0-ask', 1760, 745), 1); C(ct, O('s $0-status', 1700, 745), 0)
-# ask for the next pass: loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills>
+# ask for the next pass: loop <steps> <step-ms> <groove> <density> <humanize> <pass> <layers> <auto-fills> <part>
 ask = O('r $0-ask', 1700, 790)
 C(ask, O('expr drmUp && drmN > 0', 1700, 815)); asel = O('sel 1', 1700, 840); C(last() - 1, asel)
-ax = O('expr drmN; drmStep; drmG; drmDens; drmHum; drmLoop+1; drmLayers; drmAF', 1700, 865); C(asel, ax)
-apk = O('pack f f f f f f f f', 1700, 890)
-for i in range(8):
+ax = O('expr drmN; drmStep; drmG; drmDens; drmHum; drmLoop+1; drmLayers; drmAF; drmPart', 1700, 865); C(asel, ax)
+apk = O('pack f f f f f f f f f', 1700, 890)
+for i in range(9):
     C(ax, apk, i, i)
 C(apk, O('list prepend send loop', 1700, 915)); C(last(), O('list trim', 1700, 940)); C(last(), net)
 
@@ -227,17 +255,17 @@ rok = O('expr drmLS>=2 && drmLS<=4 && drmLen>=100', 1150, 600); C(rd, rok)
 rsel = O('sel 1 0', 1150, 612); C(rok, rsel)
 ft = O('t b b b b b b', 1250, 625); C(rsel, ft, 0)
 posT = O('timer', 1050, 640); C(rsel, posT, 0, 0)          # ms since this loop started
-# 5: bars in the loop: from the heard tempo, else the tapped one, else ~100 bpm in 4/4;
+# 5: bars in the loop: from the heard tempo, else the tapped one, else a likely bar length;
 # more than 16 bars plays half-time
-bars = O('expr if(drmGuess>0 || drmTap>0, max(1, rint(drmLen*if(drmGuess>0, drmGuess, drmTap)/240000)), '
-         'max(1, rint(drmLen/2400)))', 1250, 650)
+bars = O('expr if(drmGuess>0 || drmTap>0, max(1, rint(drmLen*if(drmGuess>0, drmGuess, drmTap)/(60000*drmBpb))), '
+         'max(1, rint(drmLen/drmBarMs)))', 1250, 650)
 C(ft, bars, 5)
-bx = O('expr if($f1>16, rint($f1/2), $f1)*16', 1250, 675); C(bars, bx)
+bx = O('expr if($f1>16, rint($f1/2), $f1)*drmBarS', 1250, 675); C(bars, bx)
 nt = O('t f f', 1250, 700); C(bx, nt)
 C(nt, O('v drmN', 1350, 725), 1)
 sx = O('expr drmLen/$f1', 1250, 725); C(nt, sx, 0)
 stt = O('t f f f', 1250, 750); C(sx, stt)
-C(stt, O('* 4', 1350, 775), 2); C(last(), O('v drmBeat', 1350, 800))
+C(stt, O('expr $f1*drmBeatS', 1350, 775), 2); C(last(), O('v drmBeat', 1350, 800))
 C(stt, O('v drmStep', 1420, 775), 1)
 C(stt, met, 0, 1)
 # 4: the brain's next pass becomes this pass (if it is ready and fits the loop); otherwise
@@ -288,21 +316,27 @@ C(nx, O('v drmBase', 1700, 950), 2); C(nx, O('v drmSrc', 1600, 950), 1); C(nx, O
 C(tt, O('s $0-prep', 1250, 950), 0)
 
 prep = O('r $0-prep', 1250, 975)
-st = O('t b b b b b', 1250, 1000); C(prep, st)
-# 4: pause at a beat, resume at a bar line
-C(st, O('expr if(drmP%16==0, drmWant, if(drmP%4==0, drmWant && drmAct, drmAct))', 1500, 1025), 4)
+st = O('t b b b b b b', 1250, 1000); C(prep, st)
+# 5: pause at a beat, resume at a bar line
+C(st, O('expr if(drmP%drmBarS==0, drmWant, if(drmP%drmBeatS==0, drmWant && drmAct, drmAct))', 1500, 1025), 5)
 C(last(), O('t f f', 1500, 1050)); at = last()
 C(at, O('v drmAct', 1600, 1075), 1)
 C(at, O('change', 1500, 1075), 0); C(last(), O('s $0-status', 1500, 1100))
-# 3: fills (accent on the downbeat after a fill, the fill plays on the last beat of the bar)
-C(st, O('t b b b b', 1700, 1025), 3); ft2 = last()
-C(ft2, O('expr if(drmP%16==0, drmFill, 0)', 1850, 1050), 3); C(last(), O('v drmAcc', 1850, 1075))
-C(ft2, O('expr if(drmP%16==0, 0, if(drmP%16==12 && drmFillP, 1, drmFill))', 1800, 1100), 2)
+# 4: fills (accent on the downbeat after a fill, the fill plays on the last beat of the bar)
+LB = 'drmBarS-drmBeatS'           # the first step of the bar's last beat
+C(st, O('t b b b b', 1700, 1025), 4); ft2 = last()
+C(ft2, O('expr if(drmP%drmBarS==0, drmFill, 0)', 1850, 1050), 3); C(last(), O('v drmAcc', 1850, 1075))
+C(ft2, O(f'expr if(drmP%drmBarS==0, 0, if(drmP%drmBarS=={LB} && drmFillP, 1, drmFill))', 1800, 1100), 2)
 C(last(), O('v drmFill', 1800, 1125))
-C(ft2, O('expr if(drmP%16==12, 0, drmFillP)', 1750, 1150), 1); C(last(), O('v drmFillP', 1750, 1175))
-C(ft2, O('expr drmFill && drmP%16 >= 12', 1700, 1200), 0); C(last(), O('v drmFm', 1700, 1225))
-# 2: swing: the off-beat 8th moves to drmSw % of the beat, the 16ths in between follow
-C(st, O('expr if(drmP%4==2, (drmSw-50)/100*drmBeat, if(drmP%2==1, (drmSw-50)/200*drmBeat, 0))', 1900, 1025), 2)
+C(ft2, O(f'expr if(drmP%drmBarS=={LB}, 0, drmFillP)', 1750, 1150), 1); C(last(), O('v drmFillP', 1750, 1175))
+C(ft2, O(f'expr drmFill && drmP%drmBarS >= {LB}', 1700, 1200), 0); C(last(), O('v drmFm', 1700, 1225))
+# 3: a song part waiting to start: it comes in on the bar line after its fill (or after any
+# bar line while paused). From here to the end of the pass it plays the part's fixed groove.
+C(st, O('expr drmP%drmBarS==0 && drmPartP!=drmPart && (drmAcc || !drmAct)', 2050, 1025), 3)
+C(last(), O('sel 1', 2050, 1050)); C(last(), O('s $0-switch', 2050, 1075))
+# 2: swing (4/4 and 3/4): the off-beat 8th moves to drmSw % of the beat, the 16ths in between follow
+C(st, O('expr if(drmBeatS!=4, 0, if(drmP%4==2, (drmSw-50)/100*drmBeat, if(drmP%2==1, (drmSw-50)/200*drmBeat, 0)))',
+        1900, 1025), 2)
 C(last(), O('v drmSwD', 1900, 1050))
 # 1: the step's hits (only while active)
 C(st, O('v drmAct', 1250, 1025), 1); hs = O('sel 1', 1250, 1050); C(last() - 1, hs)
@@ -318,7 +352,7 @@ rl = O('until', 1250, 1100); C(ht, M('8', 1250, 1090), 1); C(last(), rl)
 rc = O('f', 1250, 1125); C(rl, rc); C(rc, O('+ 1', 1300, 1125)); C(last(), rc, 0, 1)
 C(ht, M('0', 1300, 1075), 2); C(last(), rc, 0, 1)
 I = 'drmP*8+$f1'
-ex = O(f'expr if(drmFm, drmfillpat[max(0, drmP%16-12)*8+$f1], if(drmSrc==0, drmbase[(drmP%16)*8+$f1], '
+ex = O(f'expr if(drmFm, drmfillpat[max(0, drmP%drmBarS-({LB}))*8+$f1], if(drmSrc==0, drmbase[(drmP%drmBarS)*8+$f1], '
        f'if(drmSrc==1, drmgroove[{I}], drmnext[{I}]))); '
        'if(!drmFm && drmSrc==0 && drmP==drmN-2 && $f1==2, 3, $f1)*128; '
        f'max(0, drmBase + drmSwD + if(drmFm || drmSrc==0, 0, if(drmSrc==1, drmtime[{I}], drmnexttime[{I}])))',
@@ -370,17 +404,16 @@ for i, look in enumerate(LOOKS):
     if look:
         C(cs, M(f'color {look[1]} {look[2]}, label {esc(look[0])}', 20 + i * 200, 1500), i)
         C(last(), cnv)
-# playing: "<groove> - <bpm> bpm", plus "- fixed" while the brain isn't running (no variation)
-pl = O('t b b b', 620, 1520); C(cs, pl, 3)
-ppk = O('pack s f', 620, 1570)
-C(pl, O('expr rint(600000/drmBeat)/10', 760, 1545), 2); C(last(), ppk, 0, 1)
-C(pl, O('v drmUp', 900, 1545), 1); upt = O('t f f', 900, 1570); C(last() - 1, upt)
-fixed, live = O('spigot', 620, 1620), O('spigot', 820, 1620)
-C(upt, O('== 0', 900, 1595), 1); C(last(), fixed, 0, 1); C(upt, live, 0, 1)
-C(pl, gname, 0); C(gname, ppk, 0, 0)
-pt2 = O('t l l', 620, 1595); C(ppk, pt2); C(pt2, fixed, 1, 0); C(pt2, live, 0, 0)
-C(fixed, M('color #2e7d32 #ffffff, label $1\\ -\\ $2\\ bpm\\ -\\ fixed', 620, 1645)); C(last(), cnv)
-C(live, M('color #2e7d32 #ffffff, label $1\\ -\\ $2\\ bpm', 820, 1645)); C(last(), cnv)
+# playing: "<groove> - <bpm> bpm", "- chorus" in the chorus, "- fixed" while the brain isn't
+# running (no variation). [route] gets "<code> <bpm> <name>" and passes on "<bpm> <name>" as a list.
+pl = O('t b b', 620, 1520); C(cs, pl, 3)
+ppk = O('pack f f s', 620, 1570)
+C(pl, gname, 1); C(gname, ppk, 0, 2)
+C(pl, O('expr (!drmUp) + 2*drmPart; rint(600000/drmBeat)/10', 760, 1545), 0); pcx = last()
+C(pcx, ppk, 1, 1); C(pcx, ppk, 0, 0)
+prr = O('route 0 1 2 3', 620, 1595); C(ppk, prr)
+for i, suffix in enumerate(['', ' - fixed', ' - chorus', ' - chorus - fixed']):
+    C(prr, M(f'color #2e7d32 #ffffff, label {esc("$2 - $1 bpm" + suffix)}', 620 + i * 160, 1645), i); C(last(), cnv)
 
 # ---------------- listening (with the brain): the first layer, or the band after a rebonk ----------------
 # drmLsn: 0 = not listening, 1 = the first layer (while it records), 2 = the band for one loop (rebonk)
@@ -430,7 +463,7 @@ C(O('r stop', 900, 1750), rbc); C(O('r clearAll', 970, 1750), rbc)
 C(rbc, M('stop', 960, 1800), 1); C(last(), rbD)
 C(rbc, O('expr drmLsn==2', 900, 1800), 0); C(last(), O('sel 1', 900, 1825)); C(last(), l3)
 clr = O('t b b', 1050, 1775); C(O('r clearAll', 1050, 1750), clr)
-C(clr, M('; drmGuess 0; drmFeel 0', 1110, 1800), 1)
+C(clr, M('; drmGuess 0; drmFeel 0; drmPart 0; drmPartP 0', 1110, 1800), 1)
 C(clr, M('color #3c3c3c #bdbdbd, label listens\\ to\\ layer\\ 1', 1050, 1825), 0); C(last(), feelCnv)
 
 # onsets -> the brain: "on <ms> <strength> <brightness 0-10> <midi 0/1>"
@@ -460,20 +493,25 @@ C(mpk2, M('$2 $1 1', 500, 2150)); C(last(), onq)
 # ---------------- the brain's reading: "drmfeel <bpm> <swing> <groove> <feel>" ----------------
 fr = O('r $0-feel', 1000, 1950)
 frt = O('t b l', 1000, 1975); C(fr, frt)
-fu = O('unpack f f f f', 1060, 2000); C(frt, fu, 1)
-newg = O('f', 1120, 2050)
-C(fu, O('v drmFeel', 1240, 2025), 3); C(fu, newg, 2, 1)
+fu = O('unpack f f f f f', 1060, 2000); C(frt, fu, 1)
+C(fu, O('v drmScope', 1300, 2025), 4); C(fu, O('v drmFeel', 1240, 2025), 3); C(fu, O('v drmNewG', 1120, 2025), 2)
 C(fu, O('v drmSw', 1180, 2025), 1); C(fu, O('v drmGuess', 1060, 2025), 0)
-fa = O('t b b b', 1000, 2075); C(frt, fa, 0)
-C(fa, O('s $0-resync', 1100, 2100), 2)                  # 1. the new tempo: re-sync the 16ths
-C(fa, newg, 1); C(newg, O('s $0-groove', 1120, 2100))   # 2. the groove (asks the brain again)
-# 3. show it: "heard 96 bpm - swing 62%" etc.
-C(fa, O('expr drmFeel*2 + (drmSw > 50); rint(drmGuess); drmSw', 1000, 2125), 0); flx = last()
+fa = O('t b b b b', 1000, 2075); C(frt, fa, 0)
+# 1. the whole song (scope 0): both parts take the groove
+C(fa, O('expr if(drmScope==0, drmNewG, drmGA); if(drmScope==0, drmNewG, drmGB)', 1300, 2100), 3); fsx = last()
+C(fsx, O('v drmGA', 1300, 2125), 0); C(fsx, O('v drmGB', 1380, 2125), 1)
+# 2. the groove (and with it the meter); 3. the new tempo: re-sync the 16ths and ask again
+C(fa, O('v drmNewG', 1120, 2100), 2); C(last(), O('s $0-groove', 1120, 2125))
+C(fa, O('t b b', 1200, 2100), 1); frs = last()
+C(frs, O('s $0-resync', 1200, 2125), 1); C(frs, O('s $0-ask', 1200, 2150), 0)
+# 4. show it: "heard 96 bpm - swing 62%", "heard 60 bpm - 6/8" etc.
+C(fa, O('expr if(drmBeatS==6, 8 + (drmFeel>0), drmFeel*2 + (drmSw > 50)); rint(drmGuess); drmSw', 1000, 2125), 0)
+flx = last()
 fpk = O('pack f f f', 1000, 2150); C(flx, fpk, 2, 2); C(flx, fpk, 1, 1); C(flx, fpk, 0, 0)
-frr = O('route 0 1 2 3 4 5 6 7', 1000, 2175); C(fpk, frr)
+frr = O('route 0 1 2 3 4 5 6 7 8 9', 1000, 2175); C(fpk, frr)
 for i, lab in enumerate(['heard $1 bpm - straight', 'heard $1 bpm - swing $2%', '$1 bpm - straight',
                          '$1 bpm - straight', '$1 bpm - swing $2%', '$1 bpm - swing $2%',
-                         '$1 bpm - triplet', '$1 bpm - triplet']):
+                         '$1 bpm - triplet', '$1 bpm - triplet', 'heard $1 bpm - 6/8', '$1 bpm - 6/8']):
     C(frr, M(f'color #263238 #ffffff, label {esc(lab)}', 1000 + i * 60, 2200 + (i % 2) * 25), i)
     C(last(), feelCnv)
 
@@ -507,21 +545,102 @@ C(rs, O('s $0-status', 1450, 1850), 0)
 # a pending re-sync never outlives the loop clock
 C(stop, M('stop', 1560, 1050), 2); C(last(), rsD)
 
-# corrections: tempo x1/2, x2, and the feel (as heard, straight, swing, triplet)
+# corrections: tempo x1/2, x2, the feel (as heard, straight, swing, triplet) and the meter
 C(O('r drummer-half', 1800, 1750), M('-1', 1800, 1775)); C(last(), O('s $0-fix', 1800, 1800))
 C(O('r drummer-double', 1900, 1750), M('1', 1900, 1775)); C(last(), O('s $0-fix', 1900, 1800))
 C(O('r drummer-feel', 2000, 1750), O('t b b', 2000, 1765)); fft = last()
 C(fft, O('expr (drmFeel+1) % 4', 2000, 1780), 1); C(last(), O('v drmFeel', 2000, 1795))
 C(fft, M('0', 2060, 1780), 0); C(last(), O('s $0-fix', 2060, 1800))
+C(O('r drummer-meter', 2150, 1750), M('2', 2150, 1775)); C(last(), O('s $0-fix', 2150, 1800))
 fx = O('r $0-fix', 1800, 1850)
 C(fx, O('expr if(drmUp && drmLen >= 100, $f1, -9)', 1800, 1875)); C(last(), O('moses -5', 1800, 1900))
 fxt = O('t b f', 1800, 1925); C(last() - 1, fxt, 1)
-fpk6 = O('pack f f f f f f', 1800, 1975)
-C(fxt, fpk6, 1, 2)
-C(fxt, O('expr drmLen; drmTap; drmFeel; drmG; drmN/16', 1800, 1950), 0); fxe = last()
+# fix <len> <tap> <dir: -1, 1, 0> <feel> <groove> <bars> <next meter 0/1>   ($0-fix 2 = the meter)
+fpk6 = O('pack f f f f f f f', 1800, 1975)
+C(fxt, O('expr if($f1==2, 0, $f1); $f1==2', 1900, 1950), 1); fdx = last()
+C(fdx, fpk6, 1, 6); C(fdx, fpk6, 0, 2)
+C(fxt, O('expr drmLen; drmTap; drmFeel; drmG; drmN/drmBarS', 1800, 1950), 0); fxe = last()
 for o, i in ((4, 5), (3, 4), (2, 3), (1, 1), (0, 0)):
     C(fxe, fpk6, o, i)
 C(fpk6, O('list prepend send fix', 1800, 2000)); C(last(), O('list trim', 1800, 2025)); C(last(), net)
+
+# ---------------- song parts: verse and chorus, each with its own groove ----------------
+# drmPartP is the part asked for, drmPart the one playing. While the drummer plays, the change
+# waits for a fill and comes in on the next bar line (see the step preparation, outlet 3).
+C(O('r drummer-verse', 20, 2300), M('0', 20, 2325)); C(last(), O('s $0-part', 20, 2350))
+C(O('r drummer-chorus', 120, 2300), M('1', 120, 2325)); C(last(), O('s $0-part', 120, 2350))
+C(O('r drummer-part', 220, 2300), O('expr !drmPartP', 220, 2325)); C(last(), O('s $0-part', 220, 2350))
+prt = O('t b f', 20, 2400); C(O('r $0-part', 20, 2375), prt)
+C(prt, O('v drmPartP', 80, 2425), 1)
+C(prt, O('expr if(drmPartP == drmPart, 0, if(drmRun && drmAct, 1, 2))', 20, 2425), 0)
+psl = O('sel 1 2', 20, 2450); C(last() - 1, psl)
+C(psl, M('1', 20, 2475), 0); C(last(), O('v drmFillP', 20, 2500))
+C(psl, O('s $0-switch', 80, 2475), 1)
+C(psl, O('s $0-status', 160, 2475), 0)
+# the change: the part's fixed groove from here to the end of the pass, the brain asked again
+swc = O('t b b b', 300, 2400); C(O('r $0-switch', 300, 2375), swc)
+C(swc, O('expr drmPartP', 420, 2425), 2); C(last(), O('v drmPart', 420, 2450))
+C(swc, M('; drmBrain 0; drmSrc 0; drmReadyN 0', 360, 2450), 1)
+C(swc, O('expr if(drmPart, drmGB, drmGA)', 300, 2475), 0); C(last(), O('s $0-groove', 300, 2500))
+
+# ---------------- footswitches (MIDI CC or program change) ----------------
+# codes: kind*100000 + channel*1000 + number (kind 1 = CC, pressed at value >= 64; 2 = program
+# change). drmfs holds the code for pause, fill, rebonk, verse/chorus; channel 0 = any channel.
+fsc = O('s drummer-fs-cnv', 600, 2650)
+def fs_say(text, x, y):
+    m = M(f'label {esc(text)}', x, y); C(m, fsc); return m
+fsr = O('s $0-fs', 600, 2400)
+ci = O('ctlin', 600, 2300)
+cpk = O('pack f f f', 600, 2325); C(ci, cpk, 2, 2); C(ci, cpk, 1, 1); C(ci, cpk, 0, 0)
+C(O('r drummer-test-cc', 700, 2300), cpk)                 # tests: "<value> <cc> <channel>"
+C(cpk, O('expr if($f1>=64, 100000 + $f3*1000 + $f2, -1); 100000 + $f2', 600, 2350)); cex = last()
+cfp = O('pack f f', 600, 2375); C(cex, cfp, 1, 1); C(cex, O('moses 0', 600, 2362), 0); C(last(), cfp, 1, 0)
+C(cfp, fsr)
+pi = O('pgmin', 800, 2300)
+ppk2 = O('pack f f', 800, 2325); C(pi, ppk2, 1, 1); C(pi, ppk2, 0, 0)
+C(ppk2, O('expr 200000 + $f2*1000 + $f1; 200000 + $f1', 800, 2350)); pex = last()
+pfp = O('pack f f', 800, 2375); C(pex, pfp, 1, 1); C(pex, pfp, 0, 0); C(pfp, fsr)
+fst = O('t l l', 600, 2450); C(O('r $0-fs', 600, 2425), fst)
+# playing: which action is this switch?
+fm = O('expr if(drmFsL>0, 0, ' + ''.join(f'if(drmfs[{k}]==$f1 || drmfs[{k}]==$f2, {k + 1}, ' for k in range(4))
+       + '0' + ')' * 5, 600, 2500)
+C(fst, fm, 0)
+fms = O('sel 1 2 3 4', 600, 2525); C(fm, fms)
+for k, name in enumerate(['drummer-pause', 'drummer-fill', 'drummer-rebonk', 'drummer-part']):
+    C(fms, O(f's {name}', 600 + k * 110, 2550), k)
+# learning: the switch becomes the one for action drmFsL (1-4), then the next action
+fl = O('expr if(drmFsL>0, $f1, -1)', 900, 2475); C(fst, fl, 1)
+flm = O('moses 0', 900, 2500); C(fl, flm)
+flt = O('t b f b', 900, 2525); C(flm, flt, 1)
+tw = O('tabwrite drmfs', 960, 2575)
+C(flt, O('expr drmFsL-1', 1020, 2550), 2); C(last(), tw, 0, 1)
+C(flt, tw, 1, 0)
+C(flt, O('expr drmFsL+1', 900, 2550), 0); C(last(), O('s $0-fs-step', 900, 2575))
+# learn button: start, or stop (and save) while learning
+C(O('r drummer-fs-learn', 1200, 2300), O('expr if(drmFsL>0, 5, 1)', 1200, 2325)); C(last(), O('s $0-fs-step', 1200, 2350))
+fss = O('t f f', 1200, 2400); C(O('r $0-fs-step', 1200, 2375), fss)
+C(fss, O('expr if($f1>4, 0, $f1)', 1300, 2425), 1); C(last(), O('v drmFsL', 1300, 2450))
+fsel = O('sel 1 2 3 4 5', 1200, 2425); C(fss, fsel, 0)
+for k, action in enumerate(FS_ACTIONS):
+    C(fsel, fs_say(f'press the footswitch for: {action}', 1200 + k * 40, 2475 + k * 22), k)
+# done: save to footswitch.txt (next to the patch)
+ftf = O('textfile', 1200, 2700)
+fsv = O('t b b b b', 1400, 2475); C(fsel, fsv, 4)
+C(fsv, M('clear', 1550, 2500), 3); C(last(), ftf)
+C(fsv, O('array get drmfs', 1500, 2500), 2); C(last(), O('list prepend add', 1500, 2525))
+C(last(), O('list trim', 1500, 2550)); C(last(), ftf)
+C(fsv, M('write footswitch.txt', 1450, 2575), 1); C(last(), ftf)
+C(fsv, fs_say('footswitches learned - click learn to redo', 1400, 2600), 0)
+# at startup: the saved footswitches, if there are any
+fwh = O('file which', 1200, 2775)
+C(lt, M('symbol footswitch.txt', 1200, 2750), 2); C(last(), fwh)
+fwl = O('list split 1', 1200, 2800); C(fwh, fwl)
+frd = O('t b b b a', 1200, 2825); C(fwl, frd)
+C(frd, M('read $1', 1200, 2850), 3); C(last(), ftf)
+C(frd, M('rewind', 1260, 2850), 2); C(last(), ftf)
+C(frd, ftf, 1, 0)
+C(frd, fs_say('footswitches learned - click learn to redo', 1320, 2875), 0)
+C(ftf, O('array set drmfs', 1200, 2725))
 
 p.save(os.path.join(HERE, '..', 'piLooper', 'drummer.pd'))
 
